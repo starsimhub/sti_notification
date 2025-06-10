@@ -53,7 +53,7 @@ def run_pn_scens(stop=2040, parallel=True):
             sim.parset = i
             sims += sim
 
-    sc.heading(f"Running {n_scen_runs} sims... ")
+    sc.heading(f"Running {len(sims)} sims... ")
     if parallel:
         sims = ss.parallel(sims).sims
     else:
