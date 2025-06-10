@@ -72,13 +72,10 @@ def process_scens(sims=None):
     if sims is None:
         sims = sc.loadobj('results/pn_scens.obj')
 
-    for s in sims:
-        s.pn_scen = s.label.split('--')[0]
-
     # Make a DataFrame with the results
     sc.heading(f"Processing sims... ")
     dfs = []
-    results = ['new_infections', 'new_false_neg', 'n_infected']
+    results = ['new_infections', 'new_false_neg', 'n_infected', 'prevalence']
     tx_results = ['new_treated_unnecessary', 'new_treated']
     results = results + tx_results
 
@@ -100,9 +97,15 @@ def process_scens(sims=None):
         sdf['parset'] = sim.parset
         sdf['scenario'] = sim.pn_scen
         dfs += [sdf]
-    df = pd.concat(dfs)
 
-    return df
+    df = pd.concat(dfs)
+    df['timevec'] = df.index
+
+    # Summarize dataframe
+    from utils import percentiles
+    df_stats = df.groupby(['timevec', 'scenario']).describe(percentiles=percentiles)
+
+    return df_stats
 
 
 if __name__ == '__main__':
@@ -112,9 +115,9 @@ if __name__ == '__main__':
     seed = 1
     n_scen_runs = [20, 1][debug]  # Number of parameter sets to run per scenario
     to_run = [
-        'run_pn_scens',
-        'process_scens',  # Process the scenarios
-        # 'plot_scenarios',  # Plot the scenarios
+        # 'run_pn_scens',
+        # 'process_scens',  # Process the scenarios
+        'plot_scenarios',  # Plot the scenarios
     ]
 
     if 'run_pn_scens' in to_run:
@@ -124,49 +127,13 @@ if __name__ == '__main__':
 
     if 'process_scens' in to_run:
         # Process the scenarios
-        df = process_scens()
-        sc.saveobj('results/pn_scens.df', df)  # Don't commit to repo
+        df_stats = process_scens()
+        sc.saveobj('results/pn_scens.df', df_stats)  # Don't commit to repo
 
     if 'plot_scenarios' in to_run:
         df = sc.loadobj('results/pn_scens.df')
-
-        # Simple plot
-        from utils import set_font
-        set_font(size=30)
-        s_base = sims[0]
-        s_intv = sims[1]
-        import pylab as pl
-        t = s_base.results.ng.timevec
-        fig, axes = pl.subplots(2, 3, figsize=(18, 12))
-        axes = axes.ravel()
-
-        disease_map = {'ng': 'NG', 'ct': 'CT'}
-        result_map = {
-            'prevalence': 'Prevalence',
-            'new_infections': 'Infections',
-            'n_infected': 'Burden',
-        }
-
-        pn = 0
-
-        for dname, dlabel in disease_map.items():
-            for rname, reslabel in result_map.items():
-                ax = axes[pn]
-
-                r0 = s_base.results[dname][rname].to_df(resample='year', use_years=True, sep='_', col_names=f'{dname}_{rname}')
-                r1 = s_intv.results[dname][rname].to_df(resample='year', use_years=True, sep='_', col_names=f'{dname}_{rname}')
-                ax.plot(r0.index, r0, label='Baseline')
-                ax.plot(r0.index, r1, label='PN')
-                ax.axvline(x=2027, color='k', ls='--')
-                ax.set_title(dlabel+' '+reslabel)
-                if pn == 2: ax.legend(frameon=False, prop={'size': 20})
-                ax.set_ylim(bottom=0)
-                ax.set_xlim(left=2020, right=2040)
-                sc.SIticks(ax=ax)
-                pn += 1
-
-        sc.figlayout()
-        sc.savefig("figures/scenarios.png", dpi=100)
+        from plot_scens import plot_scens
+        plot_scens(df, show=False)
 
 
     print('Done!')
