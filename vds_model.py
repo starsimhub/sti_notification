@@ -11,7 +11,7 @@ import pandas as pd
 import stisim as sti
 
 from interventions import make_testing
-from syph_tests import make_syph_testing
+# from syph_tests import make_syph_testing
 from hiv_model import make_hiv, make_hiv_intvs
 time_units = dict(unit='month', dt=1)  # Time units for the simulation
 
@@ -82,11 +82,12 @@ def make_sim(seed=1, n_agents=5e3, start=1990, stop=2030, pn_pars=None, poc=None
         analyzers = [sti.sw_stats(diseases=['ng', 'ct', 'tv'], **time_units)]
         connectors = [sti.hiv_ng(hiv, ng), sti.hiv_ct(hiv, ct), sti.hiv_tv(hiv, tv)]
     elif which == 'ulcerative':
-        syph, gud = make_ulcerative_stis()
-        diseases += [syph, gud]
-        intvs += make_syph_testing(scenario='soc', time_units=time_units)
-        connectors = sti.hiv_syph(hiv, syph, rel_sus_hiv_syph=2, **time_units)
-        analyzers = []
+        raise NotImplementedError("Ulcerative STIs not implemented yet")
+        # syph, gud = make_ulcerative_stis()
+        # diseases += [syph, gud]
+        # intvs += make_syph_testing(scenario='soc', time_units=time_units)
+        # connectors = sti.hiv_syph(hiv, syph, rel_sus_hiv_syph=2, **time_units)
+        # analyzers = []
 
     sim = ss.Sim(
         **time_units,
