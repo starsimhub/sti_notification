@@ -115,9 +115,9 @@ if __name__ == '__main__':
     seed = 1
     n_scen_runs = [20, 1][debug]  # Number of parameter sets to run per scenario
     to_run = [
-        # 'run_pn_scens',
-        # 'process_scens',  # Process the scenarios
-        'plot_scenarios',  # Plot the scenarios
+        'run_pn_scens',
+        'process_scens',  # Process the scenarios
+        # 'plot_scenarios',  # Plot the scenarios
     ]
 
     if 'run_pn_scens' in to_run:
