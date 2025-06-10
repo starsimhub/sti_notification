@@ -48,8 +48,10 @@ def run_pn_scens(stop=2040, parallel=True):
             printstr = f"Making sim {pnlabel}"
             printstr += f"param set {i+1}/{n_scen_runs}"
             print(printstr)
-            sim = make_sim(pn_pars=pn_pars, stop=stop)
+            sim = make_sim(seed=i, pn_pars=pn_pars, stop=stop)
             sim.label = f'{pnlabel}--{str(i)}'
+            sim.pn_scen = pnlabel  # Label for the scenario
+            sim.pn_pars = pn_pars  # Parameters for the scenario
             sim.parset = i
             sims += sim
 
@@ -70,18 +72,36 @@ def process_scens(sims=None):
     if sims is None:
         sims = sc.loadobj('results/pn_scens.obj')
 
-    sc.heading("Processing results...")
+    for s in sims:
+        s.pn_scen = s.label.split('--')[0]
 
     # Make a DataFrame with the results
-    df = pd.DataFrame()
-    for sim in sims:
-        res = sim.results.to_df(resample='year', use_years=True, sep='_')
-        res['label'] = sim.label
-        res['parset'] = sim.parset
-        df = pd.concat([df, res], ignore_index=True)
+    sc.heading(f"Processing sims... ")
+    dfs = []
+    results = ['new_infections', 'new_false_neg', 'n_infected']
+    tx_results = ['new_treated_unnecessary', 'new_treated']
+    results = results + tx_results
 
-    # Save the processed results
-    sc.saveobj('results/pn_scens_processed.obj', df)
+    for s, sim in enumerate(sims):
+        print(f"Processing sim {s+1}/{len(sims)}")
+        sdfs = sc.autolist()
+        for res in results:
+            for disease in ['ng', 'ct', 'tv']:
+                colname = f'{disease}.{res}'
+                thisdf = sim.results[disease][res].to_df(resample='year', use_years=True, col_names=colname)
+                sdfs += thisdf
+        for tres in tx_results:
+            for tx in ['ng_tx', 'ct_tx', 'metronidazole']:
+                colname = f'{tx}.{tres}'
+                thisdf = sim.results[tx][tres].to_df(resample='year', use_years=True, col_names=colname)
+                sdfs += thisdf
+
+        sdf = pd.concat(sdfs, axis=1)
+        sdf['parset'] = sim.parset
+        sdf['scenario'] = sim.pn_scen
+        dfs += [sdf]
+    df = pd.concat(dfs)
+
     return df
 
 
@@ -90,10 +110,11 @@ if __name__ == '__main__':
     # SETTINGS
     debug = False
     seed = 1
-    n_scen_runs = [2, 1][debug]  # Number of parameter sets to run per scenario
+    n_scen_runs = [20, 1][debug]  # Number of parameter sets to run per scenario
     to_run = [
         'run_pn_scens',
         'process_scens',  # Process the scenarios
+        # 'plot_scenarios',  # Plot the scenarios
     ]
 
     if 'run_pn_scens' in to_run:
@@ -106,45 +127,47 @@ if __name__ == '__main__':
         df = process_scens()
         sc.saveobj('results/pn_scens.df', df)  # Don't commit to repo
 
+    if 'plot_scenarios' in to_run:
+        df = sc.loadobj('results/pn_scens.df')
 
-        # # Simple plot
-        # from utils import set_font
-        # set_font(size=30)
-        # s_base = sims[0]
-        # s_intv = sims[1]
-        # import pylab as pl
-        # t = s_base.results.ng.timevec
-        # fig, axes = pl.subplots(2, 3, figsize=(18, 12))
-        # axes = axes.ravel()
-        #
-        # disease_map = {'ng': 'NG', 'ct': 'CT'}
-        # result_map = {
-        #     'prevalence': 'Prevalence',
-        #     'new_infections': 'Infections',
-        #     'n_infected': 'Burden',
-        # }
-        #
-        # pn = 0
-        #
-        # for dname, dlabel in disease_map.items():
-        #     for rname, reslabel in result_map.items():
-        #         ax = axes[pn]
-        #
-        #         r0 = s_base.results[dname][rname].to_df(resample='year', use_years=True, sep='_', col_names=f'{dname}_{rname}')
-        #         r1 = s_intv.results[dname][rname].to_df(resample='year', use_years=True, sep='_', col_names=f'{dname}_{rname}')
-        #         ax.plot(r0.index, r0, label='Baseline')
-        #         ax.plot(r0.index, r1, label='PN')
-        #         ax.axvline(x=2027, color='k', ls='--')
-        #         ax.set_title(dlabel+' '+reslabel)
-        #         if pn == 2: ax.legend(frameon=False, prop={'size': 20})
-        #         ax.set_ylim(bottom=0)
-        #         ax.set_xlim(left=2020, right=2040)
-        #         sc.SIticks(ax=ax)
-        #         pn += 1
-        #
-        # sc.figlayout()
-        # sc.savefig("figures/scenarios.png", dpi=100)
-        #
+        # Simple plot
+        from utils import set_font
+        set_font(size=30)
+        s_base = sims[0]
+        s_intv = sims[1]
+        import pylab as pl
+        t = s_base.results.ng.timevec
+        fig, axes = pl.subplots(2, 3, figsize=(18, 12))
+        axes = axes.ravel()
+
+        disease_map = {'ng': 'NG', 'ct': 'CT'}
+        result_map = {
+            'prevalence': 'Prevalence',
+            'new_infections': 'Infections',
+            'n_infected': 'Burden',
+        }
+
+        pn = 0
+
+        for dname, dlabel in disease_map.items():
+            for rname, reslabel in result_map.items():
+                ax = axes[pn]
+
+                r0 = s_base.results[dname][rname].to_df(resample='year', use_years=True, sep='_', col_names=f'{dname}_{rname}')
+                r1 = s_intv.results[dname][rname].to_df(resample='year', use_years=True, sep='_', col_names=f'{dname}_{rname}')
+                ax.plot(r0.index, r0, label='Baseline')
+                ax.plot(r0.index, r1, label='PN')
+                ax.axvline(x=2027, color='k', ls='--')
+                ax.set_title(dlabel+' '+reslabel)
+                if pn == 2: ax.legend(frameon=False, prop={'size': 20})
+                ax.set_ylim(bottom=0)
+                ax.set_xlim(left=2020, right=2040)
+                sc.SIticks(ax=ax)
+                pn += 1
+
+        sc.figlayout()
+        sc.savefig("figures/scenarios.png", dpi=100)
+
 
     print('Done!')
 

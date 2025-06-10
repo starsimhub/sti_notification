@@ -404,7 +404,7 @@ def make_testing(ng, ct, tv, bv, time_units=None, poc=None, pn_pars=None, stop=2
         ct_care = dis.ct.symptomatic & (dis.ct.ti_seeks_care == dis.ct.ti) & male
         return (ng_care | ct_care | tv_care).uids
 
-    ng_tx = sti.GonorrheaTreatment(**time_units)
+    ng_tx = sti.GonorrheaTreatment(name='ng_tx', label='ng_tx', **time_units)
     ct_tx = sti.STITreatment(diseases='ct', name='ct_tx', label='ct_tx', **time_units)
     metronidazole = sti.STITreatment(diseases=['tv', 'bv'], name='metronidazole', label='metronidazole', **time_units)
     treatments = [ng_tx, ct_tx, metronidazole]
