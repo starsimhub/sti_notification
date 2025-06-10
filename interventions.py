@@ -277,7 +277,7 @@ class PartnerNotification(ss.Intervention):
     """ Give presumptive NG+CT treatment to partners of people being treated for NG or CT """
 
     def __init__(self, pars=None, eligibility=None, treat_current=None, treat_previous=None, name=None, label=None, **kwargs):
-        super().__init__(eligibility=eligibility, name=name, label=label, **kwargs)
+        super().__init__(eligibility=eligibility, name=name, label=label)
         self.define_pars(
             p_notify_current=dict(
                 current=ss.bernoulli(p=0.5),  # Probability of notifying current partners
