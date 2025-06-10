@@ -441,7 +441,7 @@ def make_testing(ng, ct, tv, bv, time_units=None, poc=None, pn_pars=None, stop=2
     # Partner treatment eligibility
     def just_treated(sim):
         """ Return UIDs of people who have been treated for NG or CT """
-        ng_treated = sim.interventions.gonorrheatreatment.ti_treated == sim.interventions.gonorrheatreatment.ti
+        ng_treated = sim.interventions.ng_tx.ti_treated == sim.interventions.ng_tx.ti
         ct_treated = sim.interventions.ct_tx.ti_treated == sim.interventions.ct_tx.ti
         # Exclude people who were the original index case
         previous_index = sim.interventions.treat_partners.ti_notified == (sim.interventions.treat_partners.ti - 1)
