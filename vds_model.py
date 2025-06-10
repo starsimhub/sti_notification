@@ -78,7 +78,7 @@ def make_sim(seed=1, n_agents=5e3, start=1990, stop=2030, pn_pars=None, poc=None
     if which == 'discharging':
         ng, ct, tv, bv = make_discharging_stis(time_units)
         diseases += [ng, ct, tv, bv]
-        intvs += make_testing(ng, ct, tv, bv, time_units=time_units, poc=poc, pn=pn_pars, stop=stop)
+        intvs += make_testing(ng, ct, tv, bv, time_units=time_units, poc=poc, pn_pars=pn_pars, stop=stop)
         analyzers = [sti.sw_stats(diseases=['ng', 'ct', 'tv'], **time_units)]
         connectors = [sti.hiv_ng(hiv, ng), sti.hiv_ct(hiv, ct), sti.hiv_tv(hiv, tv)]
     elif which == 'ulcerative':
