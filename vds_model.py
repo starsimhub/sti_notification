@@ -66,7 +66,7 @@ def make_sim(seed=1, n_agents=5e3, start=1990, stop=2030, pn_pars=None, poc=None
         condom_data=pd.read_csv(f'data/condom_use.csv'),
         **time_units
     )
-    priorpartners = sti.PriorPartners(dur_recall=ss.years(0.5), **time_units)
+    priorpartners = sti.PriorPartners(dur_recall=ss.years(0.25), **time_units)
     maternal = ss.MaternalNet(**time_units)
 
     ####################################################################################################################
