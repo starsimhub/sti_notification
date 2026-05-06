@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+*.egg
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv
+
+# Jupyter
+.ipynb_checkpoints
+*.ipynb
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Results — large/binary outputs not committed
+results/*.msim
+results/*.obj
+results/*.df
+results/*_full.*
+results/large_*
+
+# Keep small summary results for quick reference
+!results/*_stats.df
+!results/*_summary.csv
+
+# Local-only docs (e.g. revision notes)
+revision_plan.md

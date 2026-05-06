@@ -320,6 +320,10 @@ class PartnerNotification(ss.Intervention):
 
     def identify_contacts(self, uids):
         # Return UIDs of people that have been identified as contacts and should be notified
+        # TODO: `successful_m_idx = nw.p1[fp_edge_inds] & m_idx` (and the f-side equivalent
+        # below) treat UID arrays as sets, which doesn't reconstruct the index-male/attending-female
+        # edge pairing the zip() expects. Fix when promoting this class to stisim layer 2.
+        # See ANALYSIS_PLAN.md "Known issues to fix before scenarios" #1.
 
         # Find contacts
         for nwtype, nw in self.nws.items():
@@ -379,7 +383,18 @@ class PartnerNotification(ss.Intervention):
         return
 
 
-def make_testing(ng, ct, tv, bv, time_units=None, poc=None, pn_pars=None, stop=2040):
+def make_syph_testing(stop=2040):
+    """
+    Minimal syphilis treatment scaffold.
+
+    Returns SyphTx only — testing wired up later when SyphDx product CSVs land
+    in data/. Smoke-test path: syph runs natural-history with no testing.
+    """
+    syph_tx = sti.SyphTx(name='syph_tx', label='syph_tx')
+    return [syph_tx]
+
+
+def make_testing(ng, ct, tv, bv, poc=None, pn_pars=None, stop=2040):
 
     intv_year = 2027
 
@@ -393,8 +408,7 @@ def make_testing(ng, ct, tv, bv, time_units=None, poc=None, pn_pars=None, stop=2
         ng_care = dis.ng.symptomatic & (dis.ng.ti_seeks_care == dis.ng.ti) & female
         tv_care = dis.tv.symptomatic & (dis.tv.ti_seeks_care == dis.tv.ti) & female
         ct_care = dis.ct.symptomatic & (dis.ct.ti_seeks_care == dis.ct.ti) & female
-        bv_care = dis.bv.symptomatic & (dis.bv.ti_seeks_care == dis.bv.ti) & female
-        return (ng_care | ct_care | tv_care | bv_care).uids
+        return (ng_care | ct_care | tv_care).uids
 
     def seeking_care_uds(sim):
         dis = sim.diseases
@@ -404,9 +418,9 @@ def make_testing(ng, ct, tv, bv, time_units=None, poc=None, pn_pars=None, stop=2
         ct_care = dis.ct.symptomatic & (dis.ct.ti_seeks_care == dis.ct.ti) & male
         return (ng_care | ct_care | tv_care).uids
 
-    ng_tx = sti.GonorrheaTreatment(name='ng_tx', label='ng_tx', **time_units)
-    ct_tx = sti.STITreatment(diseases='ct', name='ct_tx', label='ct_tx', **time_units)
-    metronidazole = sti.STITreatment(diseases=['tv', 'bv'], name='metronidazole', label='metronidazole', **time_units)
+    ng_tx = sti.GonorrheaTreatment(name='ng_tx', label='ng_tx')
+    ct_tx = sti.STITreatment(diseases='ct', name='ct_tx', label='ct_tx')
+    metronidazole = sti.STITreatment(diseases=['tv', 'bv'], name='metronidazole', label='metronidazole')
     treatments = [ng_tx, ct_tx, metronidazole]
     outcome_treatment_map = dict(
         all3=treatments,
@@ -424,8 +438,7 @@ def make_testing(ng, ct, tv, bv, time_units=None, poc=None, pn_pars=None, stop=2
         eligibility=seeking_care_vds,
         treatments=treatments,
         outcome_treatment_map=outcome_treatment_map,
-        **time_units
-        )
+    )
 
     syndromic_uds = SyndromicMgmt(
         name='syndromic_uds',
@@ -435,7 +448,6 @@ def make_testing(ng, ct, tv, bv, time_units=None, poc=None, pn_pars=None, stop=2
         eligibility=seeking_care_uds,
         treatments=treatments,
         outcome_treatment_map=outcome_treatment_map,
-        **time_units
     )
 
     # Partner treatment eligibility
@@ -460,7 +472,6 @@ def make_testing(ng, ct, tv, bv, time_units=None, poc=None, pn_pars=None, stop=2
                 label='treat_partners',
                 treat_current=dict(m=syndromic_uds, f=syndromic_vds),
                 treat_previous=dict(m=syndromic_uds, f=syndromic_vds),
-                **time_units
             )
 
             intvs = [syndromic_vds, syndromic_uds, ng_tx, ct_tx, metronidazole, partner_notification]
@@ -479,7 +490,6 @@ def make_testing(ng, ct, tv, bv, time_units=None, poc=None, pn_pars=None, stop=2
             disease_treatment_map=disease_treatment_map,
             p_mtnz=p_mtnz,
             negative_treatments=[metronidazole],
-            **time_units
         )
         if pn_pars is None:
             intvs = [syndromic_vds, syndromic_uds, panel, ng_tx, ct_tx, metronidazole]
@@ -491,7 +501,6 @@ def make_testing(ng, ct, tv, bv, time_units=None, poc=None, pn_pars=None, stop=2
                 label='treat_partners',
                 treat_current=dict(m=syndromic_uds, f=syndromic_vds),
                 treat_previous=dict(m=syndromic_uds, f=syndromic_vds),
-                **time_units
             )
 
             intvs = [syndromic_vds, syndromic_uds, panel, ng_tx, ct_tx, metronidazole, partner_notification]

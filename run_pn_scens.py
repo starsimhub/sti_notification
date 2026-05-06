@@ -9,7 +9,7 @@ import sciris as sc
 import starsim as ss
 
 # From this repo
-from vds_model import make_sim
+from model import make_sim
 
 
 def make_pn_pars(pnc=None, pnp=None, pac=None, pap=None):

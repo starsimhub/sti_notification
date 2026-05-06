@@ -23,8 +23,12 @@ unneeded_results = [
 
 # Helper functions
 def set_font(size=None, font='Libertinus Sans'):
-    sc.fonts(add=sc.thisdir(aspath=True) / 'assets' / 'LibertinusSans-Regular.otf')
-    sc.options(font=font, fontsize=size)
+    fontfile = sc.thisdir(aspath=True) / 'assets' / 'LibertinusSans-Regular.otf'
+    if fontfile.exists():
+        sc.fonts(add=fontfile)
+        sc.options(font=font, fontsize=size)
+    else:
+        sc.options(fontsize=size)
     return
 
 def count(arr):
