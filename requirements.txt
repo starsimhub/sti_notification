@@ -1,0 +1,7 @@
+stisim>=1.5.5
+starsim>=3.3.2
+sciris>=3.2.9
+pandas
+numpy
+matplotlib
+seaborn
