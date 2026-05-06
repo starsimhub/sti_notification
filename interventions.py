@@ -273,113 +273,35 @@ class SyndromicMgmt(sti.STITest):
         return
 
 
-class PartnerNotification(ss.Intervention):
-    """ Give presumptive NG+CT treatment to partners of people being treated for NG or CT """
+class SyndromicPN(sti.PartnerNotification):
+    """
+    Partner notification adapted for syndromic STI treatment.
 
-    def __init__(self, pars=None, eligibility=None, treat_current=None, treat_previous=None, name=None, label=None, **kwargs):
-        super().__init__(eligibility=eligibility, name=name, label=label)
-        self.define_pars(
-            p_notify=dict(
-                current=ss.bernoulli(p=0.5),  # Probability of notifying current partners
-                previous=ss.bernoulli(p=0.05),  # Probability of notifying previous partners
-            ),
-            p_attends=dict(
-                current=ss.bernoulli(p=0.5),  # Probability that current partners will attend
-                previous=ss.bernoulli(p=0.01),  # Probability that previous partners will attend
-            ),
-        )
-        self.update_pars(pars, **kwargs)
+    Inherits the network-based traceback (current sexual network + optional
+    PriorPartners recall) and notification × attendance logic from
+    :class:`stisim.PartnerNotification`. On attendance, routes partners by
+    sex through the appropriate syndromic-management intervention; partners
+    are treated per the syndromic algorithm on the next timestep.
 
-        # Store the current and prior network
-        self.nws = None  # Initialized in init_pre
-        self.start = 2027
-
-        # Store the test/treatment intervention that notified partners will be eligible to receive
-        self.tx = dict(
-            current=treat_current,  # Treatment for current partners
-            previous=treat_previous,  # Treatment for prior partners
-        )
-
-        self.define_states(
-            ss.FloatArr('ti_notified')
-        )
-
-        self.contacts = sc.objdict(
-            current=sc.objdict(mf=None, fm=None),  # Current partners notified
-            previous=sc.objdict(mf=None, fm=None),  # Current partners notified
-        )
-
+    Args:
+        eligibility: Index-case selector, e.g. just-treated agents.
+        syndromic_vds: SyndromicMgmt instance for women.
+        syndromic_uds: SyndromicMgmt instance for men.
+    """
+    def __init__(self, eligibility, syndromic_vds, syndromic_uds, **kwargs):
+        super().__init__(eligibility=eligibility, test=None, **kwargs)
+        self.syndromic_vds = syndromic_vds
+        self.syndromic_uds = syndromic_uds
         return
 
-    def init_pre(self, sim):
-        super().init_pre(sim)
-        self.nws = dict(
-            current=sim.networks.structuredsexual,  # Current sexual network
-            previous=sim.networks.priorpartners,  # Prior sexual network
-        )
-
-    def identify_contacts(self, uids):
-        # Return UIDs of people that have been identified as contacts and should be notified
-        # TODO: `successful_m_idx = nw.p1[fp_edge_inds] & m_idx` (and the f-side equivalent
-        # below) treat UID arrays as sets, which doesn't reconstruct the index-male/attending-female
-        # edge pairing the zip() expects. Fix when promoting this class to stisim layer 2.
-        # See ANALYSIS_PLAN.md "Known issues to fix before scenarios" #1.
-
-        # Find contacts
-        for nwtype, nw in self.nws.items():
-            m_edge_inds = np.isin(nw.p1, uids).nonzero()[-1]
-            f_edge_inds = np.isin(nw.p2, uids).nonzero()[-1]
-            m_idx = nw.p1[m_edge_inds]
-            f_partners = nw.p2[m_edge_inds]
-            f_idx = nw.p2[f_edge_inds]
-            m_partners = nw.p1[f_edge_inds]
-
-            # Females notified and attending
-            notified_f = self.pars.p_notify[nwtype].filter(f_partners)
-            attending_f = self.pars.p_attends[nwtype].filter(notified_f)
-            fp_edge_inds = np.isin(nw.p2, attending_f).nonzero()[-1]
-            successful_m_idx = nw.p1[fp_edge_inds] & m_idx
-            mf_pairs = list(zip(successful_m_idx, attending_f))
-
-            # Males notified and attending
-            notified_m = self.pars.p_notify[nwtype].filter(m_partners)
-            attending_m = self.pars.p_attends[nwtype].filter(notified_m)
-            mp_edge_inds = np.isin(nw.p1, attending_m).nonzero()[-1]
-            successful_f_idx = nw.p2[mp_edge_inds] & f_idx
-            fm_pairs = list(zip(successful_f_idx, attending_m))
-
-            # Store contacts
-            self.ti_notified[attending_m | attending_f] = self.ti
-            self.contacts[nwtype].mf = mf_pairs
-            self.contacts[nwtype].fm = fm_pairs
-
-        return
-
-    def step(self):
-        sim = self.sim
-
-        if self.t.now('year') >= self.start:
-            index_cases = self.eligibility(sim)
-            if len(index_cases) > 0:
-                self.identify_contacts(index_cases)
-
-                # In this scenario, we just treat all the contacts same as index case
-                for pstatus in ['current', 'previous']:
-                    for pairkey, clist in self.contacts[pstatus].items():
-                        if len(clist) > 0:
-
-                            intv = self.sim.interventions[self.tx[pstatus][pairkey[0]].name]
-                            idx_txdict = intv.treated_by_uid  # Index case treatment
-                            idx_uids = [c[0] for c in clist]
-                            partner_txdict = {tx: ss.uids([clist[idx_uids.index(uid)][1] for uid in uids if uid in idx_uids]) for tx, uids in idx_txdict.items()}  # Sorry :(
-
-                            # Set treatment eligibility
-                            for oc, partner_uids in partner_txdict.items():
-                                if len(partner_uids):
-                                    txs = intv.outcome_treatment_map[oc]
-                                    for tx in txs:
-                                        tx.eligibility = tx.eligibility | partner_uids
-
+    def notify_attendees(self, uids):
+        ppl = self.sim.people
+        f_uids = uids[ppl.female[uids]]
+        m_uids = uids[ppl.male[uids]]
+        if len(f_uids):
+            self.syndromic_vds.step(uids=f_uids)
+        if len(m_uids):
+            self.syndromic_uds.step(uids=m_uids)
         return
 
 
@@ -450,59 +372,43 @@ def make_testing(ng, ct, tv, bv, poc=None, pn_pars=None, stop=2040):
         outcome_treatment_map=outcome_treatment_map,
     )
 
-    # Partner treatment eligibility
+    # Index cases: women & men whose NG or CT treatment fired this step,
+    # excluding those who were themselves notified one step prior (avoid recursion).
     def just_treated(sim):
-        """ Return UIDs of people who have been treated for NG or CT """
         ng_treated = sim.interventions.ng_tx.ti_treated == sim.interventions.ng_tx.ti
         ct_treated = sim.interventions.ct_tx.ti_treated == sim.interventions.ct_tx.ti
-        # Exclude people who were the original index case
-        previous_index = sim.interventions.treat_partners.ti_notified == (sim.interventions.treat_partners.ti - 1)
-        return ((ng_treated | ct_treated) & ~previous_index).uids
+        if 'pn' in sim.interventions:
+            pn = sim.interventions.pn
+            previous_index = pn.ti_notified == (pn.ti - 1)
+            return ((ng_treated | ct_treated) & ~previous_index).uids
+        return (ng_treated | ct_treated).uids
 
-    # Optionally add partner treatment
-    if not poc:
-        if pn_pars is None:
-            intvs = [syndromic_vds, syndromic_uds, ng_tx, ct_tx, metronidazole]
+    def make_pn():
+        return SyndromicPN(
+            eligibility=just_treated,
+            syndromic_vds=syndromic_vds,
+            syndromic_uds=syndromic_uds,
+            name='pn', label='pn',
+            **(pn_pars or {}),
+        )
 
-        else:
-            partner_notification = PartnerNotification(
-                **pn_pars,
-                eligibility=just_treated,
-                name='treat_partners',
-                label='treat_partners',
-                treat_current=dict(m=syndromic_uds, f=syndromic_vds),
-                treat_previous=dict(m=syndromic_uds, f=syndromic_vds),
-            )
-
-            intvs = [syndromic_vds, syndromic_uds, ng_tx, ct_tx, metronidazole, partner_notification]
+    intvs = [syndromic_vds, syndromic_uds, ng_tx, ct_tx, metronidazole]
 
     if poc:
         disease_treatment_map = {'ng': ng_tx, 'ct': ct_tx, 'tv': metronidazole}
-        p_mtnz = 0.8  # Probability of metronidazole treatment for TV
-
         panel = sti.SymptomaticTesting(
-            name='panel',
-            label='panel',
+            name='panel', label='panel',
             start=intv_year,
             diseases=[ng, ct, tv],
             eligibility=seeking_care_vds,
             treatments=treatments,
             disease_treatment_map=disease_treatment_map,
-            p_mtnz=p_mtnz,
+            p_mtnz=0.8,  # Probability of metronidazole treatment for TV
             negative_treatments=[metronidazole],
         )
-        if pn_pars is None:
-            intvs = [syndromic_vds, syndromic_uds, panel, ng_tx, ct_tx, metronidazole]
+        intvs.append(panel)
 
-        else:
-            partner_notification = PartnerNotification(
-                eligibility=just_treated,
-                name='treat_partners',
-                label='treat_partners',
-                treat_current=dict(m=syndromic_uds, f=syndromic_vds),
-                treat_previous=dict(m=syndromic_uds, f=syndromic_vds),
-            )
-
-            intvs = [syndromic_vds, syndromic_uds, panel, ng_tx, ct_tx, metronidazole, partner_notification]
+    if pn_pars is not None:
+        intvs.append(make_pn())
 
     return intvs

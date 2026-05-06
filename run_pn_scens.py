@@ -13,20 +13,13 @@ from model import make_sim
 
 
 def make_pn_pars(pnc=None, pnp=None, pac=None, pap=None):
-    """
-    Make partner notification parameters
-    """
-    pn_pars = dict(
-        p_notify=dict(
-            current=ss.bernoulli(p=pnc),  # Probability of notifying current partners
-            previous=ss.bernoulli(p=pnp),  # Probability of notifying previous partners
-        ),
-        p_attends=dict(
-            current=ss.bernoulli(p=pac),  # Probability that current partners will attend
-            previous=ss.bernoulli(p=pap),  # Probability that previous partners will attend
-        ),
+    """ Build partner-notification parameter dict for SyndromicPN. """
+    return dict(
+        p_notify_current=ss.bernoulli(p=pnc),
+        p_notify_previous=ss.bernoulli(p=pnp),
+        p_attends_current=ss.bernoulli(p=pac),
+        p_attends_previous=ss.bernoulli(p=pap),
     )
-    return pn_pars
 
 
 def run_pn_scens(stop=2040, parallel=True):

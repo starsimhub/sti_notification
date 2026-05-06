@@ -13,6 +13,7 @@ import stisim as sti
 
 from interventions import make_testing, make_syph_testing
 from hiv_model import make_hiv, make_hiv_intvs
+from connectors import sti_fetal
 
 LOCATION = 'zimbabwe'
 DATA_DIR = 'data'
@@ -76,11 +77,18 @@ def make_interventions(diseases, which='all', poc=None, pn_pars=None, stop=2040)
 
 
 def make_sim(seed=1, n_agents=5e3, start=1985, stop=2030,
-             pn_pars=None, poc=None, which='all', dur_recall=ss.years(0.25)):
+             pn_pars=None, poc=None, which='all', dur_recall=ss.years(0.25),
+             fetal_health=True):
 
     diseases, analyzers = make_diseases(which)
     networks = make_networks(dur_recall)
     interventions = make_interventions(diseases, which=which, poc=poc, pn_pars=pn_pars, stop=stop)
+
+    # FetalHealth tracks adverse birth outcomes (LBW, SGA, SVN, timing); the
+    # sti_fetal connector translates STI infections + treatments into
+    # FetalHealth API calls. Both go in `custom` so the standard
+    # auto-connector machinery (hiv_*, etc.) still runs.
+    custom = [ss.FetalHealth(), sti_fetal()] if fetal_health else None
 
     simpars = dict(
         rand_seed=seed, n_agents=n_agents,
@@ -97,6 +105,7 @@ def make_sim(seed=1, n_agents=5e3, start=1985, stop=2030,
         networks=networks,
         interventions=interventions,
         analyzers=analyzers,
+        custom=custom,
     )
     return sim
 
