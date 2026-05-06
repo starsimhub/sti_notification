@@ -305,15 +305,53 @@ class SyndromicPN(sti.PartnerNotification):
         return
 
 
-def make_syph_testing(stop=2040):
+def make_syph_testing(stop=2040, anc_test_prob=0.5, symp_test_prob=0.5):
     """
-    Minimal syphilis treatment scaffold.
+    Symptomatic + ANC syphilis testing pathways.
 
-    Returns SyphTx only — testing wired up later when SyphDx product CSVs land
-    in data/. Smoke-test path: syph runs natural-history with no testing.
+    Two STITest interventions feed into a single SyphTx:
+      1. Symptomatic test: agents with chancre or rash visible (fires when
+         care is sought).
+      2. ANC test: pregnant women in the first trimester.
+
+    Both use the `gud` SyphDx product from data/syph_dx.csv (90% sensitivity
+    for primary syph; lower for other stages).
     """
-    syph_tx = sti.SyphTx(name='syph_tx', label='syph_tx')
-    return [syph_tx]
+    syph_dx_df = pd.read_csv(f'data/syph_dx.csv')
+    gud_dx = sti.SyphDx(syph_dx_df[syph_dx_df.name == 'gud'], name='SyphDx_gud')
+
+    def syph_dx_eligibility(sim):
+        """Treat anyone newly diagnosed positive by either syph test this step."""
+        sympt = sim.interventions.syph_symp_test
+        anct = sim.interventions.syph_anc_test
+        return ((sympt.ti_positive == sympt.ti) | (anct.ti_positive == anct.ti)).uids
+
+    syph_tx = sti.SyphTx(name='syph_tx', label='syph_tx', eligibility=syph_dx_eligibility)
+
+    def syph_symp_eligibility(sim):
+        syph = sim.diseases.syph
+        return syph.chancre_visible | syph.rash_visible
+
+    syph_symp_test = sti.SyphTest(
+        name='syph_symp_test', label='syph_symp_test',
+        product=gud_dx,
+        test_prob_data=symp_test_prob,
+        eligibility=syph_symp_eligibility,
+    )
+
+    def anc_eligibility(sim):
+        if not hasattr(sim.demographics, 'pregnancy'):
+            return ss.uids()
+        return sim.demographics.pregnancy.tri1_uids
+
+    syph_anc_test = sti.SyphTest(
+        name='syph_anc_test', label='syph_anc_test',
+        product=gud_dx,
+        test_prob_data=anc_test_prob,
+        eligibility=anc_eligibility,
+    )
+
+    return [syph_symp_test, syph_anc_test, syph_tx]
 
 
 def make_testing(ng, ct, tv, bv, poc=None, pn_pars=None, stop=2040):
