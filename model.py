@@ -88,7 +88,7 @@ def make_interventions(diseases, which='all', poc=None, pn_pars=None, stop=2040)
 
 def make_sim(seed=1, n_agents=5e3, start=1985, stop=2030,
              pn_pars=None, poc=None, which='all', dur_recall=ss.years(0.25),
-             fetal_health=True, care_seek_mult=1.0):
+             fetal_health=True, care_seek_mult=1.0, verbose=1/12):
 
     diseases, analyzers = make_diseases(which, care_seek_mult=care_seek_mult)
     networks = make_networks(dur_recall)
@@ -103,7 +103,7 @@ def make_sim(seed=1, n_agents=5e3, start=1985, stop=2030,
     simpars = dict(
         rand_seed=seed, n_agents=n_agents,
         start=start, stop=stop,
-        use_migration=False, verbose=1/12,
+        use_migration=False, verbose=verbose,
     )
     # Coinfection connectors auto-added by sti.Sim. GUDPlaceholder is named
     # 'gudp' so the buggy `gud_syph` auto-connector isn't matched.
