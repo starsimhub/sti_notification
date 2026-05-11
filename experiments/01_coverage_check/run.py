@@ -72,8 +72,7 @@ STOP      = int(os.environ.get('STOP', 2025))
 RESULTS   = Path(__file__).parent / 'results'
 
 
-def run_one(args):
-    draw_pars, seed = args
+def run_one(draw_pars, seed):
     sim = make_sim(seed=seed, start=START, stop=STOP, n_agents=N_AGENTS,
                    pn_pars=None, fetal_health=False, verbose=-1)
     set_pars_local(sim, draw_pars)
@@ -96,13 +95,13 @@ if __name__ == '__main__':
     sc.heading(f'Coverage check: {N_DRAWS} prior draws | n_agents={N_AGENTS} '
                f'| {START}-{STOP}')
     draw_list = sample_draws(N_DRAWS)
-    args = [(d, i) for i, d in enumerate(draw_list)]
 
     T = sc.timer()
     if N_WORKERS > 1:
-        dfs = sc.parallelize(run_one, iterarg=args, ncpus=N_WORKERS)
+        iter_kwargs = [dict(draw_pars=d, seed=i) for i, d in enumerate(draw_list)]
+        dfs = sc.parallelize(run_one, iterkwargs=iter_kwargs, ncpus=N_WORKERS)
     else:
-        dfs = [run_one(a) for a in sc.progressbar(args)]
+        dfs = [run_one(d, i) for i, d in enumerate(sc.progressbar(draw_list))]
     T.toc(f'Ran {N_DRAWS} draws')
 
     RESULTS.mkdir(parents=True, exist_ok=True)
