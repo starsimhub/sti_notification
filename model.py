@@ -45,6 +45,7 @@ def make_ulcerative_stis():
         beta_m2c=1.,
         eff_condom=0.5,
         rel_trans_latent_half_life=ss.years(1),
+        rel_init_prev=0.2,
         init_prev_data=pd.read_csv(init_prev_path) if os.path.exists(init_prev_path) else None,
         init_prev_latent_data=pd.read_csv(init_prev_latent_path) if os.path.exists(init_prev_latent_path) else None,
     )
