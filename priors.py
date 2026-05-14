@@ -21,7 +21,7 @@ calib_pars = sc.objdict({
     'hiv.beta_m2f':             ('HIV β (M→F)',          0.002, 0.014, False),
     'hiv.rel_init_prev':        ('HIV rel. init prev',   2,    15,     False),
     # Syphilis
-    'syph.beta_m2f':            ('Syph β (M→F)',         0.01,  0.20,  True),
+    'syph.beta_m2f':            ('Syph β (M→F)',         0.01,  0.35,  True),
     # Discharging STIs
     'ng.beta_m2f':              ('NG β (M→F)',           0.02,  0.30,  True),
     'ct.beta_m2f':              ('CT β (M→F)',           0.02,  0.30,  True),

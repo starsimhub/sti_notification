@@ -1,21 +1,33 @@
-# Exp 02 — Coverage check: syphilis seeding fix
+# Exp 02 — Coverage check: syphilis seeding and config fix
 
-**Question.** Exp 01 showed syphilis extinct across all 100 prior draws. The
-root cause was missing `init_prev_syph.csv` and `init_prev_latent_syph.csv` in
-`sti_notification/data/` — STIsim silently seeded near-zero and clearance won.
-Does the model now sustain syphilis and bracket the observed active prevalence
-data (~3–8% from ZIMPHIA) when those files are present?
+**Question.** Exp 01 showed syphilis extinct in all 100 prior draws. Three
+root causes were identified. Does the model now sustain syphilis and bracket
+the observed active prevalence data (~2–3% from Zimbabwe surveys) after all
+three are resolved?
 
-**Plan.** Port the two init_prev files from `syph_dx_zim/data/` (active:
-0.001–0.02 by risk group/sex/SW; latent: 0.02 uniform) and set
-`rel_init_prev=0.2` in `model.py` to match the `syph_dx_zim` configuration.
-Re-run the identical 100-draw prior predictive check (n_agents=5000, 1985–2025,
-no PN, no FetalHealth). NG/CT/TV/HIV panels expected to be unchanged.
+**Fixes applied relative to exp 01:**
 
-One flag to watch: `syph_dx_zim`'s posterior for `syph.beta_m2f` ran 0.15–0.35,
-while the current prior ceiling is 0.20. If syphilis trajectories just barely
-bracket the data in this run, exp 03 should widen the prior to 0.35.
+1. *Missing seed files.* `init_prev_syph.csv` and `init_prev_latent_syph.csv`
+   ported from `syph_dx_zim/data/`. `rel_init_prev=0.2` set in `model.py`
+   (fixed, matches `syph_dx_zim`).
 
-**Success criteria.** Syphilis active prevalence trajectories from prior draws
-visually bracket the ZIMPHIA data points (~3–8%). Extinction across draws would
-indicate model misspecification or `rel_init_prev` too aggressive a scale-down.
+2. *Syphilis module config misaligned with calibrated model.* `model.py`
+   updated to match the `syph_dx_zim` configuration:
+   - `rel_trans_primary=5`, `rel_trans_secondary=1`, `rel_trans_latent=0.1`
+   - `rel_trans_latent_half_life=months(6)` (was `years(1)`)
+   - `beta_m2c=0.075` (was `1.0`)
+   - `p_symp_primary=[0.3, 0.8]`, `anc_detection=1.`
+
+3. *Prior ceiling too low.* `syph.beta_m2f` upper bound widened from 0.20 to
+   0.35 — aligns with the `syph_dx_zim` Optuna search range.
+
+4. *STIsim 1.5.5 bug.* `active_prevalence` result was not being populated
+   (line was commented out in `stisim/diseases/syphilis.py`). Uncommented.
+
+**Plan.** Identical 100-draw prior predictive check: n_agents=5000, 1985–2025,
+no PN, no FetalHealth. NG/CT/TV/HIV panels expected to be unchanged.
+
+**Success criteria.** Syphilis active prevalence trajectories bracket the
+Zimbabwe data points. Extinction across all draws would indicate further
+model misspecification. If trajectories bracket but predominantly sit below
+the data, the `rel_init_prev` or beta prior may need widening further.

@@ -64,7 +64,7 @@ def plot_coverage(savepath='figures/coverage.png', show=False):
                  fontsize=13, y=1.00)
     sc.figlayout()
 
-    savepath = Path(__file__).resolve().parents[2] / savepath
+    savepath = Path(__file__).resolve().parent / savepath
     savepath.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(savepath, dpi=120, bbox_inches='tight')
     if show:
