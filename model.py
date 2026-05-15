@@ -74,8 +74,9 @@ def make_diseases(which='all', care_seek_mult=1.0):
 def make_networks(dur_recall=ss.years(0.25)):
     sexual = sti.StructuredSexual(
         prop_f0=0.67, prop_m0=0.55,
-        prop_f2=0.025, prop_m2=0.05,
+        prop_f2=0.05, prop_m2=0.15,
         f1_conc=0.05,
+        f2_conc=0.25, m2_conc=0.50,
         recall_prior=True,
         condom_data=pd.read_csv(f'{DATA_DIR}/condom_use.csv'),
     )
