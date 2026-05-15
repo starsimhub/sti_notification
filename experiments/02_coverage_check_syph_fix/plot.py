@@ -27,7 +27,7 @@ TARGETS = [
     ('ct.prevalence_f_25_30',  'zimbabwe_sti_data.csv',  'ct_prevalence_f_25_30',   'CT prevalence (women 25-30)'),
     ('tv.prevalence',          'zimbabwe_sti_data.csv',  'tv_prevalence',           'TV prevalence'),
     ('hiv.prevalence',         'zimbabwe_hiv_calib.csv', 'hiv_prevalence',          'HIV prevalence'),
-    ('syph.active_prevalence', 'zimbabwe_syph_data.csv', 'syph.active_prevalence',  'Syphilis active prevalence'),
+    ('syph.prevalence',        'zimbabwe_syph_data.csv', 'syph.active_prevalence',  'Syphilis prevalence (seropositive)'),
 ]
 
 

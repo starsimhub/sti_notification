@@ -21,8 +21,12 @@ three are resolved?
 3. *Prior ceiling too low.* `syph.beta_m2f` upper bound widened from 0.20 to
    0.35 — aligns with the `syph_dx_zim` Optuna search range.
 
-4. *STIsim 1.5.5 bug.* `active_prevalence` result was not being populated
-   (line was commented out in `stisim/diseases/syphilis.py`). Uncommented.
+4. *STIsim 1.5.5 API change.* In 1.5.2 `active_prevalence` tracked total
+   seropositive prevalence; in 1.5.5 it tracks only primary + secondary (near-zero
+   in endemic equilibrium). The uncommented line was also missing. Fix: use
+   `syph.prevalence` (total infected among sexually active adults 15–50) as the
+   calibration target — this is what the ZIMPHIA Zimbabwe data (~2%) represents.
+   Plot/run scripts updated accordingly.
 
 **Plan.** Identical 100-draw prior predictive check: n_agents=5000, 1985–2025,
 no PN, no FetalHealth. NG/CT/TV/HIV panels expected to be unchanged.
