@@ -305,18 +305,22 @@ class SyndromicPN(sti.PartnerNotification):
         return
 
 
-def make_syph_testing(stop=2040, anc_test_prob=0.5, symp_test_prob=0.5):
+def make_syph_testing(stop=2040, anc_test_prob=0.5, symp_test_prob=None):
     """
     Symptomatic + ANC syphilis testing pathways.
 
     Two STITest interventions feed into a single SyphTx:
       1. Symptomatic test: agents with chancre or rash visible (fires when
-         care is sought).
+         care is sought). Test probability stratified by sex, risk group,
+         and sex-work status via data/symp_test_prob_soc.csv.
       2. ANC test: pregnant women in the first trimester.
 
     Both use the `gud` SyphDx product from data/syph_dx.csv (90% sensitivity
     for primary syph; lower for other stages).
     """
+    if symp_test_prob is None:
+        symp_test_prob = pd.read_csv('data/symp_test_prob_soc.csv')
+
     syph_dx_df = pd.read_csv(f'data/syph_dx.csv')
     gud_dx = sti.SyphDx(syph_dx_df[syph_dx_df.name == 'gud'], name='SyphDx_gud')
 

@@ -68,17 +68,22 @@ def make_diseases(which='all', care_seek_mult=1.0):
         analyzers.append(sti.sw_stats(diseases=['ng', 'ct', 'tv']))
     if which in ('ulcerative', 'all'):
         d.syph, d.gudp = make_ulcerative_stis()
+        analyzers.append(sti.coinfection_stats('syph', 'hiv', name='syph_hiv_coinfection'))
     return d, analyzers
 
 
 def make_networks(dur_recall=ss.years(0.25)):
     sexual = sti.StructuredSexual(
         prop_f0=0.67, prop_m0=0.55,
-        prop_f2=0.05, prop_m2=0.15,
-        f1_conc=0.15,
-        f2_conc=0.25, m2_conc=0.50,
+        prop_f2=0.10, prop_m2=0.20,
+        concurrency_dist=ss.nbinom(n=2, p=0.5),
+        f1_conc=0.15, m1_conc=0.20,
+        f2_conc=1.0, m2_conc=4.4,
         recall_prior=True,
         condom_data=pd.read_csv(f'{DATA_DIR}/condom_use.csv'),
+        fsw_shares=ss.bernoulli(p=0.10),
+        client_shares=ss.bernoulli(p=0.20),
+        sw_seeking_rate=ss.permonth(20),
     )
     return [sexual, sti.PriorPartners(dur_recall=dur_recall), ss.MaternalNet()]
 

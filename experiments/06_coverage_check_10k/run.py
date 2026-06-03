@@ -62,7 +62,14 @@ RESULT_COLS = [
     'ct.prevalence_f_25_30',
     'tv.prevalence',
     'hiv.prevalence',
-    'syph.prevalence',
+    'syph.prevalence_f',
+    'syph.prevalence_m',
+    'syph.serological_prevalence_f',
+    'syph.serological_prevalence_m',
+    'syph.pregnant_prevalence',
+    'syph.active_prevalence',
+    'syph_hiv_coinfection.syph_prev_has_hiv',
+    'syph_hiv_coinfection.syph_prev_no_hiv',
 ]
 N_DRAWS   = int(os.environ.get('N_DRAWS', 10))      # bump via env var on VM
 N_WORKERS = int(os.environ.get('N_WORKERS', 1))     # set to ~75 on the IDM VM
