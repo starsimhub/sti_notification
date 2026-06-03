@@ -1,0 +1,8 @@
+{
+  "n_raw_sims": 1000,
+  "n_after_syph_filter": 597,
+  "n_after_lik_filter": 597,
+  "ess": 1.0021434663528197,
+  "ess_ratio": 0.0016786322719477716,
+  "n_posterior": 500
+}
