@@ -41,6 +41,13 @@ confirm,primary,0.9
 confirm,secondary,0.9
 confirm,latent,0.9
 confirm,tertiary,0.9
+rpr,naive,0.05
+rpr,sus_not_naive,0.05
+rpr,exposed,0.1
+rpr,primary,0.9
+rpr,secondary,0.9
+rpr,latent,0.9
+rpr,tertiary,0.9
 exam,susceptible,0.1
 exam,congenital,0.3
 poc_cs,susceptible,0

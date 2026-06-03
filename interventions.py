@@ -305,33 +305,43 @@ class SyndromicPN(sti.PartnerNotification):
         return
 
 
-def make_syph_testing(stop=2040, anc_test_prob=0.5, symp_test_prob=None):
+def make_syph_testing(stop=2040, symp_test_prob=None, rdt_year=2012):
     """
     Symptomatic + ANC syphilis testing pathways.
 
-    Two STITest interventions feed into a single SyphTx:
-      1. Symptomatic test: agents with chancre or rash visible (fires when
-         care is sought). Test probability stratified by sex, risk group,
-         and sex-work status via data/symp_test_prob_soc.csv.
-      2. ANC test: pregnant women in the first trimester.
+    Three channels feed into a single SyphTx:
+      1. Symptomatic test (GUD): agents with chancre or rash visible.
+      2. ANC RPR screen (1980–rdt_year): serology for pregnant women.
+      3. ANC dual RDT screen (rdt_year–stop): treponemal rapid test.
 
-    Both use the `gud` SyphDx product from data/syph_dx.csv (90% sensitivity
-    for primary syph; lower for other stages).
+    ANC coverage ramps from ~20% (1980s) through a 2008 dip to ~95%
+    (EMTCT era). The product switches from RPR (non-treponemal, detects
+    active infection) to dual RDT (treponemal, lifelong positivity).
     """
     if symp_test_prob is None:
         symp_test_prob = pd.read_csv('data/symp_test_prob_soc.csv')
 
     syph_dx_df = pd.read_csv(f'data/syph_dx.csv')
     gud_dx = sti.SyphDx(syph_dx_df[syph_dx_df.name == 'gud'], name='SyphDx_gud')
+    rpr_dx = sti.SyphDx(syph_dx_df[syph_dx_df.name == 'rpr'], name='SyphDx_rpr')
+    dual_dx = sti.SyphDx(syph_dx_df[syph_dx_df.name == 'dual'], name='SyphDx_dual')
+
+    anc_years = [1980, 1990, 1999, 2008, 2012, 2018, 2040]
+    anc_probs = [0.20, 0.30, 0.40, 0.35, 0.50, 0.90, 0.95]
 
     def syph_dx_eligibility(sim):
-        """Treat anyone newly diagnosed positive by either syph test this step."""
-        sympt = sim.interventions.syph_symp_test
-        anct = sim.interventions.syph_anc_test
-        return ((sympt.ti_positive == sympt.ti) | (anct.ti_positive == anct.ti)).uids
+        """Treat anyone newly diagnosed positive by any syph test this step."""
+        tests = [sim.interventions.syph_symp_test,
+                 sim.interventions.syph_anc_rpr,
+                 sim.interventions.syph_anc_rdt]
+        pos = tests[0].ti_positive == tests[0].ti
+        for t in tests[1:]:
+            pos = pos | (t.ti_positive == t.ti)
+        return pos.uids
 
     syph_tx = sti.SyphTx(name='syph_tx', label='syph_tx', eligibility=syph_dx_eligibility)
 
+    # --- Symptomatic channel (unchanged) ---
     def syph_symp_eligibility(sim):
         syph = sim.diseases.syph
         return syph.chancre_visible | syph.rash_visible
@@ -343,19 +353,31 @@ def make_syph_testing(stop=2040, anc_test_prob=0.5, symp_test_prob=None):
         eligibility=syph_symp_eligibility,
     )
 
+    # --- ANC channels (era-gated) ---
     def anc_eligibility(sim):
         if not hasattr(sim.demographics, 'pregnancy'):
             return ss.uids()
         return sim.demographics.pregnancy.tri1_uids
 
-    syph_anc_test = sti.SyphTest(
-        name='syph_anc_test', label='syph_anc_test',
-        product=gud_dx,
-        test_prob_data=anc_test_prob,
+    syph_anc_rpr = sti.SyphTest(
+        name='syph_anc_rpr', label='syph_anc_rpr',
+        product=rpr_dx,
+        years=anc_years,
+        test_prob_data=anc_probs,
         eligibility=anc_eligibility,
     )
+    syph_anc_rpr.stop = rdt_year
 
-    return [syph_symp_test, syph_anc_test, syph_tx]
+    syph_anc_rdt = sti.SyphTest(
+        name='syph_anc_rdt', label='syph_anc_rdt',
+        product=dual_dx,
+        years=anc_years,
+        test_prob_data=anc_probs,
+        eligibility=anc_eligibility,
+    )
+    syph_anc_rdt.start = rdt_year
+
+    return [syph_symp_test, syph_anc_rpr, syph_anc_rdt, syph_tx]
 
 
 def make_testing(ng, ct, tv, bv, poc=None, pn_pars=None, stop=2040):
