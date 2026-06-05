@@ -1,0 +1,99 @@
+{
+  "parameters": [
+    "hiv.beta_m2f",
+    "log_syph.beta_m2f",
+    "log_ng.beta_m2f",
+    "log_ct.beta_m2f",
+    "log_tv.beta_m2f",
+    "structuredsexual.prop_f0",
+    "structuredsexual.m1_conc",
+    "structuredsexual.dur_sw"
+  ],
+  "parameter_bounds": {
+    "hiv.beta_m2f": [
+      0.005,
+      0.05
+    ],
+    "log_syph.beta_m2f": [
+      -2.3025850929940455,
+      -1.0498221244986778
+    ],
+    "log_ng.beta_m2f": [
+      -3.912023005428146,
+      -1.2039728043259361
+    ],
+    "log_ct.beta_m2f": [
+      -3.912023005428146,
+      -1.2039728043259361
+    ],
+    "log_tv.beta_m2f": [
+      -3.912023005428146,
+      -0.5108256237659907
+    ],
+    "structuredsexual.prop_f0": [
+      0.55,
+      0.9
+    ],
+    "structuredsexual.m1_conc": [
+      0.05,
+      0.3
+    ],
+    "structuredsexual.dur_sw": [
+      2.0,
+      15.0
+    ]
+  },
+  "observations": {
+    "hiv_prev_2000_2010": [
+      0.116,
+      0.015
+    ],
+    "hiv_prev_2010_2020": [
+      0.092,
+      0.01
+    ],
+    "ng_prev_2005_2015": [
+      0.02,
+      0.003
+    ],
+    "ct_prev_f2530": [
+      0.12,
+      0.02
+    ],
+    "tv_prev_2005_2015": [
+      0.111,
+      0.015
+    ],
+    "syph_prev_f_2016": [
+      0.01,
+      0.003
+    ],
+    "syph_prev_m_2016": [
+      0.006,
+      0.002
+    ],
+    "syph_seroprev_f_2016": [
+      0.03,
+      0.005
+    ],
+    "syph_seroprev_m_2016": [
+      0.024,
+      0.005
+    ],
+    "syph_anc_2000_2015": [
+      0.02,
+      0.005
+    ],
+    "syph_prev_hivpos_2016": [
+      0.029,
+      0.008
+    ],
+    "syph_prev_hivneg_2016": [
+      0.004,
+      0.002
+    ]
+  },
+  "n_samples": 1000,
+  "max_iterations": 8,
+  "implausibility_threshold": 3.0
+}

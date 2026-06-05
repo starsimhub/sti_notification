@@ -1,0 +1,443 @@
+2026-05-18 16:38:08 [INFO] ============================================================
+2026-05-18 16:38:08 [INFO] HISTORY MATCHING ENGINE — CONFIGURATION
+2026-05-18 16:38:08 [INFO] ============================================================
+2026-05-18 16:38:08 [INFO]   Emulator type:          bayes_linear
+2026-05-18 16:38:08 [INFO]   Parameters:             8
+2026-05-18 16:38:08 [INFO]   Observation targets:    12
+2026-05-18 16:38:08 [INFO]   Samples per wave:       20
+2026-05-18 16:38:08 [INFO]   Max iterations:         1
+2026-05-18 16:38:08 [INFO]   Implausibility threshold: 3.0
+2026-05-18 16:38:08 [INFO]   Auto space reduction:   disabled
+2026-05-18 16:38:08 [INFO]   Random seed:            None
+2026-05-18 16:38:08 [INFO]   Oversample factor:      1.1
+2026-05-18 16:38:08 [INFO]   Max batch size:         10000
+2026-05-18 16:38:08 [INFO]   Output directory:       /home/robyn/sti_notification/experiments/09_history_matching/outputs/hm_zim
+2026-05-18 16:38:08 [INFO]   Run log:                /home/robyn/sti_notification/experiments/09_history_matching/outputs/hm_zim/log.txt
+2026-05-18 16:38:08 [INFO]   Parameters: ['hiv.beta_m2f', 'log_syph.beta_m2f', 'log_ng.beta_m2f', 'log_ct.beta_m2f', 'log_tv.beta_m2f', 'structuredsexual.prop_f0', 'structuredsexual.m1_conc', 'structuredsexual.dur_sw']
+2026-05-18 16:38:08 [INFO]   Targets: ['hiv_prev_2000_2010', 'hiv_prev_2010_2020', 'ng_prev_2005_2015', 'ct_prev_f2530', 'tv_prev_2005_2015', 'syph_prev_f_2016', 'syph_prev_m_2016', 'syph_seroprev_f_2016', 'syph_seroprev_m_2016', 'syph_anc_2000_2015', 'syph_prev_hivpos_2016', 'syph_prev_hivneg_2016']
+2026-05-18 16:38:08 [INFO] ============================================================
+2026-05-18 16:38:08 [INFO] Simulation function configured
+2026-05-18 16:38:08 [INFO] Starting automated run with 1 max iterations
+2026-05-18 16:38:08 [INFO] ============================================================
+2026-05-18 16:38:08 [INFO] WAVE 1 STARTING
+2026-05-18 16:38:08 [INFO] ============================================================
+2026-05-18 16:38:08 [INFO] [Wave 1] Phase 1/5 SAMPLING: generated 20 samples (acceptance rate: 1.000) [0.0s]
+2026-05-18 16:38:08 [INFO] [Wave 1] Phase 2/5 SIMULATION: running 20 simulations...
+2026-05-18 16:42:26 [INFO] [Wave 1] Phase 2/5 SIMULATION: complete — 12 outputs [258.2s]
+2026-05-18 16:42:26 [INFO]   Feature ranking (mean_sq_z): syph_prev_hivpos_2016=152.39, hiv_prev_2010_2020=87.93, ng_prev_2005_2015=70.29, hiv_prev_2000_2010=43.48, tv_prev_2005_2015=39.93
+2026-05-18 16:42:26 [INFO]   SELECTED: syph_prev_hivpos_2016 (score=152.39, mean_z=-0.33, std_z=12.66)
+2026-05-18 16:42:26 [INFO] [Wave 1] Phase 3/5 FEATURE SELECTION: ['syph_prev_hivpos_2016'] [0.0s]
+2026-05-18 16:42:26 [INFO] [Wave 1] Phase 4/5 EMULATOR TRAINING: training 1 emulators...
+2026-05-18 16:42:26 [INFO]   Emulator 1/1 [syph_prev_hivpos_2016]: creating (20 samples, 8 params, type=bayes_linear)...
+2026-05-18 16:42:26 [DEBUG] Created bayes_linear emulator for feature: syph_prev_hivpos_2016
+2026-05-18 16:42:26 [INFO]   Emulator 1/1 [syph_prev_hivpos_2016]: training...
+2026-05-18 16:42:26 [INFO]     Training Bayes Linear: 15 points, 8 dims
+2026-05-18 16:42:26 [INFO]     OLS trend fit [0.0s]
+2026-05-18 16:42:26 [INFO]     Optimizing theta (8 correlation lengths, 15x15 Cholesky per eval)...
+2026-05-18 16:42:26 [INFO]     L-BFGS-B iter 19: NLL=-5.5397 [0s]
+2026-05-18 16:42:26 [INFO]     L-BFGS-B iter 29: NLL=-5.5436 [0s]
+2026-05-18 16:42:26 [INFO]     L-BFGS-B iter 39: NLL=-5.5651 [0s]
+2026-05-18 16:42:26 [INFO]     L-BFGS-B iter 58: NLL=-5.5877 [0s]
+2026-05-18 16:42:26 [INFO]     L-BFGS-B iter 77: NLL=-5.7246 [0s]
+2026-05-18 16:42:26 [INFO]     L-BFGS-B iter 96: NLL=-5.7890 [0s]
+2026-05-18 16:42:26 [INFO]     L-BFGS-B iter 106: NLL=-5.9623 [0s]
+2026-05-18 16:42:26 [INFO]     L-BFGS-B iter 125: NLL=-6.0657 [0s]
+2026-05-18 16:42:26 [INFO]     L-BFGS-B iter 144: NLL=-6.2507 [0s]
+2026-05-18 16:42:26 [INFO]     L-BFGS-B iter 163: NLL=-6.3865 [0s]
+2026-05-18 16:42:26 [INFO]     L-BFGS-B iter 173: NLL=-6.5004 [0s]
+2026-05-18 16:42:26 [INFO]     L-BFGS-B iter 183: NLL=-6.5367 [0s]
+2026-05-18 16:42:26 [INFO]     L-BFGS-B iter 193: NLL=-6.5476 [0s]
+2026-05-18 16:42:26 [INFO]     L-BFGS-B iter 203: NLL=-6.5551 [0s]
+2026-05-18 16:42:26 [INFO]     L-BFGS-B iter 213: NLL=-6.5636 [0s]
+2026-05-18 16:42:26 [INFO]     L-BFGS-B iter 223: NLL=-6.5686 [0s]
+2026-05-18 16:42:26 [INFO]     L-BFGS-B iter 233: NLL=-6.5712 [0s]
+2026-05-18 16:42:26 [INFO]     L-BFGS-B iter 243: NLL=-6.5726 [0s]
+2026-05-18 16:42:26 [INFO]     L-BFGS-B iter 253: NLL=-6.5732 [0s]
+2026-05-18 16:42:26 [INFO]     L-BFGS-B iter 263: NLL=-6.5735 [0s]
+2026-05-18 16:42:26 [INFO]     L-BFGS-B iter 273: NLL=-6.5736 [0s]
+2026-05-18 16:42:26 [INFO]     L-BFGS-B iter 283: NLL=-6.5736 [0s]
+2026-05-18 16:42:26 [INFO]     L-BFGS-B iter 293: NLL=-6.5737 [0s]
+2026-05-18 16:42:26 [INFO]     L-BFGS-B iter 303: NLL=-6.5737 [0s]
+2026-05-18 16:42:26 [INFO]     L-BFGS-B iter 313: NLL=-6.5737 [0s]
+2026-05-18 16:42:26 [INFO]     Theta optimization: 25 L-BFGS iters, 313 NLL evals, final NLL=-6.5737 [0.0s]
+2026-05-18 16:42:26 [INFO]     Building 15x15 correlation matrix and Cholesky...
+2026-05-18 16:42:26 [INFO]     Training complete — sigma²=0.5164, theta range=[0.079, 54.598] [0.0s total]
+2026-05-18 16:42:26 [INFO]   Emulator 1/1 [syph_prev_hivpos_2016]: trained [0.0s]
+2026-05-18 16:42:26 [INFO] [Wave 1] Phase 4/5 EMULATOR TRAINING: complete [0.0s]
+2026-05-18 16:42:26 [INFO] [Wave 1] Phase 5/5 NROY SAMPLING: finding 20 plausible candidates for next wave...
+2026-05-18 16:42:26 [INFO]   LHS rejection: 0/20 (0%) — starting
+2026-05-18 16:42:26 [INFO]   LHS rejection: 13/20 (65%) | 22 tested | rate=59.0909% [0s]
+2026-05-18 16:42:26 [INFO]   LHS rejection: 20/20 (100%) | 35 tested | rate=57.1429% [0s]
+2026-05-18 16:42:26 [INFO]   LHS rejection: 20/20 [0.0s]
+2026-05-18 16:42:26 [INFO]   NROY SUMMARY: 20/20 [OK] — sources: LHS=20 [0.0s]
+2026-05-18 16:42:26 [DEBUG] NROY fraction: 0.571429
+2026-05-18 16:42:26 [INFO] [Wave 1] Phase 5/5 NROY SAMPLING: found 20 candidates [0.0s]
+2026-05-18 16:42:26 [INFO] [Wave 1] ALL PHASES COMPLETE [258.3s total]. Committing...
+2026-05-18 16:42:28 [INFO] Checkpoint saved to /home/robyn/sti_notification/experiments/09_history_matching/outputs/hm_zim/checkpoint.pkl
+2026-05-18 16:42:28 [INFO] Wave 1 output saved to /home/robyn/sti_notification/experiments/09_history_matching/outputs/hm_zim/wave1
+2026-05-18 16:42:28 [INFO] [Wave 1] COMMITTED — diagnostics and checkpoint saved to /home/robyn/sti_notification/experiments/09_history_matching/outputs/hm_zim
+2026-05-18 16:42:28 [INFO] ============================================================
+2026-05-18 16:42:28 [INFO] Automated run completed. 1 iterations executed.
+2026-05-18 16:47:50 [INFO] ============================================================
+2026-05-18 16:47:50 [INFO] HISTORY MATCHING ENGINE — CONFIGURATION
+2026-05-18 16:47:50 [INFO] ============================================================
+2026-05-18 16:47:50 [INFO]   Emulator type:          bayes_linear
+2026-05-18 16:47:50 [INFO]   Parameters:             8
+2026-05-18 16:47:50 [INFO]   Observation targets:    12
+2026-05-18 16:47:50 [INFO]   Samples per wave:       1000
+2026-05-18 16:47:50 [INFO]   Max iterations:         8
+2026-05-18 16:47:50 [INFO]   Implausibility threshold: 3.0
+2026-05-18 16:47:50 [INFO]   Auto space reduction:   disabled
+2026-05-18 16:47:50 [INFO]   Random seed:            None
+2026-05-18 16:47:50 [INFO]   Oversample factor:      1.1
+2026-05-18 16:47:50 [INFO]   Max batch size:         10000
+2026-05-18 16:47:50 [INFO]   Output directory:       /home/robyn/sti_notification/experiments/09_history_matching/outputs/hm_zim
+2026-05-18 16:47:50 [INFO]   Run log:                /home/robyn/sti_notification/experiments/09_history_matching/outputs/hm_zim/log.txt
+2026-05-18 16:47:50 [INFO]   Parameters: ['hiv.beta_m2f', 'log_syph.beta_m2f', 'log_ng.beta_m2f', 'log_ct.beta_m2f', 'log_tv.beta_m2f', 'structuredsexual.prop_f0', 'structuredsexual.m1_conc', 'structuredsexual.dur_sw']
+2026-05-18 16:47:50 [INFO]   Targets: ['hiv_prev_2000_2010', 'hiv_prev_2010_2020', 'ng_prev_2005_2015', 'ct_prev_f2530', 'tv_prev_2005_2015', 'syph_prev_f_2016', 'syph_prev_m_2016', 'syph_seroprev_f_2016', 'syph_seroprev_m_2016', 'syph_anc_2000_2015', 'syph_prev_hivpos_2016', 'syph_prev_hivneg_2016']
+2026-05-18 16:47:50 [INFO] ============================================================
+2026-05-18 16:47:50 [INFO] Simulation function configured
+2026-05-18 16:47:50 [WARNING] Checkpoint exists at /home/robyn/sti_notification/experiments/09_history_matching/outputs/hm_zim/checkpoint.pkl but resume=False. Starting fresh (existing output will be overwritten).
+2026-05-18 16:47:50 [INFO] Starting automated run with 8 max iterations
+2026-05-18 16:47:50 [INFO] ============================================================
+2026-05-18 16:47:50 [INFO] WAVE 1 STARTING
+2026-05-18 16:47:50 [INFO] ============================================================
+2026-05-18 16:47:50 [INFO] [Wave 1] Phase 1/5 SAMPLING: generated 1000 samples (acceptance rate: 1.000) [0.0s]
+2026-05-18 16:47:50 [INFO] [Wave 1] Phase 2/5 SIMULATION: running 1000 simulations...
+2026-05-18 17:00:46 [INFO] [Wave 1] Phase 2/5 SIMULATION: complete — 12 outputs [776.0s]
+2026-05-18 17:00:46 [INFO]   Feature ranking (mean_sq_z): syph_prev_m_2016=647.39, syph_prev_f_2016=326.02, syph_prev_hivpos_2016=169.89, syph_prev_hivneg_2016=116.88, syph_seroprev_f_2016=114.48
+2026-05-18 17:00:46 [INFO]   SELECTED: syph_prev_m_2016 (score=647.39, mean_z=9.09, std_z=23.78)
+2026-05-18 17:00:46 [INFO] [Wave 1] Phase 3/5 FEATURE SELECTION: ['syph_prev_m_2016'] [0.0s]
+2026-05-18 17:00:46 [INFO] [Wave 1] Phase 4/5 EMULATOR TRAINING: training 1 emulators...
+2026-05-18 17:00:46 [INFO]   Emulator 1/1 [syph_prev_m_2016]: creating (1000 samples, 8 params, type=bayes_linear)...
+2026-05-18 17:00:46 [DEBUG] Created bayes_linear emulator for feature: syph_prev_m_2016
+2026-05-18 17:00:46 [INFO]   Emulator 1/1 [syph_prev_m_2016]: training...
+2026-05-18 17:00:46 [INFO]     Training Bayes Linear: 750 points, 8 dims
+2026-05-18 17:00:46 [INFO]     OLS trend fit [0.0s]
+2026-05-18 17:00:46 [INFO]     Optimizing theta (8 correlation lengths, 750x750 Cholesky per eval)...
+2026-05-18 17:00:47 [INFO]     L-BFGS-B iter 19: NLL=-84.5252 [1s]
+2026-05-18 17:00:47 [INFO]     Theta optimization: 1 L-BFGS iters, 19 NLL evals, final NLL=-84.5252 [0.9s]
+2026-05-18 17:00:47 [INFO]     Building 750x750 correlation matrix and Cholesky...
+2026-05-18 17:00:47 [INFO]     Training complete — sigma²=0.7982, theta range=[0.018, 0.018] [0.9s total]
+2026-05-18 17:00:47 [INFO]   Emulator 1/1 [syph_prev_m_2016]: trained [0.9s]
+2026-05-18 17:00:47 [INFO] [Wave 1] Phase 4/5 EMULATOR TRAINING: complete [1.0s]
+2026-05-18 17:00:47 [INFO] [Wave 1] Phase 5/5 NROY SAMPLING: finding 1000 plausible candidates for next wave...
+2026-05-18 17:00:47 [INFO]   LHS rejection: 0/1000 (0%) — starting
+2026-05-18 17:00:47 [INFO]   LHS rejection: 1100/1000 (110%) | 1,100 tested | rate=100.0000% [0s]
+2026-05-18 17:00:47 [INFO]   LHS rejection: 1000/1000 [0.1s]
+2026-05-18 17:00:47 [INFO]   NROY SUMMARY: 1000/1000 [OK] — sources: LHS=1000 [0.1s]
+2026-05-18 17:00:47 [DEBUG] NROY fraction: 0.909091
+2026-05-18 17:00:47 [INFO] [Wave 1] Phase 5/5 NROY SAMPLING: found 1000 candidates [0.1s]
+2026-05-18 17:00:47 [INFO] [Wave 1] ALL PHASES COMPLETE [777.0s total]. Committing...
+2026-05-18 17:00:49 [INFO] Checkpoint saved to /home/robyn/sti_notification/experiments/09_history_matching/outputs/hm_zim/checkpoint.pkl
+2026-05-18 17:00:49 [INFO] Wave 1 output saved to /home/robyn/sti_notification/experiments/09_history_matching/outputs/hm_zim/wave1
+2026-05-18 17:00:49 [INFO] [Wave 1] COMMITTED — diagnostics and checkpoint saved to /home/robyn/sti_notification/experiments/09_history_matching/outputs/hm_zim
+2026-05-18 17:00:49 [INFO] ============================================================
+2026-05-18 17:00:49 [INFO] ============================================================
+2026-05-18 17:00:49 [INFO] WAVE 2 STARTING
+2026-05-18 17:00:49 [INFO] ============================================================
+2026-05-18 17:00:49 [INFO] [Wave 2] Phase 1/5 SAMPLING: using 1000 pre-computed samples from wave 1 [0.0s]
+2026-05-18 17:00:49 [INFO] [Wave 2] Phase 2/5 SIMULATION: running 1000 simulations...
+2026-05-18 17:13:47 [INFO] [Wave 2] Phase 2/5 SIMULATION: complete — 12 outputs [778.0s]
+2026-05-18 17:13:47 [INFO]   Feature ranking (mean_sq_z): syph_prev_m_2016=542.49, syph_prev_f_2016=273.93, syph_prev_hivpos_2016=144.22, syph_prev_hivneg_2016=101.50, syph_seroprev_f_2016=99.44
+2026-05-18 17:13:47 [INFO]   Cooldown (skip): ['syph_prev_m_2016']
+2026-05-18 17:13:47 [INFO]   SELECTED: hiv_prev_2010_2020 (score=80.68, mean_z=7.04, std_z=5.58)
+2026-05-18 17:13:47 [INFO] [Wave 2] Phase 3/5 FEATURE SELECTION: ['hiv_prev_2010_2020'] [0.0s]
+2026-05-18 17:13:47 [INFO] [Wave 2] Phase 4/5 EMULATOR TRAINING: training 1 emulators...
+2026-05-18 17:13:47 [INFO]   Emulator 1/1 [hiv_prev_2010_2020]: creating (1000 samples, 8 params, type=bayes_linear)...
+2026-05-18 17:13:47 [DEBUG] Created bayes_linear emulator for feature: hiv_prev_2010_2020
+2026-05-18 17:13:47 [INFO]   Emulator 1/1 [hiv_prev_2010_2020]: training...
+2026-05-18 17:13:47 [INFO]     Training Bayes Linear: 750 points, 8 dims
+2026-05-18 17:13:47 [INFO]     OLS trend fit [0.0s]
+2026-05-18 17:13:47 [INFO]     Optimizing theta (8 correlation lengths, 750x750 Cholesky per eval)...
+2026-05-18 17:13:48 [INFO]     L-BFGS-B iter 19: NLL=-1042.6385 [1s]
+2026-05-18 17:13:48 [INFO]     Theta optimization: 1 L-BFGS iters, 19 NLL evals, final NLL=-1042.6385 [0.8s]
+2026-05-18 17:13:48 [INFO]     Building 750x750 correlation matrix and Cholesky...
+2026-05-18 17:13:48 [INFO]     Training complete — sigma²=0.0620, theta range=[0.018, 0.018] [0.8s total]
+2026-05-18 17:13:48 [INFO]   Emulator 1/1 [hiv_prev_2010_2020]: trained [0.8s]
+2026-05-18 17:13:48 [INFO] [Wave 2] Phase 4/5 EMULATOR TRAINING: complete [0.8s]
+2026-05-18 17:13:48 [INFO] [Wave 2] Phase 5/5 NROY SAMPLING: finding 1000 plausible candidates for next wave...
+2026-05-18 17:13:48 [INFO]   LHS rejection: 0/1000 (0%) — starting
+2026-05-18 17:13:48 [INFO]   LHS rejection: 432/1000 (43%) | 1,100 tested | rate=39.2727% [0s]
+2026-05-18 17:13:48 [INFO]   LHS rejection: 1057/1000 (105%) | 2,690 tested | rate=39.2937% [0s]
+2026-05-18 17:13:48 [INFO]   LHS rejection: 1000/1000 [0.2s]
+2026-05-18 17:13:48 [INFO]   NROY SUMMARY: 1000/1000 [OK] — sources: LHS=1000 [0.2s]
+2026-05-18 17:13:48 [DEBUG] NROY fraction: 0.371747
+2026-05-18 17:13:48 [INFO] [Wave 2] Phase 5/5 NROY SAMPLING: found 1000 candidates [0.3s]
+2026-05-18 17:13:48 [INFO] [Wave 2] ALL PHASES COMPLETE [779.1s total]. Committing...
+2026-05-18 17:13:52 [INFO] Checkpoint saved to /home/robyn/sti_notification/experiments/09_history_matching/outputs/hm_zim/checkpoint.pkl
+2026-05-18 17:13:52 [INFO] Wave 2 output saved to /home/robyn/sti_notification/experiments/09_history_matching/outputs/hm_zim/wave2
+2026-05-18 17:13:52 [INFO] [Wave 2] COMMITTED — diagnostics and checkpoint saved to /home/robyn/sti_notification/experiments/09_history_matching/outputs/hm_zim
+2026-05-18 17:13:52 [INFO] ============================================================
+2026-05-18 17:13:52 [INFO] ============================================================
+2026-05-18 17:13:52 [INFO] WAVE 3 STARTING
+2026-05-18 17:13:52 [INFO] ============================================================
+2026-05-18 17:13:52 [INFO] [Wave 3] Phase 1/5 SAMPLING: using 1000 pre-computed samples from wave 2 [0.0s]
+2026-05-18 17:13:52 [INFO] [Wave 3] Phase 2/5 SIMULATION: running 1000 simulations...
+2026-05-18 17:26:45 [INFO] [Wave 3] Phase 2/5 SIMULATION: complete — 12 outputs [773.3s]
+2026-05-18 17:26:45 [INFO]   Feature ranking (mean_sq_z): syph_prev_m_2016=669.07, syph_prev_f_2016=339.64, syph_prev_hivpos_2016=258.48, syph_prev_hivneg_2016=222.40, syph_seroprev_f_2016=119.25
+2026-05-18 17:26:45 [INFO]   Cooldown (skip): ['hiv_prev_2010_2020']
+2026-05-18 17:26:45 [INFO]   SELECTED: syph_prev_m_2016 (score=669.07, mean_z=9.17, std_z=24.20)
+2026-05-18 17:26:45 [INFO] [Wave 3] Phase 3/5 FEATURE SELECTION: ['syph_prev_m_2016'] [0.0s]
+2026-05-18 17:26:45 [INFO] [Wave 3] Phase 4/5 EMULATOR TRAINING: training 1 emulators...
+2026-05-18 17:26:45 [INFO]   Emulator 1/1 [syph_prev_m_2016]: creating (1000 samples, 8 params, type=bayes_linear)...
+2026-05-18 17:26:45 [DEBUG] Created bayes_linear emulator for feature: syph_prev_m_2016
+2026-05-18 17:26:45 [INFO]   Emulator 1/1 [syph_prev_m_2016]: training...
+2026-05-18 17:26:45 [INFO]     Training Bayes Linear: 750 points, 8 dims
+2026-05-18 17:26:45 [INFO]     OLS trend fit [0.0s]
+2026-05-18 17:26:45 [INFO]     Optimizing theta (8 correlation lengths, 750x750 Cholesky per eval)...
+2026-05-18 17:26:46 [INFO]     L-BFGS-B iter 19: NLL=-82.5439 [1s]
+2026-05-18 17:26:46 [INFO]     Theta optimization: 1 L-BFGS iters, 19 NLL evals, final NLL=-82.5439 [0.6s]
+2026-05-18 17:26:46 [INFO]     Building 750x750 correlation matrix and Cholesky...
+2026-05-18 17:26:46 [INFO]     Training complete — sigma²=0.8024, theta range=[0.018, 0.018] [0.6s total]
+2026-05-18 17:26:46 [INFO]   Emulator 1/1 [syph_prev_m_2016]: trained [0.6s]
+2026-05-18 17:26:46 [INFO] [Wave 3] Phase 4/5 EMULATOR TRAINING: complete [0.6s]
+2026-05-18 17:26:46 [INFO] [Wave 3] Phase 5/5 NROY SAMPLING: finding 1000 plausible candidates for next wave...
+2026-05-18 17:26:46 [INFO]   LHS rejection: 0/1000 (0%) — starting
+2026-05-18 17:26:46 [INFO]   LHS rejection: 430/1000 (43%) | 1,100 tested | rate=39.0909% [0s]
+2026-05-18 17:26:46 [INFO]   LHS rejection: 1051/1000 (105%) | 2,703 tested | rate=38.8827% [0s]
+2026-05-18 17:26:46 [INFO]   LHS rejection: 1000/1000 [0.4s]
+2026-05-18 17:26:46 [INFO]   NROY SUMMARY: 1000/1000 [OK] — sources: LHS=1000 [0.4s]
+2026-05-18 17:26:46 [DEBUG] NROY fraction: 0.369959
+2026-05-18 17:26:46 [INFO] [Wave 3] Phase 5/5 NROY SAMPLING: found 1000 candidates [0.4s]
+2026-05-18 17:26:46 [INFO] [Wave 3] ALL PHASES COMPLETE [774.3s total]. Committing...
+2026-05-18 17:26:50 [INFO] Checkpoint saved to /home/robyn/sti_notification/experiments/09_history_matching/outputs/hm_zim/checkpoint.pkl
+2026-05-18 17:26:50 [INFO] Wave 3 output saved to /home/robyn/sti_notification/experiments/09_history_matching/outputs/hm_zim/wave3
+2026-05-18 17:26:50 [INFO] [Wave 3] COMMITTED — diagnostics and checkpoint saved to /home/robyn/sti_notification/experiments/09_history_matching/outputs/hm_zim
+2026-05-18 17:26:50 [INFO] ============================================================
+2026-05-18 17:26:50 [INFO] ============================================================
+2026-05-18 17:26:50 [INFO] WAVE 4 STARTING
+2026-05-18 17:26:50 [INFO] ============================================================
+2026-05-18 17:26:50 [INFO] [Wave 4] Phase 1/5 SAMPLING: using 1000 pre-computed samples from wave 3 [0.0s]
+2026-05-18 17:26:50 [INFO] [Wave 4] Phase 2/5 SIMULATION: running 1000 simulations...
+2026-05-18 17:39:49 [INFO] [Wave 4] Phase 2/5 SIMULATION: complete — 12 outputs [778.5s]
+2026-05-18 17:39:49 [INFO]   Feature ranking (mean_sq_z): syph_prev_m_2016=590.93, syph_prev_f_2016=306.73, syph_prev_hivpos_2016=244.47, syph_prev_hivneg_2016=197.46, syph_seroprev_f_2016=108.07
+2026-05-18 17:39:49 [INFO]   Cooldown (skip): ['syph_prev_m_2016']
+2026-05-18 17:39:49 [INFO]   SELECTED: ng_prev_2005_2015 (score=73.21, mean_z=0.20, std_z=8.56)
+2026-05-18 17:39:49 [INFO] [Wave 4] Phase 3/5 FEATURE SELECTION: ['ng_prev_2005_2015'] [0.0s]
+2026-05-18 17:39:49 [INFO] [Wave 4] Phase 4/5 EMULATOR TRAINING: training 1 emulators...
+2026-05-18 17:39:49 [INFO]   Emulator 1/1 [ng_prev_2005_2015]: creating (1000 samples, 8 params, type=bayes_linear)...
+2026-05-18 17:39:49 [DEBUG] Created bayes_linear emulator for feature: ng_prev_2005_2015
+2026-05-18 17:39:49 [INFO]   Emulator 1/1 [ng_prev_2005_2015]: training...
+2026-05-18 17:39:49 [INFO]     Training Bayes Linear: 750 points, 8 dims
+2026-05-18 17:39:49 [INFO]     OLS trend fit [0.0s]
+2026-05-18 17:39:49 [INFO]     Optimizing theta (8 correlation lengths, 750x750 Cholesky per eval)...
+2026-05-18 17:39:50 [INFO]     L-BFGS-B iter 37: NLL=-974.1136 [2s]
+2026-05-18 17:39:51 [INFO]     L-BFGS-B iter 47: NLL=-1134.6500 [2s]
+2026-05-18 17:39:51 [INFO]     L-BFGS-B iter 57: NLL=-1252.7286 [2s]
+2026-05-18 17:39:52 [INFO]     L-BFGS-B iter 67: NLL=-1262.8870 [3s]
+2026-05-18 17:39:52 [INFO]     L-BFGS-B iter 77: NLL=-1266.3917 [3s]
+2026-05-18 17:39:52 [INFO]     L-BFGS-B iter 87: NLL=-1275.8013 [4s]
+2026-05-18 17:39:53 [INFO]     L-BFGS-B iter 106: NLL=-1282.1323 [4s]
+2026-05-18 17:39:54 [INFO]     L-BFGS-B iter 125: NLL=-1286.4910 [5s]
+2026-05-18 17:39:54 [INFO]     L-BFGS-B iter 135: NLL=-1293.3747 [6s]
+2026-05-18 17:39:55 [INFO]     L-BFGS-B iter 145: NLL=-1303.4027 [6s]
+2026-05-18 17:39:55 [INFO]     L-BFGS-B iter 155: NLL=-1310.9744 [6s]
+2026-05-18 17:39:56 [INFO]     L-BFGS-B iter 165: NLL=-1313.7187 [7s]
+2026-05-18 17:39:56 [INFO]     L-BFGS-B iter 175: NLL=-1320.0002 [7s]
+2026-05-18 17:39:56 [INFO]     L-BFGS-B iter 185: NLL=-1321.6896 [8s]
+2026-05-18 17:39:57 [INFO]     L-BFGS-B iter 195: NLL=-1322.8726 [8s]
+2026-05-18 17:39:57 [INFO]     L-BFGS-B iter 205: NLL=-1323.1394 [8s]
+2026-05-18 17:39:57 [INFO]     L-BFGS-B iter 215: NLL=-1323.2214 [9s]
+2026-05-18 17:39:58 [INFO]     L-BFGS-B iter 225: NLL=-1323.2539 [9s]
+2026-05-18 17:39:58 [INFO]     L-BFGS-B iter 235: NLL=-1323.2574 [9s]
+2026-05-18 17:39:59 [INFO]     L-BFGS-B iter 245: NLL=-1323.2637 [10s]
+2026-05-18 17:39:59 [INFO]     L-BFGS-B iter 255: NLL=-1323.2650 [10s]
+2026-05-18 17:39:59 [INFO]     Theta optimization: 21 L-BFGS iters, 255 NLL evals, final NLL=-1323.2650 [10.3s]
+2026-05-18 17:39:59 [INFO]     Building 750x750 correlation matrix and Cholesky...
+2026-05-18 17:39:59 [INFO]     Training complete — sigma²=0.1051, theta range=[0.113, 2.400] [10.3s total]
+2026-05-18 17:39:59 [INFO]   Emulator 1/1 [ng_prev_2005_2015]: trained [10.3s]
+2026-05-18 17:39:59 [INFO] [Wave 4] Phase 4/5 EMULATOR TRAINING: complete [10.3s]
+2026-05-18 17:39:59 [INFO] [Wave 4] Phase 5/5 NROY SAMPLING: finding 1000 plausible candidates for next wave...
+2026-05-18 17:39:59 [INFO]   LHS rejection: 0/1000 (0%) — starting
+2026-05-18 17:39:59 [INFO]   LHS rejection: 112/1000 (11%) | 1,100 tested | rate=10.1818% [0s]
+2026-05-18 17:40:00 [INFO]   LHS rejection: 1217/1000 (121%) | 10,693 tested | rate=11.3813% [1s]
+2026-05-18 17:40:00 [INFO]   LHS rejection: 1000/1000 [1.4s]
+2026-05-18 17:40:00 [INFO]   NROY SUMMARY: 1000/1000 [OK] — sources: LHS=1000 [1.4s]
+2026-05-18 17:40:00 [DEBUG] NROY fraction: 0.093519
+2026-05-18 17:40:00 [INFO] [Wave 4] Phase 5/5 NROY SAMPLING: found 1000 candidates [1.4s]
+2026-05-18 17:40:00 [INFO] [Wave 4] ALL PHASES COMPLETE [790.2s total]. Committing...
+2026-05-18 17:40:05 [INFO] Checkpoint saved to /home/robyn/sti_notification/experiments/09_history_matching/outputs/hm_zim/checkpoint.pkl
+2026-05-18 17:40:05 [INFO] Wave 4 output saved to /home/robyn/sti_notification/experiments/09_history_matching/outputs/hm_zim/wave4
+2026-05-18 17:40:05 [INFO] [Wave 4] COMMITTED — diagnostics and checkpoint saved to /home/robyn/sti_notification/experiments/09_history_matching/outputs/hm_zim
+2026-05-18 17:40:05 [INFO] ============================================================
+2026-05-18 17:40:05 [INFO] ============================================================
+2026-05-18 17:40:05 [INFO] WAVE 5 STARTING
+2026-05-18 17:40:05 [INFO] ============================================================
+2026-05-18 17:40:05 [INFO] [Wave 5] Phase 1/5 SAMPLING: using 1000 pre-computed samples from wave 4 [0.0s]
+2026-05-18 17:40:05 [INFO] [Wave 5] Phase 2/5 SIMULATION: running 1000 simulations...
+2026-05-18 17:53:10 [INFO] [Wave 5] Phase 2/5 SIMULATION: complete — 12 outputs [785.2s]
+2026-05-18 17:53:10 [INFO]   Feature ranking (mean_sq_z): syph_prev_m_2016=752.05, syph_prev_f_2016=385.54, syph_prev_hivpos_2016=289.32, syph_prev_hivneg_2016=252.64, syph_seroprev_f_2016=132.85
+2026-05-18 17:53:10 [INFO]   Cooldown (skip): ['ng_prev_2005_2015']
+2026-05-18 17:53:10 [INFO]   SELECTED: syph_prev_m_2016 (score=752.05, mean_z=10.39, std_z=25.39)
+2026-05-18 17:53:10 [INFO] [Wave 5] Phase 3/5 FEATURE SELECTION: ['syph_prev_m_2016'] [0.0s]
+2026-05-18 17:53:10 [INFO] [Wave 5] Phase 4/5 EMULATOR TRAINING: training 1 emulators...
+2026-05-18 17:53:10 [INFO]   Emulator 1/1 [syph_prev_m_2016]: creating (1000 samples, 8 params, type=bayes_linear)...
+2026-05-18 17:53:10 [DEBUG] Created bayes_linear emulator for feature: syph_prev_m_2016
+2026-05-18 17:53:10 [INFO]   Emulator 1/1 [syph_prev_m_2016]: training...
+2026-05-18 17:53:10 [INFO]     Training Bayes Linear: 750 points, 8 dims
+2026-05-18 17:53:10 [INFO]     OLS trend fit [0.0s]
+2026-05-18 17:53:10 [INFO]     Optimizing theta (8 correlation lengths, 750x750 Cholesky per eval)...
+2026-05-18 17:53:11 [INFO]     L-BFGS-B iter 19: NLL=-113.1711 [1s]
+2026-05-18 17:53:11 [INFO]     Theta optimization: 1 L-BFGS iters, 19 NLL evals, final NLL=-113.1711 [0.6s]
+2026-05-18 17:53:11 [INFO]     Building 750x750 correlation matrix and Cholesky...
+2026-05-18 17:53:11 [INFO]     Training complete — sigma²=0.7395, theta range=[0.018, 0.018] [0.6s total]
+2026-05-18 17:53:11 [INFO]   Emulator 1/1 [syph_prev_m_2016]: trained [0.6s]
+2026-05-18 17:53:11 [INFO] [Wave 5] Phase 4/5 EMULATOR TRAINING: complete [0.6s]
+2026-05-18 17:53:11 [INFO] [Wave 5] Phase 5/5 NROY SAMPLING: finding 1000 plausible candidates for next wave...
+2026-05-18 17:53:11 [INFO]   LHS rejection: 0/1000 (0%) — starting
+2026-05-18 17:53:11 [INFO]   LHS rejection: 121/1000 (12%) | 1,100 tested | rate=11.0000% [0s]
+2026-05-18 17:53:13 [INFO]   LHS rejection: 1129/1000 (112%) | 9,890 tested | rate=11.4156% [2s]
+2026-05-18 17:53:13 [INFO]   LHS rejection: 1000/1000 [2.0s]
+2026-05-18 17:53:13 [INFO]   NROY SUMMARY: 1000/1000 [OK] — sources: LHS=1000 [2.0s]
+2026-05-18 17:53:13 [DEBUG] NROY fraction: 0.101112
+2026-05-18 17:53:13 [INFO] [Wave 5] Phase 5/5 NROY SAMPLING: found 1000 candidates [2.0s]
+2026-05-18 17:53:13 [INFO] [Wave 5] ALL PHASES COMPLETE [787.8s total]. Committing...
+2026-05-18 17:53:17 [INFO] Checkpoint saved to /home/robyn/sti_notification/experiments/09_history_matching/outputs/hm_zim/checkpoint.pkl
+2026-05-18 17:53:17 [INFO] Wave 5 output saved to /home/robyn/sti_notification/experiments/09_history_matching/outputs/hm_zim/wave5
+2026-05-18 17:53:17 [INFO] [Wave 5] COMMITTED — diagnostics and checkpoint saved to /home/robyn/sti_notification/experiments/09_history_matching/outputs/hm_zim
+2026-05-18 17:53:17 [INFO] ============================================================
+2026-05-18 17:53:17 [INFO] ============================================================
+2026-05-18 17:53:17 [INFO] WAVE 6 STARTING
+2026-05-18 17:53:17 [INFO] ============================================================
+2026-05-18 17:53:17 [INFO] [Wave 6] Phase 1/5 SAMPLING: using 1000 pre-computed samples from wave 5 [0.0s]
+2026-05-18 17:53:17 [INFO] [Wave 6] Phase 2/5 SIMULATION: running 1000 simulations...
+2026-05-18 18:06:29 [INFO] [Wave 6] Phase 2/5 SIMULATION: complete — 12 outputs [791.9s]
+2026-05-18 18:06:29 [INFO]   Feature ranking (mean_sq_z): syph_prev_m_2016=739.69, syph_prev_f_2016=374.50, syph_prev_hivpos_2016=275.80, syph_prev_hivneg_2016=238.92, syph_seroprev_f_2016=128.85
+2026-05-18 18:06:29 [INFO]   Cooldown (skip): ['syph_prev_m_2016']
+2026-05-18 18:06:29 [INFO]   SELECTED: tv_prev_2005_2015 (score=40.59, mean_z=-1.49, std_z=6.20)
+2026-05-18 18:06:29 [INFO] [Wave 6] Phase 3/5 FEATURE SELECTION: ['tv_prev_2005_2015'] [0.0s]
+2026-05-18 18:06:29 [INFO] [Wave 6] Phase 4/5 EMULATOR TRAINING: training 1 emulators...
+2026-05-18 18:06:29 [INFO]   Emulator 1/1 [tv_prev_2005_2015]: creating (1000 samples, 8 params, type=bayes_linear)...
+2026-05-18 18:06:29 [DEBUG] Created bayes_linear emulator for feature: tv_prev_2005_2015
+2026-05-18 18:06:29 [INFO]   Emulator 1/1 [tv_prev_2005_2015]: training...
+2026-05-18 18:06:29 [INFO]     Training Bayes Linear: 750 points, 8 dims
+2026-05-18 18:06:29 [INFO]     OLS trend fit [0.0s]
+2026-05-18 18:06:29 [INFO]     Optimizing theta (8 correlation lengths, 750x750 Cholesky per eval)...
+2026-05-18 18:06:30 [INFO]     L-BFGS-B iter 28: NLL=-957.9330 [1s]
+2026-05-18 18:06:32 [INFO]     L-BFGS-B iter 56: NLL=-1353.4937 [2s]
+2026-05-18 18:06:32 [INFO]     L-BFGS-B iter 66: NLL=-1377.8500 [3s]
+2026-05-18 18:06:32 [INFO]     L-BFGS-B iter 76: NLL=-1413.4502 [3s]
+2026-05-18 18:06:34 [INFO]     L-BFGS-B iter 113: NLL=-1445.8076 [5s]
+2026-05-18 18:06:35 [INFO]     L-BFGS-B iter 132: NLL=-1448.6038 [5s]
+2026-05-18 18:06:35 [INFO]     L-BFGS-B iter 142: NLL=-1458.5544 [6s]
+2026-05-18 18:06:35 [INFO]     L-BFGS-B iter 152: NLL=-1468.2378 [6s]
+2026-05-18 18:06:36 [INFO]     L-BFGS-B iter 162: NLL=-1474.2976 [7s]
+2026-05-18 18:06:36 [INFO]     L-BFGS-B iter 172: NLL=-1481.2168 [7s]
+2026-05-18 18:06:37 [INFO]     L-BFGS-B iter 182: NLL=-1485.3823 [7s]
+2026-05-18 18:06:37 [INFO]     L-BFGS-B iter 192: NLL=-1487.3496 [8s]
+2026-05-18 18:06:37 [INFO]     L-BFGS-B iter 202: NLL=-1487.6083 [8s]
+2026-05-18 18:06:38 [INFO]     L-BFGS-B iter 212: NLL=-1487.6319 [9s]
+2026-05-18 18:06:38 [INFO]     L-BFGS-B iter 222: NLL=-1487.6361 [9s]
+2026-05-18 18:06:39 [INFO]     L-BFGS-B iter 232: NLL=-1487.6372 [9s]
+2026-05-18 18:06:39 [INFO]     Theta optimization: 16 L-BFGS iters, 232 NLL evals, final NLL=-1487.6372 [9.3s]
+2026-05-18 18:06:39 [INFO]     Building 750x750 correlation matrix and Cholesky...
+2026-05-18 18:06:39 [INFO]     Training complete — sigma²=0.0625, theta range=[0.055, 4.876] [9.3s total]
+2026-05-18 18:06:39 [INFO]   Emulator 1/1 [tv_prev_2005_2015]: trained [9.3s]
+2026-05-18 18:06:39 [INFO] [Wave 6] Phase 4/5 EMULATOR TRAINING: complete [9.3s]
+2026-05-18 18:06:39 [INFO] [Wave 6] Phase 5/5 NROY SAMPLING: finding 1000 plausible candidates for next wave...
+2026-05-18 18:06:39 [INFO]   LHS rejection: 0/1000 (0%) — starting
+2026-05-18 18:06:39 [INFO]   LHS rejection: 34/1000 (3%) | 1,100 tested | rate=3.0909% [0s]
+2026-05-18 18:06:44 [INFO]   LHS rejection: 907/1000 (90%) | 35,478 tested | rate=2.5565% [5s]
+2026-05-18 18:06:44 [INFO]   LHS rejection: 1008/1000 (100%) | 39,479 tested | rate=2.5533% [6s]
+2026-05-18 18:06:44 [INFO]   LHS rejection: 1000/1000 [5.7s]
+2026-05-18 18:06:44 [INFO]   NROY SUMMARY: 1000/1000 [OK] — sources: LHS=1000 [5.7s]
+2026-05-18 18:06:44 [DEBUG] NROY fraction: 0.025330
+2026-05-18 18:06:44 [INFO] [Wave 6] Phase 5/5 NROY SAMPLING: found 1000 candidates [5.7s]
+2026-05-18 18:06:44 [INFO] [Wave 6] ALL PHASES COMPLETE [807.0s total]. Committing...
+2026-05-18 18:06:49 [INFO] Checkpoint saved to /home/robyn/sti_notification/experiments/09_history_matching/outputs/hm_zim/checkpoint.pkl
+2026-05-18 18:06:49 [INFO] Wave 6 output saved to /home/robyn/sti_notification/experiments/09_history_matching/outputs/hm_zim/wave6
+2026-05-18 18:06:49 [INFO] [Wave 6] COMMITTED — diagnostics and checkpoint saved to /home/robyn/sti_notification/experiments/09_history_matching/outputs/hm_zim
+2026-05-18 18:06:49 [INFO] ============================================================
+2026-05-18 18:06:49 [INFO] ============================================================
+2026-05-18 18:06:49 [INFO] WAVE 7 STARTING
+2026-05-18 18:06:49 [INFO] ============================================================
+2026-05-18 18:06:49 [INFO] [Wave 7] Phase 1/5 SAMPLING: using 1000 pre-computed samples from wave 6 [0.0s]
+2026-05-18 18:06:49 [INFO] [Wave 7] Phase 2/5 SIMULATION: running 1000 simulations...
+2026-05-18 18:20:04 [INFO] [Wave 7] Phase 2/5 SIMULATION: complete — 12 outputs [795.6s]
+2026-05-18 18:20:04 [INFO]   Feature ranking (mean_sq_z): syph_prev_m_2016=735.08, syph_prev_f_2016=375.65, syph_prev_hivpos_2016=275.77, syph_prev_hivneg_2016=234.60, syph_seroprev_f_2016=130.14
+2026-05-18 18:20:04 [INFO]   Cooldown (skip): ['tv_prev_2005_2015']
+2026-05-18 18:20:04 [INFO]   SELECTED: syph_prev_m_2016 (score=735.08, mean_z=10.10, std_z=25.17)
+2026-05-18 18:20:04 [INFO] [Wave 7] Phase 3/5 FEATURE SELECTION: ['syph_prev_m_2016'] [0.0s]
+2026-05-18 18:20:04 [INFO] [Wave 7] Phase 4/5 EMULATOR TRAINING: training 1 emulators...
+2026-05-18 18:20:04 [INFO]   Emulator 1/1 [syph_prev_m_2016]: creating (1000 samples, 8 params, type=bayes_linear)...
+2026-05-18 18:20:04 [DEBUG] Created bayes_linear emulator for feature: syph_prev_m_2016
+2026-05-18 18:20:04 [INFO]   Emulator 1/1 [syph_prev_m_2016]: training...
+2026-05-18 18:20:04 [INFO]     Training Bayes Linear: 750 points, 8 dims
+2026-05-18 18:20:04 [INFO]     OLS trend fit [0.0s]
+2026-05-18 18:20:04 [INFO]     Optimizing theta (8 correlation lengths, 750x750 Cholesky per eval)...
+2026-05-18 18:20:05 [INFO]     L-BFGS-B iter 19: NLL=-102.4928 [0s]
+2026-05-18 18:20:05 [INFO]     Theta optimization: 1 L-BFGS iters, 19 NLL evals, final NLL=-102.4928 [0.4s]
+2026-05-18 18:20:05 [INFO]     Building 750x750 correlation matrix and Cholesky...
+2026-05-18 18:20:05 [INFO]     Training complete — sigma²=0.7609, theta range=[0.018, 0.018] [0.4s total]
+2026-05-18 18:20:05 [INFO]   Emulator 1/1 [syph_prev_m_2016]: trained [0.4s]
+2026-05-18 18:20:05 [INFO] [Wave 7] Phase 4/5 EMULATOR TRAINING: complete [0.4s]
+2026-05-18 18:20:05 [INFO] [Wave 7] Phase 5/5 NROY SAMPLING: finding 1000 plausible candidates for next wave...
+2026-05-18 18:20:05 [INFO]   LHS rejection: 0/1000 (0%) — starting
+2026-05-18 18:20:05 [INFO]   LHS rejection: 25/1000 (2%) | 1,100 tested | rate=2.2727% [0s]
+2026-05-18 18:20:15 [INFO]   LHS rejection: 1175/1000 (117%) | 48,290 tested | rate=2.4332% [10s]
+2026-05-18 18:20:15 [INFO]   LHS rejection: 1000/1000 [10.2s]
+2026-05-18 18:20:15 [INFO]   NROY SUMMARY: 1000/1000 [OK] — sources: LHS=1000 [10.2s]
+2026-05-18 18:20:15 [DEBUG] NROY fraction: 0.020708
+2026-05-18 18:20:15 [INFO] [Wave 7] Phase 5/5 NROY SAMPLING: found 1000 candidates [10.2s]
+2026-05-18 18:20:15 [INFO] [Wave 7] ALL PHASES COMPLETE [806.2s total]. Committing...
+2026-05-18 18:20:20 [INFO] Checkpoint saved to /home/robyn/sti_notification/experiments/09_history_matching/outputs/hm_zim/checkpoint.pkl
+2026-05-18 18:20:20 [INFO] Wave 7 output saved to /home/robyn/sti_notification/experiments/09_history_matching/outputs/hm_zim/wave7
+2026-05-18 18:20:20 [INFO] [Wave 7] COMMITTED — diagnostics and checkpoint saved to /home/robyn/sti_notification/experiments/09_history_matching/outputs/hm_zim
+2026-05-18 18:20:20 [INFO] ============================================================
+2026-05-18 18:20:20 [INFO] ============================================================
+2026-05-18 18:20:20 [INFO] WAVE 8 STARTING
+2026-05-18 18:20:20 [INFO] ============================================================
+2026-05-18 18:20:20 [INFO] [Wave 8] Phase 1/5 SAMPLING: using 1000 pre-computed samples from wave 7 [0.0s]
+2026-05-18 18:20:20 [INFO] [Wave 8] Phase 2/5 SIMULATION: running 1000 simulations...
+2026-05-18 18:33:34 [INFO] [Wave 8] Phase 2/5 SIMULATION: complete — 12 outputs [794.0s]
+2026-05-18 18:33:34 [INFO]   Feature ranking (mean_sq_z): syph_prev_m_2016=734.41, syph_prev_f_2016=372.06, syph_prev_hivpos_2016=270.96, syph_prev_hivneg_2016=245.00, syph_seroprev_f_2016=129.76
+2026-05-18 18:33:34 [INFO]   Cooldown (skip): ['syph_prev_m_2016']
+2026-05-18 18:33:34 [INFO]   SELECTED: ct_prev_f2530 (score=29.90, mean_z=-0.96, std_z=5.39)
+2026-05-18 18:33:34 [INFO] [Wave 8] Phase 3/5 FEATURE SELECTION: ['ct_prev_f2530'] [0.0s]
+2026-05-18 18:33:34 [INFO] [Wave 8] Phase 4/5 EMULATOR TRAINING: training 1 emulators...
+2026-05-18 18:33:34 [INFO]   Emulator 1/1 [ct_prev_f2530]: creating (1000 samples, 8 params, type=bayes_linear)...
+2026-05-18 18:33:34 [DEBUG] Created bayes_linear emulator for feature: ct_prev_f2530
+2026-05-18 18:33:34 [INFO]   Emulator 1/1 [ct_prev_f2530]: training...
+2026-05-18 18:33:34 [INFO]     Training Bayes Linear: 750 points, 8 dims
+2026-05-18 18:33:34 [INFO]     OLS trend fit [0.0s]
+2026-05-18 18:33:34 [INFO]     Optimizing theta (8 correlation lengths, 750x750 Cholesky per eval)...
+2026-05-18 18:33:35 [INFO]     L-BFGS-B iter 28: NLL=-791.0259 [1s]
+2026-05-18 18:33:36 [INFO]     L-BFGS-B iter 56: NLL=-1144.6999 [2s]
+2026-05-18 18:33:37 [INFO]     L-BFGS-B iter 75: NLL=-1158.7465 [3s]
+2026-05-18 18:33:37 [INFO]     L-BFGS-B iter 85: NLL=-1162.2389 [3s]
+2026-05-18 18:33:38 [INFO]     L-BFGS-B iter 104: NLL=-1171.5309 [4s]
+2026-05-18 18:33:39 [INFO]     L-BFGS-B iter 114: NLL=-1175.5368 [5s]
+2026-05-18 18:33:39 [INFO]     L-BFGS-B iter 124: NLL=-1182.4665 [5s]
+2026-05-18 18:33:40 [INFO]     L-BFGS-B iter 143: NLL=-1191.7485 [6s]
+2026-05-18 18:33:41 [INFO]     L-BFGS-B iter 162: NLL=-1194.4742 [6s]
+2026-05-18 18:33:41 [INFO]     L-BFGS-B iter 172: NLL=-1199.7131 [7s]
+2026-05-18 18:33:41 [INFO]     L-BFGS-B iter 182: NLL=-1202.2136 [7s]
+2026-05-18 18:33:42 [INFO]     L-BFGS-B iter 192: NLL=-1202.4812 [8s]
+2026-05-18 18:33:42 [INFO]     L-BFGS-B iter 202: NLL=-1202.5912 [8s]
+2026-05-18 18:33:42 [INFO]     L-BFGS-B iter 212: NLL=-1202.7459 [8s]
+2026-05-18 18:33:43 [INFO]     L-BFGS-B iter 222: NLL=-1202.7931 [9s]
+2026-05-18 18:33:43 [INFO]     L-BFGS-B iter 232: NLL=-1202.8116 [9s]
+2026-05-18 18:33:44 [INFO]     L-BFGS-B iter 242: NLL=-1202.8197 [10s]
+2026-05-18 18:33:44 [INFO]     L-BFGS-B iter 252: NLL=-1202.8229 [10s]
+2026-05-18 18:33:45 [INFO]     L-BFGS-B iter 271: NLL=-1202.8232 [11s]
+2026-05-18 18:33:45 [INFO]     Theta optimization: 19 L-BFGS iters, 271 NLL evals, final NLL=-1202.8232 [10.8s]
+2026-05-18 18:33:45 [INFO]     Building 750x750 correlation matrix and Cholesky...
+2026-05-18 18:33:45 [INFO]     Training complete — sigma²=0.0970, theta range=[0.129, 1.917] [10.8s total]
+2026-05-18 18:33:45 [INFO]   Emulator 1/1 [ct_prev_f2530]: trained [10.8s]
+2026-05-18 18:33:45 [INFO] [Wave 8] Phase 4/5 EMULATOR TRAINING: complete [10.8s]
+2026-05-18 18:33:45 [INFO] [Wave 8] Phase 5/5 NROY SAMPLING: finding 1000 plausible candidates for next wave...
+2026-05-18 18:33:45 [INFO]   LHS rejection: 0/1000 (0%) — starting
+2026-05-18 18:33:45 [INFO]   LHS rejection: 12/1000 (1%) | 1,100 tested | rate=1.0909% [0s]
+2026-05-18 18:34:06 [INFO]   LHS rejection: 865/1000 (86%) | 100,723 tested | rate=0.8588% [21s]
+2026-05-18 18:34:09 [INFO]   LHS rejection: 1009/1000 (100%) | 118,014 tested | rate=0.8550% [24s]
+2026-05-18 18:34:09 [INFO]   LHS rejection: 1000/1000 [24.5s]
+2026-05-18 18:34:09 [INFO]   NROY SUMMARY: 1000/1000 [OK] — sources: LHS=1000 [24.5s]
+2026-05-18 18:34:09 [DEBUG] NROY fraction: 0.008474
+2026-05-18 18:34:09 [INFO] [Wave 8] Phase 5/5 NROY SAMPLING: found 1000 candidates [24.5s]
+2026-05-18 18:34:09 [INFO] [Wave 8] ALL PHASES COMPLETE [829.3s total]. Committing...
+2026-05-18 18:34:15 [INFO] Checkpoint saved to /home/robyn/sti_notification/experiments/09_history_matching/outputs/hm_zim/checkpoint.pkl
+2026-05-18 18:34:15 [INFO] Wave 8 output saved to /home/robyn/sti_notification/experiments/09_history_matching/outputs/hm_zim/wave8
+2026-05-18 18:34:15 [INFO] [Wave 8] COMMITTED — diagnostics and checkpoint saved to /home/robyn/sti_notification/experiments/09_history_matching/outputs/hm_zim
+2026-05-18 18:34:15 [INFO] ============================================================
+2026-05-18 18:34:15 [INFO] Automated run completed. 8 iterations executed.

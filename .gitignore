@@ -38,3 +38,9 @@ results/large_*
 
 # Local-only docs (e.g. revision notes)
 revision_plan.md
+
+# History matching raw outputs — too large for git (checkpoints ~170MB,
+# emulator pickles, per-wave diagnostic PNGs). Small summary artifacts
+# (nroy_samples.csv, metrics.json, run_config.json, log.txt) are
+# salvaged to experiments/*/nroy/ alongside the SUMMARY.
+experiments/*/outputs/hm_zim*/

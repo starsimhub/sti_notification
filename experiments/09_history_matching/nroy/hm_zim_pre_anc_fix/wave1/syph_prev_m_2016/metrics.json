@@ -1,0 +1,38 @@
+{
+  "r2_score": 0.2294674661985473,
+  "mse": 0.001712471218104453,
+  "training_size": 750,
+  "training_complete": true,
+  "testing_complete": true,
+  "hyperparameters": {
+    "type": "bayes_linear",
+    "nugget": 1e-06,
+    "sigma_sq": 0.0018105908820177214,
+    "sigma_sq_standardized": 0.7981955686929177,
+    "theta": {
+      "hiv.beta_m2f": 0.01831563888873418,
+      "log_syph.beta_m2f": 0.01831563888873418,
+      "log_ng.beta_m2f": 0.01831563888873418,
+      "log_ct.beta_m2f": 0.01831563888873418,
+      "log_tv.beta_m2f": 0.01831563888873418,
+      "structuredsexual.prop_f0": 0.01831563888873418,
+      "structuredsexual.m1_conc": 0.01831563888873418,
+      "structuredsexual.dur_sw": 0.01831563888873418
+    },
+    "beta": {
+      "intercept": 0.005126865860145331,
+      "hiv.beta_m2f": 0.0013510565788076316,
+      "log_syph.beta_m2f": 0.06840109921448811,
+      "log_ng.beta_m2f": -0.007173329936636618,
+      "log_ct.beta_m2f": 0.0019750622549294127,
+      "log_tv.beta_m2f": -0.006578139178600487,
+      "structuredsexual.prop_f0": 0.008235676611995764,
+      "structuredsexual.m1_conc": -0.004760638033820922,
+      "structuredsexual.dur_sw": -0.0229146181169121
+    },
+    "optimizer_converged": true,
+    "nll": -84.52523925315856,
+    "n_train": 750,
+    "n_dims": 8
+  }
+}

@@ -9,7 +9,11 @@ for the coverage check and parameter engineering that preceded this.
 
 Re-run required after the ANC serology fix (commit dc951f0) switched
 latent syphilis detection from GUD (~5% sensitivity) to RPR/dual RDT
-(~90% sensitivity). Pre-fix outputs archived to `outputs/hm_zim_pre_anc_fix`.
+(~90% sensitivity). Pre-fix and post-fix small artifacts (per-wave
+`nroy_samples.csv`, `metrics.json`, `run_config.json`, `log.txt`) are
+preserved under `nroy/{hm_zim,hm_zim_pre_anc_fix}/`. Heavy artifacts
+(checkpoint pickles, emulator pickles, per-wave diagnostic PNGs) are
+gitignored — regenerable by re-running HM with the saved configs.
 
 **Result.** NROY narrowed from 91% to 1.2% of the prior volume over
 8 waves — a ~75x reduction. NG, TV, CT, and HIV betas are well
