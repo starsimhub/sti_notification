@@ -1,0 +1,16 @@
+Using first 50 NROY draws (deterministic order from CSV).
+Running 300 sims across 6 rates × 50 NROY draws, 24 workers.
+  [25/300] rate=0.25/s elapsed=100s eta=1101s
+  [50/300] rate=0.32/s elapsed=154s eta=771s
+  [75/300] rate=0.36/s elapsed=208s eta=625s
+  [100/300] rate=0.38/s elapsed=261s eta=522s
+  [125/300] rate=0.40/s elapsed=315s eta=441s
+  [150/300] rate=0.41/s elapsed=369s eta=369s
+  [175/300] rate=0.42/s elapsed=422s eta=301s
+  [200/300] rate=0.42/s elapsed=477s eta=239s
+  [225/300] rate=0.42/s elapsed=530s eta=177s
+  [250/300] rate=0.43/s elapsed=586s eta=117s
+  [275/300] rate=0.43/s elapsed=641s eta=58s
+  [300/300] rate=0.43/s elapsed=692s eta=0s
+
+Finished. Wrote /home/robyn/sti_notification/experiments/15_syph_foi_floor/outputs/results.jsonl
