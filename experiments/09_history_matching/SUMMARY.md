@@ -1,20 +1,23 @@
 # Exp 09 — History matching: 8 waves
 
-**Date:** 2026-05-19.
+**Date:** 2026-05-19 (initial run); 2026-06-03 (re-run post-ANC fix).
 
 **Question.** Can history matching narrow the 8-parameter prior to a
 NROY region consistent with all calibration targets? See
 [`../08_coverage_tv_hiv_syphtesting/SUMMARY.md`](../08_coverage_tv_hiv_syphtesting/SUMMARY.md)
 for the coverage check and parameter engineering that preceded this.
 
-**Result.** NROY narrowed from 91% to 0.85% of the prior volume over
-8 waves — a ~100x reduction. The five disease betas are tightly
-constrained (83–93% variance reduction). The three network parameters
-(`prop_f0`, `m1_conc`, `dur_sw`) are unconstrained by the data, as
-predicted by sensitivity analysis. Syphilis targets remain poorly
-fitted: the bimodal sustain/extinct dynamics defeat the Bayes linear
-emulator, producing z-scores of 10–80σ despite `syph_prev_m_2016`
-being selected in 4 of 8 waves.
+Re-run required after the ANC serology fix (commit dc951f0) switched
+latent syphilis detection from GUD (~5% sensitivity) to RPR/dual RDT
+(~90% sensitivity). Pre-fix outputs archived to `outputs/hm_zim_pre_anc_fix`.
+
+**Result.** NROY narrowed from 91% to 1.2% of the prior volume over
+8 waves — a ~75x reduction. NG, TV, CT, and HIV betas are well
+constrained (69–96% variance reduction). Syphilis beta and the three
+network parameters remain unconstrained (14–17% variance reduction).
+The syphilis bimodality (sustain/extinct) continues to defeat the
+Bayes linear emulator (R² = 0.18–0.25 across 4 attempts), consistent
+with the pre-fix run.
 
 ![Convergence: NROY fraction per wave.](figures/convergence.png)
 
@@ -22,52 +25,69 @@ being selected in 4 of 8 waves.
 
 ![Parameter pairplot: waves 1, 4, 8. Betas narrow; network params remain broad.](figures/pairplot.png)
 
-![Constrained dimensions. PCs 1–4 (betas) show 83–93% variance reduction. PC5 (network params) shows 0%.](figures/constrained_dims.png)
+![Constrained dimensions.](figures/constrained_dims.png)
 
 ## Wave-by-wave
 
-| Wave | NROY % | Feature emulated | Notes |
+| Wave | NROY % | Feature emulated | R² | Notes |
+|---|---|---|---|---|
+| 1 | 91.0% | syph_prev_m_2016 | 0.25 | Syph dominates z-score but emulator can't learn bimodal surface |
+| 2 | 16.4% | ng_prev_2005_2015 | 0.99 | NG beta constrained; big NROY cut |
+| 3 | 15.5% | syph_prev_m_2016 | 0.18 | Syph emulator still flat |
+| 4 | 7.9% | ct_prev_f2530 | 0.94 | CT beta constrained |
+| 5 | 8.7% | syph_prev_m_2016 | 0.25 | Syph: no improvement |
+| 6 | 2.4% | tv_prev_2005_2015 | 0.99 | TV beta constrained |
+| 7 | 2.9% | syph_prev_m_2016 | 0.19 | Syph: still flat |
+| 8 | 1.2% | hiv_prev_2010_2020 | 0.93 | HIV beta constrained |
+
+## Parameter constraint (variance reduction vs prior)
+
+| Parameter | Prior range | NROY 90% CI | Var reduction |
 |---|---|---|---|
-| 1 | 90.9% | syph_prev_hivpos_2016 | Coinfection target; initial cut |
-| 2 | 37.2% | hiv_prev_2010_2020 | HIV prevalence; big reduction |
-| 3 | 37.0% | syph_prev_m_2016 | Minimal further cut — emulator struggles with bimodal surface |
-| 4 | 9.4% | ng_prev_2005_2015 | NG beta constrained; NROY drops to <10% |
-| 5 | 10.1% | syph_prev_m_2016 | Slight NROY expansion (sampling noise) |
-| 6 | 2.5% | tv_prev_2005_2015 | TV beta constrained |
-| 7 | 2.1% | syph_prev_m_2016 | Incremental |
-| 8 | 0.85% | ct_prev_f2530 | CT beta constrained; final NROY |
+| NG β | [0.02, 0.30] | [0.049, 0.087] | 95.5% |
+| TV β | [0.02, 0.60] | [0.051, 0.147] | 90.4% |
+| CT β | [0.02, 0.30] | [0.031, 0.111] | 77.8% |
+| HIV β | [0.005, 0.05] | [0.006, 0.031] | 68.8% |
+| Syph β | [0.10, 0.35] | [0.105, 0.335] | 14.9% |
+| prop_f0 | [0.55, 0.90] | [0.568, 0.888] | 16.5% |
+| m1_conc | [0.05, 0.30] | [0.061, 0.290] | 15.9% |
+| dur_sw | [2, 15] | [2.4, 14.4] | 13.8% |
 
 ## Observations
 
-1. **Beta parameters are well-identified.** HIV, NG, CT, and TV betas
-   all show tight NROY marginals with >83% variance reduction. These
-   are the parameters the data can speak to — each has a dominant,
-   near-orthogonal target.
+1. **Disease betas well-identified (NG/TV/CT/HIV).** Each has a
+   dominant near-orthogonal target that the Bayes linear emulator fits
+   well (R² > 0.93). NROY marginals are tight.
 
-2. **Syphilis beta is partially constrained** but the emulator can't
-   fully resolve it. The sustain/extinct bimodality means most of the
-   parameter space produces zero syphilis, and the Bayes linear emulator
-   fits the mean of this bimodal surface poorly (high sigma², low R²).
+2. **Syphilis beta unconstrained by emulation.** The sustain/extinct
+   bimodality produces σ² ≈ 0.75 and θ collapsed to the lower bound
+   on all dimensions — the emulator sees the bimodal surface as pure
+   noise. `syph_prev_m_2016` was selected in 4 of 8 waves by the
+   automatic feature selector (highest mean_sq_z ≈ 3300) but never
+   achieved R² > 0.25.
 
-3. **Network parameters are unconstrained.** `prop_f0`, `m1_conc`, and
-   `dur_sw` show 0% variance reduction — the calibration data doesn't
-   discriminate between network structures. This is expected: these
-   parameters showed rho < 0.2 in the sensitivity analysis. They remain
-   open for uncertainty propagation in the decision analysis.
+3. **Network parameters unconstrained.** `prop_f0`, `m1_conc`, `dur_sw`
+   show 14–17% variance reduction — effectively open. Expected from
+   sensitivity analysis (ρ < 0.2 for all three).
 
-4. **8000 model evaluations total** (1000/wave × 8 waves) in ~105
-   minutes. Efficient given the ~24s/sim cost and 75-worker
-   parallelization.
+4. **8000 model evaluations** (1000/wave × 8 waves) in ~135 minutes
+   on 75 workers (~18 min/wave).
+
+5. **Comparison to pre-fix run.** Final NROY 1.2% vs 0.85% pre-fix.
+   The wider NROY is expected: increased ANC treatment throughput adds
+   noise to the syphilis surface, making the emulator slightly more
+   conservative. Non-syphilis constraint is comparable.
 
 ## Acceptance
 
-The NROY is usable. The disease betas are constrained; the network
-parameters carry prior uncertainty forward to the decision analysis.
-The syphilis bimodality is a known property best handled at the
-trajectory selection stage, not by more HM waves.
+The NROY is usable for trajectory selection. Disease betas are
+constrained; syphilis and network parameters carry prior uncertainty
+forward. Syphilis constraint will happen at the trajectory selection
+stage via direct simulation + sustainability filtering + likelihood
+weighting, bypassing the emulator entirely.
 
 ## Next
 
-- Trajectory selection within NROY: draw ~1000 parameter sets from the
-  NROY region, run with multiple seeds, filter extinct syphilis runs,
-  weight by data fit to produce the posterior predictive distribution.
+- [Trajectory selection](../10_trajectory_selection/README.md): draw
+  from NROY, run with seeds, filter extinct syphilis, weight by
+  pseudo-likelihood to produce the posterior.
