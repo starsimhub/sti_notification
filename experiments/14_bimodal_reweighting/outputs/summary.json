@@ -1,0 +1,42 @@
+{
+  "variants": [
+    {
+      "variant": "A_gaussian_alive_only",
+      "n_input": 1000,
+      "n_in_weighting": 600,
+      "n_finite_loglik": 600,
+      "ess": 7.290091950886837,
+      "ess_ratio": 0.012150153251478063,
+      "alive_pool_predictive_syph_late": 0.09151073706471949,
+      "posterior_predictive_syph_late": 0.0012900010505938325,
+      "gap_ratio": 70.93849809083015
+    },
+    {
+      "variant": "B_gaussian_nan",
+      "n_input": 1000,
+      "n_in_weighting": 1000,
+      "n_finite_loglik": 1000,
+      "ess": 5.362734910431662,
+      "ess_ratio": 0.005362734910431662,
+      "alive_pool_predictive_syph_late": 0.09151073706471949,
+      "posterior_predictive_syph_late": 3.0346466096897335e-06,
+      "gap_ratio": 30155.319163859964
+    },
+    {
+      "variant": "C_studentt_nan",
+      "n_input": 1000,
+      "n_in_weighting": 1000,
+      "n_finite_loglik": 1000,
+      "ess": 42.413687276081134,
+      "ess_ratio": 0.042413687276081136,
+      "alive_pool_predictive_syph_late": 0.09151073706471949,
+      "posterior_predictive_syph_late": 0.001233954813771936,
+      "gap_ratio": 74.1605252018838
+    }
+  ],
+  "extinct_cutoff_on_syph_prev_f_2016": 0.001,
+  "alive_filter_cutoff_syph_prev_f_2016": 0.005,
+  "student_t_df": 3,
+  "syph_std_mult": 3.0,
+  "nonsyph_std_mult": 2.0
+}
