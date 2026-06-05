@@ -1,0 +1,20 @@
+[36m
+
+——————————————————————————————————————————————————————————————————
+Exp 16 coverage check: 100 prior draws, n_agents=10000, 24 workers
+——————————————————————————————————————————————————————————————————
+[0m
+Sampled 100 prior draws → /home/robyn/sti_notification/experiments/16_coverage_detectable/outputs/prior_draws.csv
+Running 100 sims, 24 workers, maxtasksperchild=10 for memory.
+  [10/100] rate=0.20/s elapsed=51s eta=458s
+  [20/100] rate=0.38/s elapsed=53s eta=211s
+  [30/100] rate=0.30/s elapsed=99s eta=231s
+  [40/100] rate=0.39/s elapsed=103s eta=155s
+  [50/100] rate=0.34/s elapsed=147s eta=147s
+  [60/100] rate=0.39/s elapsed=155s eta=103s
+  [70/100] rate=0.44/s elapsed=158s eta=68s
+  [80/100] rate=0.40/s elapsed=202s eta=50s
+  [90/100] rate=0.43/s elapsed=208s eta=23s
+  [100/100] rate=0.41/s elapsed=245s eta=0s
+
+Finished. Wrote /home/robyn/sti_notification/experiments/16_coverage_detectable/outputs/results.jsonl
