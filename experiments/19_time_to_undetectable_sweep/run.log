@@ -1,0 +1,18 @@
+[36m
+
+————————————————————————————————————————————————————————————————————————————————
+time_to_undetectable sweep: 15 draws x 5 grid points, n_agents=10000, 24 workers
+————————————————————————————————————————————————————————————————————————————————
+[0m
+Cohort: [(440, 'top_weighted'), (577, 'top_weighted'), (227, 'top_weighted'), (749, 'top_weighted'), (529, 'top_weighted'), (60, 'low_ratio'), (375, 'low_ratio'), (777, 'low_ratio'), (44, 'low_ratio'), (683, 'low_ratio'), (269, 'uniform'), (307, 'uniform'), (510, 'uniform'), (635, 'uniform'), (848, 'uniform')]
+Running 75 sims on 24 workers...
+  [10/75] rate=0.25/s elapsed=40s eta=260s
+  [20/75] rate=0.48/s elapsed=41s eta=114s
+  [30/75] rate=0.38/s elapsed=79s eta=119s
+  [40/75] rate=0.49/s elapsed=81s eta=71s
+  [50/75] rate=0.43/s elapsed=115s eta=58s
+  [60/75] rate=0.51/s elapsed=119s eta=30s
+  [70/75] rate=0.58/s elapsed=121s eta=9s
+  [75/75] rate=0.49/s elapsed=154s eta=0s
+
+Finished. JSONL: /home/robyn/sti_notification/experiments/19_time_to_undetectable_sweep/outputs/results.jsonl
