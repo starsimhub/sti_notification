@@ -1,0 +1,72 @@
+[36m
+
+——————————————————————————————————————————————————————————————————————————————————
+Trajectory selection (detectable mapping): 1 seed/draw, n_agents=10000, 24 workers
+——————————————————————————————————————————————————————————————————————————————————
+[0m
+Loaded 1000 NROY samples from /home/robyn/sti_notification/experiments/17_history_matching_detectable/nroy/hm_zim/wave8/nroy_samples.csv
+Running 1000 simulations across 24 workers (maxtasksperchild=10 to bound per-worker memory growth)...
+  [25/1000] rate=0.33/s elapsed=77s eta=2996s
+  [50/1000] rate=0.43/s elapsed=115s eta=2191s
+  [75/1000] rate=0.48/s elapsed=155s eta=1915s
+  [100/1000] rate=0.51/s elapsed=194s eta=1750s
+  [125/1000] rate=0.54/s elapsed=234s eta=1635s
+  [150/1000] rate=0.55/s elapsed=273s eta=1545s
+  [175/1000] rate=0.56/s elapsed=312s eta=1473s
+  [200/1000] rate=0.57/s elapsed=353s eta=1410s
+  [225/1000] rate=0.57/s elapsed=393s eta=1354s
+  [250/1000] rate=0.57/s elapsed=435s eta=1305s
+  [275/1000] rate=0.58/s elapsed=476s eta=1254s
+  [300/1000] rate=0.58/s elapsed=518s eta=1208s
+  [325/1000] rate=0.58/s elapsed=558s eta=1158s
+  [350/1000] rate=0.59/s elapsed=598s eta=1110s
+  [375/1000] rate=0.59/s elapsed=639s eta=1064s
+  [400/1000] rate=0.59/s elapsed=679s eta=1019s
+  [425/1000] rate=0.59/s elapsed=719s eta=973s
+  [450/1000] rate=0.59/s elapsed=761s eta=930s
+  [475/1000] rate=0.59/s elapsed=801s eta=885s
+  [500/1000] rate=0.59/s elapsed=841s eta=841s
+  [525/1000] rate=0.59/s elapsed=884s eta=799s
+  [550/1000] rate=0.59/s elapsed=925s eta=757s
+  [575/1000] rate=0.59/s elapsed=967s eta=715s
+/home/robyn/stisim/stisim/diseases/hiv.py:658: RuntimeWarning: invalid value encountered in cast
+  self.ti_zero[uids] = ti + dur_post_art.astype(int)
+  [600/1000] rate=0.59/s elapsed=1011s eta=674s
+  [625/1000] rate=0.59/s elapsed=1056s eta=634s
+  [650/1000] rate=0.59/s elapsed=1099s eta=592s
+  [675/1000] rate=0.59/s elapsed=1142s eta=550s
+  [700/1000] rate=0.59/s elapsed=1183s eta=507s
+  [725/1000] rate=0.59/s elapsed=1227s eta=465s
+  [750/1000] rate=0.59/s elapsed=1266s eta=422s
+  [775/1000] rate=0.59/s elapsed=1308s eta=380s
+  [800/1000] rate=0.59/s elapsed=1352s eta=338s
+  [825/1000] rate=0.59/s elapsed=1392s eta=295s
+  [850/1000] rate=0.59/s elapsed=1431s eta=252s
+  [875/1000] rate=0.59/s elapsed=1472s eta=210s
+  [900/1000] rate=0.60/s elapsed=1512s eta=168s
+  [925/1000] rate=0.60/s elapsed=1554s eta=126s
+  [950/1000] rate=0.60/s elapsed=1596s eta=84s
+  [975/1000] rate=0.59/s elapsed=1640s eta=42s
+  [1000/1000] rate=0.60/s elapsed=1680s eta=0s
+
+Finished sims. JSONL: /home/robyn/sti_notification/experiments/18_trajectory_selection_detectable/outputs/results.jsonl
+
+Loaded 1000 rows from /home/robyn/sti_notification/experiments/18_trajectory_selection_detectable/outputs/results.jsonl
+Sim status: 1000/1000 ok
+Syphilis filter (detectable_f_2016 > 0.001): 1000 -> 418 (42% survive)
+Finite log-lik: 418
+ESS: 4.8 / 418 = 0.012
+
+Summary: {
+  "n_raw_sims": 1000,
+  "n_ok": 1000,
+  "n_after_syph_filter": 418,
+  "n_after_lik_filter": 418,
+  "syph_late_window_mean_alive": 0.13732133092683363,
+  "syph_late_window_mean_posterior": 0.01003571576664917,
+  "invisible_reservoir_ratio_posterior": 25.5,
+  "ess": 4.8379012684854565,
+  "ess_ratio": 0.011573926479630278,
+  "n_posterior": 418
+}
+Saved to /home/robyn/sti_notification/experiments/18_trajectory_selection_detectable/outputs
