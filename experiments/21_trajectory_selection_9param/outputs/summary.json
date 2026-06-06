@@ -1,0 +1,12 @@
+{
+  "n_raw_sims": 1000,
+  "n_ok": 1000,
+  "n_after_detect_filter": 975,
+  "n_after_lik_filter": 975,
+  "syph_late_window_mean_alive": 0.051007120578621196,
+  "syph_late_window_mean_posterior": 0.0005887761461687294,
+  "sero_detect_ratio_posterior_median": 4.217391304347826,
+  "ess": 67.977085807164,
+  "ess_ratio": 0.06972008800734769,
+  "n_posterior": 500
+}

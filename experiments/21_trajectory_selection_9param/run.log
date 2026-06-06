@@ -1,0 +1,70 @@
+[36m
+
+———————————————————————————————————————————————————————————————————————
+Trajectory selection (9-param): 1 seed/draw, n_agents=10000, 24 workers
+———————————————————————————————————————————————————————————————————————
+[0m
+Loaded 1000 NROY samples from /home/robyn/sti_notification/experiments/20_history_matching_9param/nroy/hm_zim/wave8/nroy_samples.csv
+Running 1000 simulations across 24 workers (maxtasksperchild=10 to bound per-worker memory growth)...
+  [25/1000] rate=0.33/s elapsed=76s eta=2983s
+  [50/1000] rate=0.43/s elapsed=116s eta=2205s
+  [75/1000] rate=0.48/s elapsed=155s eta=1911s
+  [100/1000] rate=0.51/s elapsed=195s eta=1754s
+  [125/1000] rate=0.53/s elapsed=235s eta=1644s
+  [150/1000] rate=0.55/s elapsed=274s eta=1553s
+  [175/1000] rate=0.55/s elapsed=315s eta=1487s
+  [200/1000] rate=0.56/s elapsed=355s eta=1418s
+  [225/1000] rate=0.57/s elapsed=395s eta=1360s
+  [250/1000] rate=0.57/s elapsed=436s eta=1308s
+  [275/1000] rate=0.58/s elapsed=477s eta=1257s
+  [300/1000] rate=0.58/s elapsed=517s eta=1206s
+  [325/1000] rate=0.58/s elapsed=558s eta=1158s
+  [350/1000] rate=0.58/s elapsed=599s eta=1112s
+  [375/1000] rate=0.59/s elapsed=640s eta=1067s
+  [400/1000] rate=0.59/s elapsed=680s eta=1020s
+  [425/1000] rate=0.59/s elapsed=722s eta=977s
+  [450/1000] rate=0.59/s elapsed=763s eta=933s
+  [475/1000] rate=0.59/s elapsed=803s eta=888s
+  [500/1000] rate=0.59/s elapsed=846s eta=846s
+  [525/1000] rate=0.59/s elapsed=887s eta=802s
+  [550/1000] rate=0.59/s elapsed=927s eta=759s
+  [575/1000] rate=0.59/s elapsed=970s eta=717s
+  [600/1000] rate=0.59/s elapsed=1013s eta=676s
+  [625/1000] rate=0.59/s elapsed=1065s eta=639s
+  [650/1000] rate=0.59/s elapsed=1105s eta=595s
+  [675/1000] rate=0.59/s elapsed=1145s eta=551s
+  [700/1000] rate=0.59/s elapsed=1187s eta=509s
+  [725/1000] rate=0.59/s elapsed=1229s eta=466s
+  [750/1000] rate=0.59/s elapsed=1270s eta=423s
+  [775/1000] rate=0.59/s elapsed=1312s eta=381s
+  [800/1000] rate=0.59/s elapsed=1355s eta=339s
+  [825/1000] rate=0.59/s elapsed=1395s eta=296s
+  [850/1000] rate=0.59/s elapsed=1437s eta=254s
+  [875/1000] rate=0.59/s elapsed=1480s eta=211s
+  [900/1000] rate=0.59/s elapsed=1521s eta=169s
+  [925/1000] rate=0.59/s elapsed=1560s eta=127s
+  [950/1000] rate=0.59/s elapsed=1604s eta=84s
+  [975/1000] rate=0.59/s elapsed=1644s eta=42s
+  [1000/1000] rate=0.59/s elapsed=1685s eta=0s
+
+Finished sims. JSONL: /home/robyn/sti_notification/experiments/21_trajectory_selection_9param/outputs/results.jsonl
+
+Loaded 1000 rows from /home/robyn/sti_notification/experiments/21_trajectory_selection_9param/outputs/results.jsonl
+Sim status: 1000/1000 ok
+Detectable filter (15_64_f > 0.001): 1000 -> 975 (98% survive)
+Finite log-lik: 975
+ESS: 68.0 / 975 = 0.070
+
+Summary: {
+  "n_raw_sims": 1000,
+  "n_ok": 1000,
+  "n_after_detect_filter": 975,
+  "n_after_lik_filter": 975,
+  "syph_late_window_mean_alive": 0.051007120578621196,
+  "syph_late_window_mean_posterior": 0.0005887761461687294,
+  "sero_detect_ratio_posterior_median": 4.217391304347826,
+  "ess": 67.977085807164,
+  "ess_ratio": 0.06972008800734769,
+  "n_posterior": 500
+}
+Saved to /home/robyn/sti_notification/experiments/21_trajectory_selection_9param/outputs
