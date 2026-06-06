@@ -1,0 +1,311 @@
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1780763196.541972  322827 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+I0000 00:00:1780763196.542649  322827 cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1780763197.442685  322827 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+I0000 00:00:1780763197.443062  322827 cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+/home/robyn/miniconda/envs/starsim/lib/python3.11/site-packages/gpflow/versions.py:1: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  import pkg_resources
+[36m
+
+——————————————————————————————————————————————————————————————————
+HM 9-param: 1000 samples/wave, 8 waves, n_agents=10000, 24 workers
+——————————————————————————————————————————————————————————————————
+[0m
+/home/robyn/history_matching/history_matching/builder.py:529: UserWarning: No feature selection specified. Using automatic selection with mean squared z-score.
+  warnings.warn("No feature selection specified. Using automatic selection with mean squared z-score.")
+INFO:history_matching.engine:Checkpoint saved to /home/robyn/sti_notification/experiments/20_history_matching_9param/outputs/hm_zim/checkpoint.pkl
+INFO:history_matching.engine:Wave 1 output saved to /home/robyn/sti_notification/experiments/20_history_matching_9param/outputs/hm_zim/wave1
+INFO:history_matching.engine:[Wave 1] COMMITTED — diagnostics and checkpoint saved to /home/robyn/sti_notification/experiments/20_history_matching_9param/outputs/hm_zim
+INFO:history_matching.engine:============================================================
+INFO:history_matching.engine:============================================================
+INFO:history_matching.engine:WAVE 2 STARTING
+INFO:history_matching.engine:============================================================
+INFO:history_matching.engine:[Wave 2] Phase 1/5 SAMPLING: using 1000 pre-computed samples from wave 1 [0.0s]
+INFO:history_matching.engine:[Wave 2] Phase 2/5 SIMULATION: running 1000 simulations...
+/home/robyn/stisim/stisim/diseases/hiv.py:658: RuntimeWarning: invalid value encountered in cast
+  self.ti_zero[uids] = ti + dur_post_art.astype(int)
+INFO:history_matching.engine:[Wave 2] Phase 2/5 SIMULATION: complete — 10 outputs [1684.2s]
+INFO:history_matching.feature_selection:  Feature ranking (mean_sq_z): syph_detectable_15_64_m_2016=993.88, syph_detectable_15_64_f_2016=503.18, syph_seroprev_15_64_f_2016=410.76, ng_prev_2005_2015=351.50, syph_seroprev_15_64_m_2016=321.49
+INFO:history_matching.feature_selection:  Cooldown (skip): ['syph_detectable_15_64_m_2016']
+INFO:history_matching.feature_selection:  SELECTED: ng_prev_2005_2015 (score=351.50, mean_z=8.69, std_z=16.62)
+INFO:history_matching.engine:[Wave 2] Phase 3/5 FEATURE SELECTION: ['ng_prev_2005_2015'] [0.0s]
+INFO:history_matching.engine:[Wave 2] Phase 4/5 EMULATOR TRAINING: training 1 emulators...
+INFO:history_matching.emulators.factory:  Emulator 1/1 [ng_prev_2005_2015]: creating (1000 samples, 9 params, type=bayes_linear)...
+DEBUG:history_matching.emulators.factory:Created bayes_linear emulator for feature: ng_prev_2005_2015
+INFO:history_matching.emulators.factory:  Emulator 1/1 [ng_prev_2005_2015]: training...
+INFO:history_matching.emulators.bayes_linear:    Training Bayes Linear: 750 points, 9 dims
+INFO:history_matching.emulators.bayes_linear:    OLS trend fit [0.0s]
+INFO:history_matching.emulators.bayes_linear:    Optimizing theta (9 correlation lengths, 750x750 Cholesky per eval)...
+INFO:history_matching.emulators.bayes_linear:    L-BFGS-B iter 41: NLL=-1341.7475 [2s]
+INFO:history_matching.emulators.bayes_linear:    L-BFGS-B iter 52: NLL=-1491.6802 [2s]
+INFO:history_matching.emulators.bayes_linear:    L-BFGS-B iter 73: NLL=-1599.1992 [3s]
+INFO:history_matching.emulators.bayes_linear:    L-BFGS-B iter 84: NLL=-1632.1710 [4s]
+INFO:history_matching.emulators.bayes_linear:    L-BFGS-B iter 95: NLL=-1651.9342 [4s]
+INFO:history_matching.emulators.bayes_linear:    L-BFGS-B iter 106: NLL=-1660.6982 [5s]
+INFO:history_matching.emulators.bayes_linear:    L-BFGS-B iter 117: NLL=-1662.5482 [5s]
+INFO:history_matching.emulators.bayes_linear:    L-BFGS-B iter 138: NLL=-1668.2287 [6s]
+INFO:history_matching.emulators.bayes_linear:    L-BFGS-B iter 159: NLL=-1669.9928 [7s]
+INFO:history_matching.emulators.bayes_linear:    L-BFGS-B iter 170: NLL=-1671.9147 [8s]
+INFO:history_matching.emulators.bayes_linear:    L-BFGS-B iter 181: NLL=-1672.5053 [8s]
+INFO:history_matching.emulators.bayes_linear:    L-BFGS-B iter 192: NLL=-1672.5730 [9s]
+INFO:history_matching.emulators.bayes_linear:    L-BFGS-B iter 203: NLL=-1672.5870 [9s]
+INFO:history_matching.emulators.bayes_linear:    L-BFGS-B iter 214: NLL=-1672.5883 [10s]
+INFO:history_matching.emulators.bayes_linear:    Theta optimization: 14 L-BFGS iters, 214 NLL evals, final NLL=-1672.5883 [9.8s]
+INFO:history_matching.emulators.bayes_linear:    Building 750x750 correlation matrix and Cholesky...
+INFO:history_matching.emulators.bayes_linear:    Training complete — sigma²=0.0550, theta range=[0.175, 2.572] [9.8s total]
+INFO:history_matching.emulators.factory:  Emulator 1/1 [ng_prev_2005_2015]: trained [9.8s]
+INFO:history_matching.engine:[Wave 2] Phase 4/5 EMULATOR TRAINING: complete [9.8s]
+INFO:history_matching.engine:[Wave 2] Phase 5/5 NROY SAMPLING: finding 1000 plausible candidates for next wave...
+INFO:history_matching.nroy_sampling:  LHS rejection: 0/1000 (0%) — starting
+INFO:history_matching.nroy_sampling:  LHS rejection: 192/1000 (19%) | 1,100 tested | rate=17.4545% [0s]
+INFO:history_matching.nroy_sampling:  LHS rejection: 1064/1000 (106%) | 6,192 tested | rate=17.1835% [1s]
+INFO:history_matching.nroy_sampling:  LHS rejection: 1000/1000 [0.5s]
+INFO:history_matching.nroy_sampling:  NROY SUMMARY: 1000/1000 [OK] — sources: LHS=1000 [0.5s]
+DEBUG:history_matching.engine:NROY fraction: 0.161499
+INFO:history_matching.engine:[Wave 2] Phase 5/5 NROY SAMPLING: found 1000 candidates [0.5s]
+INFO:history_matching.engine:[Wave 2] ALL PHASES COMPLETE [1694.6s total]. Committing...
+INFO:history_matching.engine:Checkpoint saved to /home/robyn/sti_notification/experiments/20_history_matching_9param/outputs/hm_zim/checkpoint.pkl
+INFO:history_matching.engine:Wave 2 output saved to /home/robyn/sti_notification/experiments/20_history_matching_9param/outputs/hm_zim/wave2
+INFO:history_matching.engine:[Wave 2] COMMITTED — diagnostics and checkpoint saved to /home/robyn/sti_notification/experiments/20_history_matching_9param/outputs/hm_zim
+INFO:history_matching.engine:============================================================
+INFO:history_matching.engine:============================================================
+INFO:history_matching.engine:WAVE 3 STARTING
+INFO:history_matching.engine:============================================================
+INFO:history_matching.engine:[Wave 3] Phase 1/5 SAMPLING: using 1000 pre-computed samples from wave 2 [0.0s]
+INFO:history_matching.engine:[Wave 3] Phase 2/5 SIMULATION: running 1000 simulations...
+INFO:history_matching.engine:[Wave 3] Phase 2/5 SIMULATION: complete — 10 outputs [1695.1s]
+INFO:history_matching.feature_selection:  Feature ranking (mean_sq_z): syph_detectable_15_64_m_2016=984.41, syph_detectable_15_64_f_2016=490.84, syph_seroprev_15_64_f_2016=420.78, syph_seroprev_15_64_m_2016=334.39, syph_anc_2000_2015=316.94
+INFO:history_matching.feature_selection:  Cooldown (skip): ['ng_prev_2005_2015']
+INFO:history_matching.feature_selection:  SELECTED: syph_detectable_15_64_m_2016 (score=984.41, mean_z=16.00, std_z=27.00)
+INFO:history_matching.engine:[Wave 3] Phase 3/5 FEATURE SELECTION: ['syph_detectable_15_64_m_2016'] [0.0s]
+INFO:history_matching.engine:[Wave 3] Phase 4/5 EMULATOR TRAINING: training 1 emulators...
+INFO:history_matching.emulators.factory:  Emulator 1/1 [syph_detectable_15_64_m_2016]: creating (1000 samples, 9 params, type=bayes_linear)...
+DEBUG:history_matching.emulators.factory:Created bayes_linear emulator for feature: syph_detectable_15_64_m_2016
+INFO:history_matching.emulators.factory:  Emulator 1/1 [syph_detectable_15_64_m_2016]: training...
+INFO:history_matching.emulators.bayes_linear:    Training Bayes Linear: 750 points, 9 dims
+INFO:history_matching.emulators.bayes_linear:    OLS trend fit [0.0s]
+INFO:history_matching.emulators.bayes_linear:    Optimizing theta (9 correlation lengths, 750x750 Cholesky per eval)...
+INFO:history_matching.emulators.bayes_linear:    L-BFGS-B iter 21: NLL=-105.6508 [1s]
+INFO:history_matching.emulators.bayes_linear:    Theta optimization: 1 L-BFGS iters, 21 NLL evals, final NLL=-105.6508 [1.0s]
+INFO:history_matching.emulators.bayes_linear:    Building 750x750 correlation matrix and Cholesky...
+INFO:history_matching.emulators.bayes_linear:    Training complete — sigma²=0.7545, theta range=[0.018, 0.018] [1.1s total]
+INFO:history_matching.emulators.factory:  Emulator 1/1 [syph_detectable_15_64_m_2016]: trained [1.1s]
+INFO:history_matching.engine:[Wave 3] Phase 4/5 EMULATOR TRAINING: complete [1.1s]
+INFO:history_matching.engine:[Wave 3] Phase 5/5 NROY SAMPLING: finding 1000 plausible candidates for next wave...
+INFO:history_matching.nroy_sampling:  LHS rejection: 0/1000 (0%) — starting
+INFO:history_matching.nroy_sampling:  LHS rejection: 202/1000 (20%) | 1,100 tested | rate=18.3636% [0s]
+INFO:history_matching.nroy_sampling:  LHS rejection: 1051/1000 (105%) | 5,880 tested | rate=17.8741% [1s]
+INFO:history_matching.nroy_sampling:  LHS rejection: 1000/1000 [0.9s]
+INFO:history_matching.nroy_sampling:  NROY SUMMARY: 1000/1000 [OK] — sources: LHS=1000 [0.9s]
+DEBUG:history_matching.engine:NROY fraction: 0.170068
+INFO:history_matching.engine:[Wave 3] Phase 5/5 NROY SAMPLING: found 1000 candidates [0.9s]
+INFO:history_matching.engine:[Wave 3] ALL PHASES COMPLETE [1697.1s total]. Committing...
+INFO:history_matching.engine:Checkpoint saved to /home/robyn/sti_notification/experiments/20_history_matching_9param/outputs/hm_zim/checkpoint.pkl
+INFO:history_matching.engine:Wave 3 output saved to /home/robyn/sti_notification/experiments/20_history_matching_9param/outputs/hm_zim/wave3
+INFO:history_matching.engine:[Wave 3] COMMITTED — diagnostics and checkpoint saved to /home/robyn/sti_notification/experiments/20_history_matching_9param/outputs/hm_zim
+INFO:history_matching.engine:============================================================
+INFO:history_matching.engine:============================================================
+INFO:history_matching.engine:WAVE 4 STARTING
+INFO:history_matching.engine:============================================================
+INFO:history_matching.engine:[Wave 4] Phase 1/5 SAMPLING: using 1000 pre-computed samples from wave 3 [0.0s]
+INFO:history_matching.engine:[Wave 4] Phase 2/5 SIMULATION: running 1000 simulations...
+/home/robyn/stisim/stisim/diseases/hiv.py:658: RuntimeWarning: invalid value encountered in cast
+  self.ti_zero[uids] = ti + dur_post_art.astype(int)
+INFO:history_matching.engine:[Wave 4] Phase 2/5 SIMULATION: complete — 10 outputs [1695.7s]
+INFO:history_matching.feature_selection:  Feature ranking (mean_sq_z): syph_detectable_15_64_m_2016=1017.94, syph_detectable_15_64_f_2016=503.71, syph_seroprev_15_64_f_2016=422.41, syph_seroprev_15_64_m_2016=337.55, syph_anc_2000_2015=312.97
+INFO:history_matching.feature_selection:  Cooldown (skip): ['syph_detectable_15_64_m_2016']
+INFO:history_matching.feature_selection:  SELECTED: ct_prev_f2530 (score=70.52, mean_z=2.53, std_z=8.01)
+INFO:history_matching.engine:[Wave 4] Phase 3/5 FEATURE SELECTION: ['ct_prev_f2530'] [0.0s]
+INFO:history_matching.engine:[Wave 4] Phase 4/5 EMULATOR TRAINING: training 1 emulators...
+INFO:history_matching.emulators.factory:  Emulator 1/1 [ct_prev_f2530]: creating (1000 samples, 9 params, type=bayes_linear)...
+DEBUG:history_matching.emulators.factory:Created bayes_linear emulator for feature: ct_prev_f2530
+INFO:history_matching.emulators.factory:  Emulator 1/1 [ct_prev_f2530]: training...
+INFO:history_matching.emulators.bayes_linear:    Training Bayes Linear: 750 points, 9 dims
+INFO:history_matching.emulators.bayes_linear:    OLS trend fit [0.0s]
+INFO:history_matching.emulators.bayes_linear:    Optimizing theta (9 correlation lengths, 750x750 Cholesky per eval)...
+INFO:history_matching.emulators.bayes_linear:    L-BFGS-B iter 21: NLL=-1050.8466 [1s]
+INFO:history_matching.emulators.bayes_linear:    Theta optimization: 1 L-BFGS iters, 21 NLL evals, final NLL=-1050.8466 [1.0s]
+INFO:history_matching.emulators.bayes_linear:    Building 750x750 correlation matrix and Cholesky...
+INFO:history_matching.emulators.bayes_linear:    Training complete — sigma²=0.0607, theta range=[0.018, 0.018] [1.0s total]
+INFO:history_matching.emulators.factory:  Emulator 1/1 [ct_prev_f2530]: trained [1.0s]
+INFO:history_matching.engine:[Wave 4] Phase 4/5 EMULATOR TRAINING: complete [1.0s]
+INFO:history_matching.engine:[Wave 4] Phase 5/5 NROY SAMPLING: finding 1000 plausible candidates for next wave...
+INFO:history_matching.nroy_sampling:  LHS rejection: 0/1000 (0%) — starting
+INFO:history_matching.nroy_sampling:  LHS rejection: 100/1000 (10%) | 1,100 tested | rate=9.0909% [0s]
+INFO:history_matching.nroy_sampling:  LHS rejection: 1049/1000 (104%) | 11,990 tested | rate=8.7490% [2s]
+INFO:history_matching.nroy_sampling:  LHS rejection: 1000/1000 [1.8s]
+INFO:history_matching.nroy_sampling:  NROY SUMMARY: 1000/1000 [OK] — sources: LHS=1000 [1.8s]
+DEBUG:history_matching.engine:NROY fraction: 0.083403
+INFO:history_matching.engine:[Wave 4] Phase 5/5 NROY SAMPLING: found 1000 candidates [1.8s]
+INFO:history_matching.engine:[Wave 4] ALL PHASES COMPLETE [1698.6s total]. Committing...
+INFO:history_matching.engine:Checkpoint saved to /home/robyn/sti_notification/experiments/20_history_matching_9param/outputs/hm_zim/checkpoint.pkl
+INFO:history_matching.engine:Wave 4 output saved to /home/robyn/sti_notification/experiments/20_history_matching_9param/outputs/hm_zim/wave4
+INFO:history_matching.engine:[Wave 4] COMMITTED — diagnostics and checkpoint saved to /home/robyn/sti_notification/experiments/20_history_matching_9param/outputs/hm_zim
+INFO:history_matching.engine:============================================================
+INFO:history_matching.engine:============================================================
+INFO:history_matching.engine:WAVE 5 STARTING
+INFO:history_matching.engine:============================================================
+INFO:history_matching.engine:[Wave 5] Phase 1/5 SAMPLING: using 1000 pre-computed samples from wave 4 [0.0s]
+INFO:history_matching.engine:[Wave 5] Phase 2/5 SIMULATION: running 1000 simulations...
+INFO:history_matching.engine:[Wave 5] Phase 2/5 SIMULATION: complete — 10 outputs [1693.8s]
+INFO:history_matching.feature_selection:  Feature ranking (mean_sq_z): syph_detectable_15_64_m_2016=1030.96, syph_detectable_15_64_f_2016=514.34, syph_seroprev_15_64_f_2016=422.74, syph_seroprev_15_64_m_2016=336.54, syph_anc_2000_2015=316.37
+INFO:history_matching.feature_selection:  Cooldown (skip): ['ct_prev_f2530']
+INFO:history_matching.feature_selection:  SELECTED: syph_detectable_15_64_m_2016 (score=1030.96, mean_z=16.77, std_z=27.40)
+INFO:history_matching.engine:[Wave 5] Phase 3/5 FEATURE SELECTION: ['syph_detectable_15_64_m_2016'] [0.0s]
+INFO:history_matching.engine:[Wave 5] Phase 4/5 EMULATOR TRAINING: training 1 emulators...
+INFO:history_matching.emulators.factory:  Emulator 1/1 [syph_detectable_15_64_m_2016]: creating (1000 samples, 9 params, type=bayes_linear)...
+DEBUG:history_matching.emulators.factory:Created bayes_linear emulator for feature: syph_detectable_15_64_m_2016
+INFO:history_matching.emulators.factory:  Emulator 1/1 [syph_detectable_15_64_m_2016]: training...
+INFO:history_matching.emulators.bayes_linear:    Training Bayes Linear: 750 points, 9 dims
+INFO:history_matching.emulators.bayes_linear:    OLS trend fit [0.0s]
+INFO:history_matching.emulators.bayes_linear:    Optimizing theta (9 correlation lengths, 750x750 Cholesky per eval)...
+INFO:history_matching.emulators.bayes_linear:    L-BFGS-B iter 21: NLL=-92.1809 [1s]
+INFO:history_matching.emulators.bayes_linear:    Theta optimization: 1 L-BFGS iters, 21 NLL evals, final NLL=-92.1809 [0.7s]
+INFO:history_matching.emulators.bayes_linear:    Building 750x750 correlation matrix and Cholesky...
+INFO:history_matching.emulators.bayes_linear:    Training complete — sigma²=0.7821, theta range=[0.018, 0.018] [0.8s total]
+INFO:history_matching.emulators.factory:  Emulator 1/1 [syph_detectable_15_64_m_2016]: trained [0.8s]
+INFO:history_matching.engine:[Wave 5] Phase 4/5 EMULATOR TRAINING: complete [0.8s]
+INFO:history_matching.engine:[Wave 5] Phase 5/5 NROY SAMPLING: finding 1000 plausible candidates for next wave...
+INFO:history_matching.nroy_sampling:  LHS rejection: 0/1000 (0%) — starting
+INFO:history_matching.nroy_sampling:  LHS rejection: 99/1000 (9%) | 1,100 tested | rate=9.0000% [0s]
+INFO:history_matching.nroy_sampling:  LHS rejection: 1063/1000 (106%) | 12,112 tested | rate=8.7764% [3s]
+INFO:history_matching.nroy_sampling:  LHS rejection: 1000/1000 [2.8s]
+INFO:history_matching.nroy_sampling:  NROY SUMMARY: 1000/1000 [OK] — sources: LHS=1000 [2.8s]
+DEBUG:history_matching.engine:NROY fraction: 0.082563
+INFO:history_matching.engine:[Wave 5] Phase 5/5 NROY SAMPLING: found 1000 candidates [2.8s]
+INFO:history_matching.engine:[Wave 5] ALL PHASES COMPLETE [1697.4s total]. Committing...
+INFO:history_matching.engine:Checkpoint saved to /home/robyn/sti_notification/experiments/20_history_matching_9param/outputs/hm_zim/checkpoint.pkl
+INFO:history_matching.engine:Wave 5 output saved to /home/robyn/sti_notification/experiments/20_history_matching_9param/outputs/hm_zim/wave5
+INFO:history_matching.engine:[Wave 5] COMMITTED — diagnostics and checkpoint saved to /home/robyn/sti_notification/experiments/20_history_matching_9param/outputs/hm_zim
+INFO:history_matching.engine:============================================================
+INFO:history_matching.engine:============================================================
+INFO:history_matching.engine:WAVE 6 STARTING
+INFO:history_matching.engine:============================================================
+INFO:history_matching.engine:[Wave 6] Phase 1/5 SAMPLING: using 1000 pre-computed samples from wave 5 [0.0s]
+INFO:history_matching.engine:[Wave 6] Phase 2/5 SIMULATION: running 1000 simulations...
+INFO:history_matching.engine:[Wave 6] Phase 2/5 SIMULATION: complete — 10 outputs [1697.3s]
+INFO:history_matching.feature_selection:  Feature ranking (mean_sq_z): syph_detectable_15_64_m_2016=1028.00, syph_detectable_15_64_f_2016=514.60, syph_seroprev_15_64_f_2016=428.53, syph_seroprev_15_64_m_2016=338.29, syph_anc_2000_2015=324.33
+INFO:history_matching.feature_selection:  Cooldown (skip): ['syph_detectable_15_64_m_2016']
+INFO:history_matching.feature_selection:  SELECTED: tv_prev_2005_2015 (score=48.84, mean_z=2.10, std_z=6.67)
+INFO:history_matching.engine:[Wave 6] Phase 3/5 FEATURE SELECTION: ['tv_prev_2005_2015'] [0.0s]
+INFO:history_matching.engine:[Wave 6] Phase 4/5 EMULATOR TRAINING: training 1 emulators...
+INFO:history_matching.emulators.factory:  Emulator 1/1 [tv_prev_2005_2015]: creating (1000 samples, 9 params, type=bayes_linear)...
+DEBUG:history_matching.emulators.factory:Created bayes_linear emulator for feature: tv_prev_2005_2015
+INFO:history_matching.emulators.factory:  Emulator 1/1 [tv_prev_2005_2015]: training...
+INFO:history_matching.emulators.bayes_linear:    Training Bayes Linear: 750 points, 9 dims
+INFO:history_matching.emulators.bayes_linear:    OLS trend fit [0.0s]
+INFO:history_matching.emulators.bayes_linear:    Optimizing theta (9 correlation lengths, 750x750 Cholesky per eval)...
+INFO:history_matching.emulators.bayes_linear:    L-BFGS-B iter 21: NLL=-1595.3582 [1s]
+INFO:history_matching.emulators.bayes_linear:    L-BFGS-B iter 152: NLL=-1595.3670 [7s]
+INFO:history_matching.emulators.bayes_linear:    L-BFGS-B iter 173: NLL=-1595.3670 [8s]
+INFO:history_matching.emulators.bayes_linear:    Theta optimization: 3 L-BFGS iters, 173 NLL evals, final NLL=-1595.3670 [8.1s]
+INFO:history_matching.emulators.bayes_linear:    Building 750x750 correlation matrix and Cholesky...
+INFO:history_matching.emulators.bayes_linear:    Training complete — sigma²=0.0142, theta range=[0.025, 54.598] [8.2s total]
+INFO:history_matching.emulators.factory:  Emulator 1/1 [tv_prev_2005_2015]: trained [8.2s]
+INFO:history_matching.engine:[Wave 6] Phase 4/5 EMULATOR TRAINING: complete [8.2s]
+INFO:history_matching.engine:[Wave 6] Phase 5/5 NROY SAMPLING: finding 1000 plausible candidates for next wave...
+INFO:history_matching.nroy_sampling:  LHS rejection: 0/1000 (0%) — starting
+INFO:history_matching.nroy_sampling:  LHS rejection: 29/1000 (2%) | 1,100 tested | rate=2.6364% [0s]
+INFO:history_matching.nroy_sampling:  LHS rejection: 1095/1000 (109%) | 41,614 tested | rate=2.6313% [6s]
+INFO:history_matching.nroy_sampling:  LHS rejection: 1000/1000 [6.5s]
+INFO:history_matching.nroy_sampling:  NROY SUMMARY: 1000/1000 [OK] — sources: LHS=1000 [6.5s]
+DEBUG:history_matching.engine:NROY fraction: 0.024030
+INFO:history_matching.engine:[Wave 6] Phase 5/5 NROY SAMPLING: found 1000 candidates [6.5s]
+INFO:history_matching.engine:[Wave 6] ALL PHASES COMPLETE [1712.0s total]. Committing...
+INFO:history_matching.engine:Checkpoint saved to /home/robyn/sti_notification/experiments/20_history_matching_9param/outputs/hm_zim/checkpoint.pkl
+INFO:history_matching.engine:Wave 6 output saved to /home/robyn/sti_notification/experiments/20_history_matching_9param/outputs/hm_zim/wave6
+INFO:history_matching.engine:[Wave 6] COMMITTED — diagnostics and checkpoint saved to /home/robyn/sti_notification/experiments/20_history_matching_9param/outputs/hm_zim
+INFO:history_matching.engine:============================================================
+INFO:history_matching.engine:============================================================
+INFO:history_matching.engine:WAVE 7 STARTING
+INFO:history_matching.engine:============================================================
+INFO:history_matching.engine:[Wave 7] Phase 1/5 SAMPLING: using 1000 pre-computed samples from wave 6 [0.0s]
+INFO:history_matching.engine:[Wave 7] Phase 2/5 SIMULATION: running 1000 simulations...
+/home/robyn/stisim/stisim/diseases/hiv.py:658: RuntimeWarning: invalid value encountered in cast
+  self.ti_zero[uids] = ti + dur_post_art.astype(int)
+INFO:history_matching.engine:[Wave 7] Phase 2/5 SIMULATION: complete — 10 outputs [1701.6s]
+INFO:history_matching.feature_selection:  Feature ranking (mean_sq_z): syph_detectable_15_64_m_2016=978.41, syph_detectable_15_64_f_2016=492.08, syph_seroprev_15_64_f_2016=420.37, syph_seroprev_15_64_m_2016=333.28, syph_anc_2000_2015=324.36
+INFO:history_matching.feature_selection:  Cooldown (skip): ['tv_prev_2005_2015']
+INFO:history_matching.feature_selection:  SELECTED: syph_detectable_15_64_m_2016 (score=978.41, mean_z=16.13, std_z=26.81)
+INFO:history_matching.engine:[Wave 7] Phase 3/5 FEATURE SELECTION: ['syph_detectable_15_64_m_2016'] [0.0s]
+INFO:history_matching.engine:[Wave 7] Phase 4/5 EMULATOR TRAINING: training 1 emulators...
+INFO:history_matching.emulators.factory:  Emulator 1/1 [syph_detectable_15_64_m_2016]: creating (1000 samples, 9 params, type=bayes_linear)...
+DEBUG:history_matching.emulators.factory:Created bayes_linear emulator for feature: syph_detectable_15_64_m_2016
+INFO:history_matching.emulators.factory:  Emulator 1/1 [syph_detectable_15_64_m_2016]: training...
+INFO:history_matching.emulators.bayes_linear:    Training Bayes Linear: 750 points, 9 dims
+INFO:history_matching.emulators.bayes_linear:    OLS trend fit [0.0s]
+INFO:history_matching.emulators.bayes_linear:    Optimizing theta (9 correlation lengths, 750x750 Cholesky per eval)...
+INFO:history_matching.emulators.bayes_linear:    L-BFGS-B iter 21: NLL=-99.0671 [1s]
+INFO:history_matching.emulators.bayes_linear:    Theta optimization: 1 L-BFGS iters, 21 NLL evals, final NLL=-99.0671 [1.0s]
+INFO:history_matching.emulators.bayes_linear:    Building 750x750 correlation matrix and Cholesky...
+INFO:history_matching.emulators.bayes_linear:    Training complete — sigma²=0.7678, theta range=[0.018, 0.018] [1.0s total]
+INFO:history_matching.emulators.factory:  Emulator 1/1 [syph_detectable_15_64_m_2016]: trained [1.0s]
+INFO:history_matching.engine:[Wave 7] Phase 4/5 EMULATOR TRAINING: complete [1.0s]
+INFO:history_matching.engine:[Wave 7] Phase 5/5 NROY SAMPLING: finding 1000 plausible candidates for next wave...
+INFO:history_matching.nroy_sampling:  LHS rejection: 0/1000 (0%) — starting
+INFO:history_matching.nroy_sampling:  LHS rejection: 24/1000 (2%) | 1,100 tested | rate=2.1818% [0s]
+INFO:history_matching.nroy_sampling:  LHS rejection: 1350/1000 (135%) | 50,306 tested | rate=2.6836% [12s]
+INFO:history_matching.nroy_sampling:  LHS rejection: 1000/1000 [11.7s]
+INFO:history_matching.nroy_sampling:  NROY SUMMARY: 1000/1000 [OK] — sources: LHS=1000 [11.7s]
+DEBUG:history_matching.engine:NROY fraction: 0.019878
+INFO:history_matching.engine:[Wave 7] Phase 5/5 NROY SAMPLING: found 1000 candidates [11.7s]
+INFO:history_matching.engine:[Wave 7] ALL PHASES COMPLETE [1714.4s total]. Committing...
+INFO:history_matching.engine:Checkpoint saved to /home/robyn/sti_notification/experiments/20_history_matching_9param/outputs/hm_zim/checkpoint.pkl
+INFO:history_matching.engine:Wave 7 output saved to /home/robyn/sti_notification/experiments/20_history_matching_9param/outputs/hm_zim/wave7
+INFO:history_matching.engine:[Wave 7] COMMITTED — diagnostics and checkpoint saved to /home/robyn/sti_notification/experiments/20_history_matching_9param/outputs/hm_zim
+INFO:history_matching.engine:============================================================
+INFO:history_matching.engine:============================================================
+INFO:history_matching.engine:WAVE 8 STARTING
+INFO:history_matching.engine:============================================================
+INFO:history_matching.engine:[Wave 8] Phase 1/5 SAMPLING: using 1000 pre-computed samples from wave 7 [0.0s]
+INFO:history_matching.engine:[Wave 8] Phase 2/5 SIMULATION: running 1000 simulations...
+/home/robyn/stisim/stisim/diseases/hiv.py:658: RuntimeWarning: invalid value encountered in cast
+  self.ti_zero[uids] = ti + dur_post_art.astype(int)
+INFO:history_matching.engine:[Wave 8] Phase 2/5 SIMULATION: complete — 10 outputs [1705.6s]
+INFO:history_matching.feature_selection:  Feature ranking (mean_sq_z): syph_detectable_15_64_m_2016=914.54, syph_detectable_15_64_f_2016=454.80, syph_seroprev_15_64_f_2016=392.10, syph_seroprev_15_64_m_2016=313.38, syph_anc_2000_2015=297.77
+INFO:history_matching.feature_selection:  Cooldown (skip): ['syph_detectable_15_64_m_2016']
+INFO:history_matching.feature_selection:  SELECTED: hiv_prev_2010_2020 (score=26.42, mean_z=2.68, std_z=4.39)
+INFO:history_matching.engine:[Wave 8] Phase 3/5 FEATURE SELECTION: ['hiv_prev_2010_2020'] [0.0s]
+INFO:history_matching.engine:[Wave 8] Phase 4/5 EMULATOR TRAINING: training 1 emulators...
+INFO:history_matching.emulators.factory:  Emulator 1/1 [hiv_prev_2010_2020]: creating (1000 samples, 9 params, type=bayes_linear)...
+DEBUG:history_matching.emulators.factory:Created bayes_linear emulator for feature: hiv_prev_2010_2020
+INFO:history_matching.emulators.factory:  Emulator 1/1 [hiv_prev_2010_2020]: training...
+INFO:history_matching.emulators.bayes_linear:    Training Bayes Linear: 750 points, 9 dims
+INFO:history_matching.emulators.bayes_linear:    OLS trend fit [0.0s]
+INFO:history_matching.emulators.bayes_linear:    Optimizing theta (9 correlation lengths, 750x750 Cholesky per eval)...
+INFO:history_matching.emulators.bayes_linear:    L-BFGS-B iter 41: NLL=-1284.9403 [1s]
+INFO:history_matching.emulators.bayes_linear:    L-BFGS-B iter 52: NLL=-1369.5290 [2s]
+INFO:history_matching.emulators.bayes_linear:    L-BFGS-B iter 63: NLL=-1464.0883 [2s]
+INFO:history_matching.emulators.bayes_linear:    L-BFGS-B iter 84: NLL=-1510.1818 [3s]
+INFO:history_matching.emulators.bayes_linear:    L-BFGS-B iter 105: NLL=-1525.6346 [4s]
+INFO:history_matching.emulators.bayes_linear:    L-BFGS-B iter 116: NLL=-1530.6675 [4s]
+INFO:history_matching.emulators.bayes_linear:    L-BFGS-B iter 127: NLL=-1532.4297 [4s]
+INFO:history_matching.emulators.bayes_linear:    L-BFGS-B iter 138: NLL=-1533.4325 [5s]
+INFO:history_matching.emulators.bayes_linear:    L-BFGS-B iter 149: NLL=-1533.8619 [5s]
+INFO:history_matching.emulators.bayes_linear:    L-BFGS-B iter 160: NLL=-1534.0210 [5s]
+INFO:history_matching.emulators.bayes_linear:    L-BFGS-B iter 171: NLL=-1534.0372 [6s]
+INFO:history_matching.emulators.bayes_linear:    L-BFGS-B iter 182: NLL=-1534.0389 [6s]
+INFO:history_matching.emulators.bayes_linear:    L-BFGS-B iter 193: NLL=-1534.0393 [6s]
+INFO:history_matching.emulators.bayes_linear:    Theta optimization: 13 L-BFGS iters, 193 NLL evals, final NLL=-1534.0393 [6.5s]
+INFO:history_matching.emulators.bayes_linear:    Building 750x750 correlation matrix and Cholesky...
+INFO:history_matching.emulators.bayes_linear:    Training complete — sigma²=0.0399, theta range=[0.038, 1.595] [6.5s total]
+INFO:history_matching.emulators.factory:  Emulator 1/1 [hiv_prev_2010_2020]: trained [6.5s]
+INFO:history_matching.engine:[Wave 8] Phase 4/5 EMULATOR TRAINING: complete [6.5s]
+INFO:history_matching.engine:[Wave 8] Phase 5/5 NROY SAMPLING: finding 1000 plausible candidates for next wave...
+INFO:history_matching.nroy_sampling:  LHS rejection: 0/1000 (0%) — starting
+INFO:history_matching.nroy_sampling:  LHS rejection: 14/1000 (1%) | 1,100 tested | rate=1.2727% [0s]
+INFO:history_matching.nroy_sampling:  LHS rejection: 802/1000 (80%) | 86,318 tested | rate=0.9291% [16s]
+INFO:history_matching.nroy_sampling:  LHS rejection: 1011/1000 (101%) | 109,759 tested | rate=0.9211% [20s]
+INFO:history_matching.nroy_sampling:  LHS rejection: 1000/1000 [19.9s]
+INFO:history_matching.nroy_sampling:  NROY SUMMARY: 1000/1000 [OK] — sources: LHS=1000 [19.9s]
+DEBUG:history_matching.engine:NROY fraction: 0.009111
+INFO:history_matching.engine:[Wave 8] Phase 5/5 NROY SAMPLING: found 1000 candidates [19.9s]
+INFO:history_matching.engine:[Wave 8] ALL PHASES COMPLETE [1732.0s total]. Committing...
+INFO:history_matching.engine:Checkpoint saved to /home/robyn/sti_notification/experiments/20_history_matching_9param/outputs/hm_zim/checkpoint.pkl
+INFO:history_matching.engine:Wave 8 output saved to /home/robyn/sti_notification/experiments/20_history_matching_9param/outputs/hm_zim/wave8
+INFO:history_matching.engine:[Wave 8] COMMITTED — diagnostics and checkpoint saved to /home/robyn/sti_notification/experiments/20_history_matching_9param/outputs/hm_zim
+INFO:history_matching.engine:============================================================
+INFO:history_matching.engine:Automated run completed. 8 iterations executed.
+
+History matching complete. Results in /home/robyn/sti_notification/experiments/20_history_matching_9param/outputs
