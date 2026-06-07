@@ -305,6 +305,85 @@ class SyndromicPN(sti.PartnerNotification):
         return
 
 
+class SyphilisANCTimer(ss.Intervention):
+    """Schedule one ANC syph test event per pregnancy at a realistic week.
+
+    In Zimbabwe many pregnant women do not attend ANC in tri1 as WHO
+    recommends; visits are spread across weeks 8-32 of gestation. This
+    intervention draws a single visit-week for each newly-conceived
+    woman from Uniform(8, 32) and marks her as ANC-test-eligible on
+    that timestep. Downstream `SyphTest` interventions read from
+    ``today_uids`` to fire the actual test.
+
+    States:
+        ti_anc_visit (FloatArr): timestep on which the woman will
+            attend her ANC visit. NaN if not pregnant / not scheduled.
+
+    Properties:
+        today_uids: UIDs whose ti_anc_visit == current ti and who are
+            still alive + still pregnant.
+
+    Pars:
+        visit_week_low  (int): lower bound of visit-week draw. Default 8.
+        visit_week_high (int): upper bound. Default 32.
+    """
+
+    def __init__(self, pars=None, name='syph_anc_timer', **kwargs):
+        super().__init__(name=name)
+        self.define_pars(
+            visit_week=ss.uniform(low=8, high=32),  # CRN-safe Dist
+        )
+        self.update_pars(pars=pars, **kwargs)
+        self.define_states(
+            ss.FloatArr('ti_anc_visit', default=np.nan,
+                        label='ti of scheduled ANC visit'),
+        )
+        return
+
+    def _schedule(self, uids):
+        """Draw a visit-week per woman and convert to a future ti."""
+        if len(uids) == 0:
+            return
+        preg = self.sim.demographics.pregnancy
+        # CRN-safe per-agent draw; ss.uniform().rvs keys on uids.
+        weeks = self.pars.visit_week.rvs(uids)
+        # Convert weeks → ti steps. preg.ti_pregnant[uids] is the
+        # conception ti; visit_ti = conception_ti + round(weeks / weeks_per_step).
+        # dt_year is the timestep duration in years; *52 → weeks per step.
+        weeks_per_step = self.t.dt_year * 52.0 if self.t.dt_year else 4.33
+        steps_to_visit = np.round(weeks / max(weeks_per_step, 1e-6)).astype(int)
+        self.ti_anc_visit[uids] = preg.ti_pregnant[uids] + steps_to_visit
+
+    def init_post(self):
+        super().init_post()
+        # Cover the cohort already pregnant at sim start so they don't
+        # miss out. Treat them like newly-conceived for scheduling.
+        if hasattr(self.sim.demographics, 'pregnancy'):
+            preg = self.sim.demographics.pregnancy
+            self._schedule(preg.pregnant.uids)
+
+    def step(self):
+        if not hasattr(self.sim.demographics, 'pregnancy'):
+            return
+        preg = self.sim.demographics.pregnancy
+        new_preg = preg.pregnant.uids[preg.ti_pregnant[preg.pregnant.uids] == self.ti]
+        self._schedule(new_preg)
+
+    @property
+    def today_uids(self):
+        if not hasattr(self.sim.demographics, 'pregnancy'):
+            return ss.uids()
+        preg = self.sim.demographics.pregnancy
+        candidates = self.ti_anc_visit.notnan.uids
+        if len(candidates) == 0:
+            return ss.uids()
+        due = candidates[self.ti_anc_visit[candidates] == self.ti]
+        if len(due) == 0:
+            return ss.uids()
+        # Still pregnant + still alive at this ti
+        return due[preg.pregnant[due] & self.sim.people.alive[due]]
+
+
 def make_syph_testing(stop=2040, symp_test_prob=None, rdt_year=2012):
     """
     Symptomatic + ANC syphilis testing pathways.
@@ -327,7 +406,15 @@ def make_syph_testing(stop=2040, symp_test_prob=None, rdt_year=2012):
     dual_dx = sti.SyphDx(syph_dx_df[syph_dx_df.name == 'dual'], name='SyphDx_dual')
 
     anc_years = [1980, 1990, 1999, 2008, 2012, 2018, 2040]
-    anc_probs = [0.20, 0.30, 0.40, 0.35, 0.50, 0.90, 0.95]
+    # PROOF-OF-CONCEPT VALUES (exp 22 v3, 2026-06-06): lowered to match the
+    # effective ~17% per-pregnancy rate that produced 55 sustainers in
+    # exp 22 v1's broken-but-passing setup. Values NOT defensible as
+    # realistic Zimbabwe ANC coverage (real rates 60-70% pre-EMTCT
+    # creeping to 90% by 2040) — used here only to test whether the
+    # existing 12-parameter prior contains a corner that brackets data.
+    # If yes, iterate upward toward realistic values; if no, the
+    # structural problem is bigger than ANC pressure.
+    anc_probs = [0.05, 0.10, 0.15, 0.15, 0.20, 0.20, 0.20]
 
     def syph_dx_eligibility(sim):
         """Treat anyone newly diagnosed positive by any syph test this step."""
@@ -346,18 +433,31 @@ def make_syph_testing(stop=2040, symp_test_prob=None, rdt_year=2012):
         syph = sim.diseases.syph
         return syph.chancre_visible | syph.rash_visible
 
+    # dt_scale=False: the CSV values are per-symptomatic-episode (visible
+    # chancres last ~1 month, the symptomatic window matches a single dt
+    # step). With dt_scale=True (stisim default) these would have been
+    # divided by 12 → effectively no symptomatic treatment of primary syph,
+    # which was a silent bug.
     syph_symp_test = sti.SyphTest(
         name='syph_symp_test', label='syph_symp_test',
         product=gud_dx,
         test_prob_data=symp_test_prob,
         eligibility=syph_symp_eligibility,
+        dt_scale=False,
     )
 
     # --- ANC channels (era-gated) ---
+    # SyphilisANCTimer schedules a single ANC-visit timestep per pregnancy
+    # at a realistic gestational week. The SyphTest products read from its
+    # today_uids and (with dt_scale=False) the listed anc_probs values are
+    # the per-visit testing probability.
+    syph_anc_timer = SyphilisANCTimer()
+
     def anc_eligibility(sim):
-        if not hasattr(sim.demographics, 'pregnancy'):
+        sched = sim.interventions.get('syph_anc_timer')
+        if sched is None:
             return ss.uids()
-        return sim.demographics.pregnancy.tri1_uids
+        return sched.today_uids
 
     syph_anc_rpr = sti.SyphTest(
         name='syph_anc_rpr', label='syph_anc_rpr',
@@ -365,6 +465,7 @@ def make_syph_testing(stop=2040, symp_test_prob=None, rdt_year=2012):
         years=anc_years,
         test_prob_data=anc_probs,
         eligibility=anc_eligibility,
+        dt_scale=False,
     )
     syph_anc_rpr.stop = rdt_year
 
@@ -374,10 +475,11 @@ def make_syph_testing(stop=2040, symp_test_prob=None, rdt_year=2012):
         years=anc_years,
         test_prob_data=anc_probs,
         eligibility=anc_eligibility,
+        dt_scale=False,
     )
     syph_anc_rdt.start = rdt_year
 
-    return [syph_symp_test, syph_anc_rpr, syph_anc_rdt, syph_tx]
+    return [syph_anc_timer, syph_symp_test, syph_anc_rpr, syph_anc_rdt, syph_tx]
 
 
 def make_testing(ng, ct, tv, bv, poc=None, pn_pars=None, stop=2040):
