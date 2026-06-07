@@ -1,0 +1,32 @@
+# Exp 30 — definitive LHS sweep over 14 priors
+n_agents: 10000
+n_draws: 300
+n_workers: 24
+start: 1985
+stop: 2040
+prior_seed: 42
+
+# 14-dim prior from priors.py:
+#   hiv.beta_m2f, syph.beta_m2f, syph.rel_trans_primary,
+#   syph.time_to_undetectable, syph.p_symp_primary_f,
+#   syph.p_symp_primary_m, syph.rel_init_prev,
+#   syph_symp_test.rel_test, ng.beta_m2f, ct.beta_m2f,
+#   tv.beta_m2f, structuredsexual.prop_f0,
+#   structuredsexual.m1_conc, structuredsexual.dur_sw
+
+stisim_branch: feat/syph-detectable-state
+stisim_patches:
+  - trep BoolState (80% persistence, window-period clearing)
+  - SyphTx clears nontrep on early-stage treatment
+  - dur_early 22-24 months
+
+symp_test_csv: ../24_concentrated_sustained_handpick/data/symp_test_prob_concentrated.csv
+anc_probs: [0.20, 0.30, 0.40, 0.35, 0.55, 0.70, 0.85]
+
+targets_loose:
+  fsw_prev_2019:   [0.20, 0.40]
+  nontrep_f_2016:  [0.01, 0.03]
+  trep_f_2016:     [0.05, 0.10]
+  primary_share:   [0.45, 0.65]
+  secondary_share: [0.25, 0.45]
+  early_latent_share_max: 0.15

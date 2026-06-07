@@ -1,0 +1,42 @@
+[36m
+
+———————————————————————————————————————————————————————
+Exp 30 — definitive LHS sweep, 300 draws over 14 priors
+———————————————————————————————————————————————————————
+[0m
+Priors (14): ['hiv.beta_m2f', 'syph.beta_m2f', 'syph.rel_trans_primary', 'syph.time_to_undetectable', 'syph.p_symp_primary_f', 'syph.p_symp_primary_m', 'syph.rel_init_prev', 'syph_symp_test.rel_test', 'ng.beta_m2f', 'ct.beta_m2f', 'tv.beta_m2f', 'structuredsexual.prop_f0', 'structuredsexual.m1_conc', 'structuredsexual.dur_sw']
+Draws saved to /home/robyn/sti_notification/experiments/30_lhs_definitive/outputs/prior_draws.csv
+
+Running 300 sims on 24 workers...
+  [ 20/300] 64s eta=895s  n_pass histogram: 1:9 2:3 3:3 4:5
+  [ 40/300] 123s eta=799s  n_pass histogram: 1:17 2:3 3:7 4:13
+  [ 60/300] 180s eta=719s  n_pass histogram: 1:23 2:8 3:10 4:19
+  [ 80/300] 236s eta=649s  n_pass histogram: 1:31 2:10 3:13 4:25 5:1
+  [100/300] 291s eta=581s  n_pass histogram: 1:43 2:11 3:16 4:28 5:2
+  [120/300] 321s eta=482s  n_pass histogram: 1:51 2:12 3:19 4:36 5:2
+  [140/300] 368s eta=420s  n_pass histogram: 1:59 2:16 3:24 4:39 5:2
+  [160/300] 423s eta=370s  n_pass histogram: 1:66 2:18 3:28 4:46 5:2
+  [180/300] 474s eta=316s  n_pass histogram: 1:73 2:19 3:31 4:55 5:2
+  [200/300] 529s eta=264s  n_pass histogram: 1:85 2:21 3:34 4:58 5:2
+  [220/300] 585s eta=213s  n_pass histogram: 1:93 2:21 3:38 4:66 5:2
+  [240/300] 634s eta=159s  n_pass histogram: 1:105 2:21 3:42 4:70 5:2
+  [260/300] 665s eta=102s  n_pass histogram: 1:114 2:26 3:43 4:75 5:2
+  [280/300] 724s eta=52s  n_pass histogram: 1:125 2:29 3:43 4:81 5:2
+  [300/300] 778s eta=0s  n_pass histogram: 1:134 2:31 3:45 4:87 5:3
+
+Total 777.8s
+
+OK: 300/300
+
+=== HIT-COUNT DISTRIBUTION ===
+  0/7 targets: 0 draws
+  1/7 targets: 134 draws
+  2/7 targets: 31 draws
+  3/7 targets: 45 draws
+  4/7 targets: 87 draws
+  5/7 targets: 3 draws
+  6/7 targets: 0 draws  <- definitive pass
+  7/7 targets: 0 draws  <- definitive pass
+
+=== TOP DRAWS (6+/7) ===
+  None — definitive miss.

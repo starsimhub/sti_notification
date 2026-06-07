@@ -1,0 +1,33 @@
+# Exp 28 — exp 24 hand-pick with SyphTx-clears-nontrep patch
+n_agents: 10000
+start: 1985
+stop: 2040
+seeds: [101, 102, 103]
+
+stisim_patch: feat/syph-detectable-state (commit adds nontrep_revert_months Dist + early-stage nontrep clearing in SyphTx.change_states)
+
+# Verbatim exp 24 hand-pick — the ONLY behavior diff is the stisim patch
+config:
+  syph.beta_m2f:              0.20
+  syph.time_to_undetectable:  20.0
+  syph.p_symp_primary_f:      0.50
+  syph.p_symp_primary_m:      0.80
+  syph.rel_init_prev:         0.20
+  syph_symp_test.rel_test:    1.30
+  structuredsexual.prop_f0:   0.55
+  structuredsexual.m1_conc:   0.20
+  structuredsexual.dur_sw:    15.0
+  hiv.beta_m2f:               0.025
+  ng.beta_m2f:                0.10
+  ct.beta_m2f:                0.10
+  tv.beta_m2f:                0.20
+
+symp_test_csv: ../24_concentrated_sustained_handpick/data/symp_test_prob_concentrated.csv
+anc_probs: [0.20, 0.30, 0.40, 0.35, 0.55, 0.70, 0.85]
+
+targets:
+  fsw_prev_2019:   [0.20, 0.40]
+  nontrep_f_2016:  [0.01, 0.03]
+  trep_f_2016:     [0.05, 0.10]
+  primary_share:   [0.50, 0.65]
+  secondary_share: [0.25, 0.40]

@@ -1,0 +1,42 @@
+# Exp 31 — draw 74 from exp 30 + 3 targeted tweaks
+n_agents: 10000
+start: 1985
+stop: 2040
+seeds: [101, 102, 103]
+
+stisim_branch_commit: feat/syph-detectable-state HEAD includes:
+  - trep BoolState (80% persistence, window-period clearing)
+  - SyphTx clears nontrep on early-stage treatment
+  - dur_early 22-24 months
+  - set_latent_trans uses rel_trans_secondary as starting value (new this commit)
+
+# Draw 74 parameters from exp 30 (5/7 pass) + 3 overrides
+config:
+  # Draw 74 values
+  hiv.beta_m2f:                   0.0270
+  syph.beta_m2f:                  0.2370
+  syph.time_to_undetectable:      17.99
+  syph.p_symp_primary_f:          0.5232
+  syph.p_symp_primary_m:          0.6610
+  syph.rel_init_prev:             0.3877
+  syph_symp_test.rel_test:        1.0453
+  ng.beta_m2f:                    0.1043
+  ct.beta_m2f:                    0.0241
+  tv.beta_m2f:                    0.4509
+  structuredsexual.prop_f0:       0.8874
+  structuredsexual.m1_conc:       0.2609
+  structuredsexual.dur_sw:        11.48
+
+  # 3 tweaks
+  syph.rel_trans_primary:         4.0     # up from 1.73 (draw 74)
+  syph.rel_trans_latent_half_life: 1.2    # up from 1.0 default (years)
+
+symp_test_csv: ../24_concentrated_sustained_handpick/data/symp_test_prob_concentrated.csv
+anc_probs: [0.20, 0.30, 0.40, 0.35, 0.55, 0.70, 0.85]
+
+targets_loose:
+  fsw_prev_2019:   [0.20, 0.40]
+  nontrep_f_2016:  [0.01, 0.03]
+  trep_f_2016:     [0.05, 0.10]
+  primary_share:   [0.45, 0.65]
+  secondary_share: [0.25, 0.45]

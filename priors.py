@@ -1,15 +1,21 @@
 """
 Prior distributions for the Zimbabwe calibration of sti_notification.
 
-Nine parameters: five disease betas (HIV, syph, NG, CT, TV), three
-network parameters, and the time-to-RPR-undetectable distribution for
-late-latent syphilis (added for exp 20 — see
-experiments/19_time_to_undetectable_sweep/SUMMARY.md). Condom
-effectiveness, rel_trans_primary, rel_init_prev, p_symp, p_symp_care,
-and care-seeking rates are *fixed* (set in model.py) per parameter-
-engineering analysis (exp 08).
-
 Format: {column_name: (label, low, high, log_scale)}.
+
+Parameters opened over time:
+- exp 17-20: disease betas (HIV, syph, NG, CT, TV), network shape
+  (prop_f0, m1_conc, dur_sw), time_to_undetectable.
+- exp 22: syph.p_symp_primary_f/m, syph_symp_test.rel_test —
+  care-seeking knobs.
+- exp 23: syph.rel_init_prev — initial-condition sensitivity.
+- exp 29 (2026-06-07): syph.rel_trans_primary — primary-stage
+  transmissibility multiplier. Robyn: previous work set this at
+  ~5; opening for calibration to test concentrated-sustained
+  hypothesis where primary-stage dominates transmission.
+
+Condom effectiveness, p_symp_secondary, p_symp_care, and most
+network parameters remain fixed (set in model.py).
 """
 
 import sciris as sc
@@ -20,6 +26,7 @@ calib_pars = sc.objdict({
     'hiv.beta_m2f':                 ('HIV β (M→F)',              0.005, 0.05,  False),
     # Syphilis
     'syph.beta_m2f':                ('Syph β (M→F)',             0.10,  0.35,  True),
+    'syph.rel_trans_primary':       ('Primary rel_trans',         1.0,   10.0,  True),
     'syph.time_to_undetectable':    ('RPR decline (yrs)',        10,    30,    False),
     'syph.p_symp_primary_f':        ('F chancre visible (prob)', 0.10,  0.60,  False),
     'syph.p_symp_primary_m':        ('M chancre visible (prob)', 0.50,  0.95,  False),

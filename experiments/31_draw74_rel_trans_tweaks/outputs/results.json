@@ -1,0 +1,68 @@
+{
+  "config": {
+    "hiv.beta_m2f": 0.027,
+    "syph.beta_m2f": 0.237,
+    "syph.rel_trans_primary": 4.0,
+    "syph.rel_trans_latent_half_life": 1.2,
+    "syph.time_to_undetectable": 17.99,
+    "syph.p_symp_primary_f": 0.5232,
+    "syph.p_symp_primary_m": 0.661,
+    "syph.rel_init_prev": 0.3877,
+    "syph_symp_test.rel_test": 1.0453,
+    "ng.beta_m2f": 0.1043,
+    "ct.beta_m2f": 0.0241,
+    "tv.beta_m2f": 0.4509,
+    "structuredsexual.prop_f0": 0.8874,
+    "structuredsexual.m1_conc": 0.2609,
+    "structuredsexual.dur_sw": 11.48
+  },
+  "per_seed": [
+    {
+      "seed": 101,
+      "fsw_prev_2019": 0.5235602094240838,
+      "nontrep_f_2016": 0.10560181680545042,
+      "trep_f_2016": 0.22255866767600302,
+      "primary_share": 0.6127562642369021,
+      "secondary_share": 0.3631630328669053,
+      "early_lat_share": 0.024080702896192647,
+      "late_lat_share": 0.0,
+      "new_inf_2030_2040_mean": 21.230031666666665,
+      "overall_prev_f_2035_2040": 0.12121045686625358
+    },
+    {
+      "seed": 102,
+      "fsw_prev_2019": 0.4885057471264368,
+      "nontrep_f_2016": 0.11056324672861749,
+      "trep_f_2016": 0.21373032429357103,
+      "primary_share": 0.5834115805946792,
+      "secondary_share": 0.39248826291079814,
+      "early_lat_share": 0.02410015649452269,
+      "late_lat_share": 0.0,
+      "new_inf_2030_2040_mean": 26.173813333333335,
+      "overall_prev_f_2035_2040": 0.12980269763123095
+    },
+    {
+      "seed": 103,
+      "fsw_prev_2019": 0.45595854922279794,
+      "nontrep_f_2016": 0.10113636363636364,
+      "trep_f_2016": 0.20037878787878788,
+      "primary_share": 0.5933147632311978,
+      "secondary_share": 0.39059114825131536,
+      "early_lat_share": 0.016094088517486844,
+      "late_lat_share": 0.0,
+      "new_inf_2030_2040_mean": 20.260095,
+      "overall_prev_f_2035_2040": 0.11280527811445978
+    }
+  ],
+  "mean": {
+    "fsw_prev_2019": 0.48934150192443954,
+    "nontrep_f_2016": 0.10576714239014384,
+    "trep_f_2016": 0.21222259328278734,
+    "primary_share": 0.5964942026875931,
+    "secondary_share": 0.38208081467633964,
+    "early_lat_share": 0.021424982636067392,
+    "late_lat_share": 0.0,
+    "new_inf_2030_2040_mean": 22.554646666666667,
+    "overall_prev_f_2035_2040": 0.1212728108706481
+  }
+}
