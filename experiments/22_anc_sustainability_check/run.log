@@ -1,0 +1,32 @@
+[36m
+
+—————————————————————————————————————————————————————————————————————————————————————
+Sustainability coverage check: 150 prior draws, n_agents=10000, stop=2040, 24 workers
+—————————————————————————————————————————————————————————————————————————————————————
+[0m
+LHS prior draws saved to /home/robyn/sti_notification/experiments/22_anc_sustainability_check/outputs/prior_draws.csv
+Running 150 sims to 2040 on 24 workers...
+  [10/150] rate=0.17/s elapsed=59s eta=823s
+  [20/150] rate=0.32/s elapsed=62s eta=405s
+/home/robyn/stisim/stisim/diseases/hiv.py:658: RuntimeWarning: invalid value encountered in cast
+  self.ti_zero[uids] = ti + dur_post_art.astype(int)
+  [30/150] rate=0.26/s elapsed=116s eta=466s
+  [40/150] rate=0.33/s elapsed=119s eta=328s
+  [50/150] rate=0.29/s elapsed=171s eta=343s
+  [60/150] rate=0.34/s elapsed=178s eta=267s
+  [70/150] rate=0.38/s elapsed=186s eta=212s
+  [80/150] rate=0.34/s elapsed=235s eta=205s
+  [90/150] rate=0.37/s elapsed=241s eta=161s
+  [100/150] rate=0.35/s elapsed=289s eta=145s
+  [110/150] rate=0.37/s elapsed=300s eta=109s
+  [120/150] rate=0.38/s elapsed=315s eta=79s
+  [130/150] rate=0.37/s elapsed=354s eta=54s
+  [140/150] rate=0.38/s elapsed=364s eta=26s
+  [150/150] rate=0.37/s elapsed=407s eta=0s
+Series saved to /home/robyn/sti_notification/experiments/22_anc_sustainability_check/outputs/series.pkl
+
+=== GATE RESULT ===
+Sims ok: 150/150
+Sustaining (prev_f_2035-40 >= 0.001 AND new_inf_2030-40 > 0): 44/150
+Gate threshold for proceeding to HM: >=30
+GATE PASSES

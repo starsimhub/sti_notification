@@ -1,0 +1,19 @@
+# Exp 22 v3 — low-ANC proof-of-concept sustainability coverage check
+n_agents: 10000
+n_draws: 150
+n_workers: 24
+start: 1985
+stop: 2040
+prior_seed: 42
+
+# Side fixes (committed in interventions.py prior to this run)
+fixes:
+  syph_anc_timer: true            # SyphilisANCTimer connector schedules one ANC visit / pregnancy at uniform week 8-32 (CRN-safe)
+  dt_scale_false_symp_test: true  # symp_test_prob_soc.csv values are per-episode, not annual
+  anc_probs: [0.05, 0.10, 0.15, 0.15, 0.20, 0.20, 0.20]  # PROOF-OF-CONCEPT; NOT defensible (real ZW ~60-70% by 2018, scaling to 90% by 2040)
+
+# Gate
+sustainability:
+  prev_f_2035_2040_min: 0.001
+  new_inf_2030_2040_strict_gt: 0
+  draws_required: 30

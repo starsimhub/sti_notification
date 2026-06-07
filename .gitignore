@@ -44,3 +44,4 @@ revision_plan.md
 # (nroy_samples.csv, metrics.json, run_config.json, log.txt) are
 # salvaged to experiments/*/nroy/ alongside the SUMMARY.
 experiments/*/outputs/hm_zim*/
+experiments/*/outputs/series.pkl
