@@ -384,37 +384,40 @@ class SyphilisANCTimer(ss.Intervention):
         return due[preg.pregnant[due] & self.sim.people.alive[due]]
 
 
-def make_syph_testing(stop=2040, symp_test_prob=None, rdt_year=2012):
+ANC_PROBS_REALISTIC = [0.20, 0.30, 0.40, 0.35, 0.55, 0.70, 0.85]
+ANC_PROBS_POC = [0.05, 0.10, 0.15, 0.15, 0.20, 0.20, 0.20]
+ANC_YEARS = [1980, 1990, 1999, 2008, 2012, 2018, 2040]
+
+
+def make_syph_testing(stop=2040, symp_test_prob=None, rdt_year=2012,
+                      anc_probs=None, anc_years=None):
     """
     Symptomatic + ANC syphilis testing pathways.
 
     Three channels feed into a single SyphTx:
       1. Symptomatic test (GUD): agents with chancre or rash visible.
-      2. ANC RPR screen (1980–rdt_year): serology for pregnant women.
-      3. ANC dual RDT screen (rdt_year–stop): treponemal rapid test.
+      2. ANC RPR screen (1980-rdt_year): serology for pregnant women.
+      3. ANC dual RDT screen (rdt_year-stop): treponemal rapid test.
 
-    ANC coverage ramps from ~20% (1980s) through a 2008 dip to ~95%
-    (EMTCT era). The product switches from RPR (non-treponemal, detects
-    active infection) to dual RDT (treponemal, lifelong positivity).
+    Args:
+        anc_probs: per-visit ANC testing probabilities at the calendar
+                   years in ``anc_years``. Default = ANC_PROBS_REALISTIC
+                   (peak 70% by 2018, 85% by 2040 — defensible Zimbabwe
+                   coverage matching reported EMTCT scale-up). For
+                   bifurcation analysis use ANC_PROBS_POC, the
+                   non-defensible proof-of-concept ramp from exps 22-23.
     """
     if symp_test_prob is None:
         symp_test_prob = pd.read_csv('data/symp_test_prob_soc.csv')
+    if anc_probs is None:
+        anc_probs = ANC_PROBS_REALISTIC
+    if anc_years is None:
+        anc_years = ANC_YEARS
 
     syph_dx_df = pd.read_csv(f'data/syph_dx.csv')
     gud_dx = sti.SyphDx(syph_dx_df[syph_dx_df.name == 'gud'], name='SyphDx_gud')
     rpr_dx = sti.SyphDx(syph_dx_df[syph_dx_df.name == 'rpr'], name='SyphDx_rpr')
     dual_dx = sti.SyphDx(syph_dx_df[syph_dx_df.name == 'dual'], name='SyphDx_dual')
-
-    anc_years = [1980, 1990, 1999, 2008, 2012, 2018, 2040]
-    # PROOF-OF-CONCEPT VALUES (exp 22 v3, 2026-06-06): lowered to match the
-    # effective ~17% per-pregnancy rate that produced 55 sustainers in
-    # exp 22 v1's broken-but-passing setup. Values NOT defensible as
-    # realistic Zimbabwe ANC coverage (real rates 60-70% pre-EMTCT
-    # creeping to 90% by 2040) — used here only to test whether the
-    # existing 12-parameter prior contains a corner that brackets data.
-    # If yes, iterate upward toward realistic values; if no, the
-    # structural problem is bigger than ANC pressure.
-    anc_probs = [0.05, 0.10, 0.15, 0.15, 0.20, 0.20, 0.20]
 
     def syph_dx_eligibility(sim):
         """Treat anyone newly diagnosed positive by any syph test this step."""

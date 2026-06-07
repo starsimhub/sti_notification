@@ -88,23 +88,28 @@ def make_networks(dur_recall=ss.years(0.25)):
     return [sexual, sti.PriorPartners(dur_recall=dur_recall), ss.MaternalNet()]
 
 
-def make_interventions(diseases, which='all', poc=None, pn_pars=None, stop=2040):
+def make_interventions(diseases, which='all', poc=None, pn_pars=None, stop=2040,
+                       syph_symp_test_prob=None, syph_anc_probs=None):
     intvs = make_hiv_intvs()
     if which in ('discharging', 'all'):
         intvs += make_testing(diseases.ng, diseases.ct, diseases.tv, diseases.bv,
                               poc=poc, pn_pars=pn_pars, stop=stop)
     if which in ('ulcerative', 'all'):
-        intvs += make_syph_testing(stop=stop)
+        intvs += make_syph_testing(stop=stop, symp_test_prob=syph_symp_test_prob,
+                                   anc_probs=syph_anc_probs)
     return intvs
 
 
 def make_sim(seed=1, n_agents=5e3, start=1985, stop=2030,
              pn_pars=None, poc=None, which='all', dur_recall=ss.years(0.25),
-             fetal_health=True, care_seek_mult=1.0, verbose=1/12):
+             fetal_health=True, care_seek_mult=1.0, verbose=1/12,
+             syph_symp_test_prob=None, syph_anc_probs=None):
 
     diseases, analyzers = make_diseases(which, care_seek_mult=care_seek_mult)
     networks = make_networks(dur_recall)
-    interventions = make_interventions(diseases, which=which, poc=poc, pn_pars=pn_pars, stop=stop)
+    interventions = make_interventions(diseases, which=which, poc=poc, pn_pars=pn_pars, stop=stop,
+                                       syph_symp_test_prob=syph_symp_test_prob,
+                                       syph_anc_probs=syph_anc_probs)
 
     # FetalHealth tracks adverse birth outcomes (LBW, SGA, SVN, timing); the
     # sti_fetal connector translates STI infections + treatments into
