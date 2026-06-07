@@ -1,0 +1,22 @@
+# Exp 23 — initial-condition sensitivity + stratified diagnostic
+n_agents: 10000
+n_draws: 150
+n_workers: 24
+start: 1985
+stop: 2040
+prior_seed: 42
+
+# 13-param prior (priors.py now includes syph.rel_init_prev on log scale 0.02-1.00)
+
+# Stratified syph result storage (toggled on in run.py)
+store_sw: true
+store_risk_groups: true
+
+# Inherits all exp 22 v3 fixes (interventions.py unchanged):
+#   - SyphilisANCTimer connector schedules one ANC visit per pregnancy at uniform week 8-32
+#   - dt_scale=False on syph_symp_test (CSV values per-episode, not annual)
+#   - low-ANC PoC ramp: anc_probs = [0.05, 0.10, 0.15, 0.15, 0.20, 0.20, 0.20]
+
+sustainability:
+  prev_f_2035_2040_min: 0.001
+  new_inf_2030_2040_strict_gt: 0

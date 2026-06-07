@@ -23,6 +23,7 @@ calib_pars = sc.objdict({
     'syph.time_to_undetectable':    ('RPR decline (yrs)',        10,    30,    False),
     'syph.p_symp_primary_f':        ('F chancre visible (prob)', 0.10,  0.60,  False),
     'syph.p_symp_primary_m':        ('M chancre visible (prob)', 0.50,  0.95,  False),
+    'syph.rel_init_prev':           ('Syph rel init prev',       0.02,  1.00,  True),
     'syph_symp_test.rel_test':      ('Syph symp care-seek mult', 0.30,  1.50,  False),
     # Discharging STIs
     'ng.beta_m2f':                  ('NG β (M→F)',               0.02,  0.30,  True),
