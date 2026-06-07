@@ -1,0 +1,21 @@
+{
+  "n_draws": 300,
+  "n_priors": 16,
+  "n_targets": 9,
+  "n_ok": 300,
+  "n_pass_distribution": {
+    "0": 0,
+    "1": 113,
+    "2": 43,
+    "3": 43,
+    "4": 65,
+    "5": 34,
+    "6": 2,
+    "7": 0,
+    "8": 0,
+    "9": 0
+  },
+  "definitive_pass": 0,
+  "partial_pass": 1,
+  "best_n_pass": 6
+}

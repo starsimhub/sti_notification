@@ -1,0 +1,46 @@
+# Exp 32 — LHS over 16 priors with HIV-stratified syph targets
+n_agents: 10000
+n_draws: 300
+n_seeds_per_draw: 1
+n_workers: 24
+start: 1985
+stop: 2040
+prior_seed: 42
+
+# 16-dim prior from priors.py (exp 30's 14 + 2 new HIV-syph coupling):
+#   hiv.beta_m2f, syph.beta_m2f, syph.rel_trans_primary,
+#   syph.time_to_undetectable, syph.p_symp_primary_f,
+#   syph.p_symp_primary_m, syph.rel_init_prev,
+#   syph_symp_test.rel_test, ng.beta_m2f, ct.beta_m2f,
+#   tv.beta_m2f, structuredsexual.prop_f0,
+#   structuredsexual.m1_conc, structuredsexual.dur_sw,
+#   hiv_syph.rel_sus_syph_hiv,                   # NEW
+#   hiv_syph.rel_trans_syph_hiv                  # NEW
+
+stisim_branch: feat/syph-detectable-state
+stisim_patches:
+  - trep BoolState (80% persistence, window-period clearing)
+  - SyphTx clears nontrep on early-stage treatment
+  - dur_early 22-24 months
+  - set_latent_trans starts at rel_trans_secondary level
+
+new_analyzers:
+  - sti.coinfection_stats(syph, hiv, state=trep, age=[15,64])
+  - sti.coinfection_stats(syph, hiv, state=nontrep, age=[15,64])
+  - SyphTransmissionEvents (events_window=2010-2025)
+
+symp_test_csv: ../24_concentrated_sustained_handpick/data/symp_test_prob_concentrated.csv
+anc_probs: [0.20, 0.30, 0.40, 0.35, 0.55, 0.70, 0.85]
+
+targets:
+  fsw_prev_2019:        [0.20, 0.40]
+  nontrep_f_2016:       [0.01, 0.05]   # relaxed from exp 30's [0.01, 0.03]
+  trep_f_2016:          [0.05, 0.10]
+  primary_share:        [0.45, 0.65]
+  secondary_share:      [0.25, 0.45]
+  early_latent_share_max: 0.15
+  sustained:            true            # mean new_inf 2030-2040 > 0
+  hiv_pos_trep_2016:    [0.05, 0.09]   # NEW absolute HIV+ trep band
+  hiv_pos_neg_trep_ratio_2016: [3.0, 6.0]  # NEW HIV+/HIV- ratio band
+
+definitive_pass: n_pass >= 7

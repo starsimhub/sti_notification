@@ -13,6 +13,13 @@ Parameters opened over time:
   transmissibility multiplier. Robyn: previous work set this at
   ~5; opening for calibration to test concentrated-sustained
   hypothesis where primary-stage dominates transmission.
+- exp 32 (2026-06-07): hiv_syph.rel_sus_syph_hiv and
+  hiv_syph.rel_trans_syph_hiv. Default 1.0 in stisim — model had
+  no mechanism for HIV+ adults to have elevated syph prev beyond
+  shared network exposure. ZIMPHIA shows HIV+ trep 3.7× HIV-
+  trep; opening these to test whether the HIV→syph coupling
+  closes that gap. AIDS variants held at 1.0 (small CD4<200
+  population).
 
 Condom effectiveness, p_symp_secondary, p_symp_care, and most
 network parameters remain fixed (set in model.py).
@@ -40,4 +47,7 @@ calib_pars = sc.objdict({
     'structuredsexual.prop_f0':     ('Prop F low-risk',          0.55,  0.90,  False),
     'structuredsexual.m1_conc':     ('M1 concurrency',           0.05,  0.30,  False),
     'structuredsexual.dur_sw':      ('FSW duration (yrs)',        2,     15,    False),
+    # HIV-syph coupling (exp 32+)
+    'hiv_syph.rel_sus_syph_hiv':    ('HIV→syph rel_sus',          1.0,   3.0,   True),
+    'hiv_syph.rel_trans_syph_hiv':  ('HIV→syph rel_trans',        1.0,   2.5,   True),
 })

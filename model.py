@@ -14,6 +14,7 @@ import stisim as sti
 from interventions import make_testing, make_syph_testing
 from hiv_model import make_hiv, make_hiv_intvs
 from connectors import sti_fetal
+from analyzers import SyphTransmissionEvents
 
 LOCATION = 'zimbabwe'
 DATA_DIR = 'data'
@@ -68,7 +69,17 @@ def make_diseases(which='all', care_seek_mult=1.0):
         analyzers.append(sti.sw_stats(diseases=['ng', 'ct', 'tv']))
     if which in ('ulcerative', 'all'):
         d.syph, d.gudp = make_ulcerative_stis()
+        # Original analyzer kept for back-compat (tracks syph.infected, 15-49)
         analyzers.append(sti.coinfection_stats('syph', 'hiv', name='syph_hiv_coinfection'))
+        # ZIMPHIA-matched: trep and nontrep at 15-64
+        analyzers.append(sti.coinfection_stats(
+            'syph', 'hiv', disease1_infected_state_name='trep',
+            age_limits=[15, 64], name='syph_hiv_trep'))
+        analyzers.append(sti.coinfection_stats(
+            'syph', 'hiv', disease1_infected_state_name='nontrep',
+            age_limits=[15, 64], name='syph_hiv_nontrep'))
+        # Transmission event recorder (Lorenz + transmission matrix)
+        analyzers.append(SyphTransmissionEvents())
     return d, analyzers
 
 
