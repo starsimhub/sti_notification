@@ -1,0 +1,31 @@
+[36m
+
+——————————————————————————————————————————————————————————————————————————————————————————————————————————————————
+Exp 23 — rel_init_prev sensitivity + stratified diagnostic: 150 prior draws, n_agents=10000, stop=2040, 24 workers
+——————————————————————————————————————————————————————————————————————————————————————————————————————————————————
+[0m
+LHS prior draws saved to /home/robyn/sti_notification/experiments/23_rel_init_prev_check/outputs/prior_draws.csv
+priors (13): ['hiv.beta_m2f', 'syph.beta_m2f', 'syph.time_to_undetectable', 'syph.p_symp_primary_f', 'syph.p_symp_primary_m', 'syph.rel_init_prev', 'syph_symp_test.rel_test', 'ng.beta_m2f', 'ct.beta_m2f', 'tv.beta_m2f', 'structuredsexual.prop_f0', 'structuredsexual.m1_conc', 'structuredsexual.dur_sw']
+Running 150 sims to 2040 on 24 workers...
+  [10/150] rate=0.17/s elapsed=59s eta=824s
+  [20/150] rate=0.32/s elapsed=62s eta=406s
+  [30/150] rate=0.26/s elapsed=115s eta=461s
+  [40/150] rate=0.33/s elapsed=120s eta=331s
+  [50/150] rate=0.29/s elapsed=171s eta=341s
+  [60/150] rate=0.34/s elapsed=177s eta=266s
+  [70/150] rate=0.38/s elapsed=186s eta=213s
+  [80/150] rate=0.34/s elapsed=235s eta=206s
+  [90/150] rate=0.37/s elapsed=242s eta=161s
+  [100/150] rate=0.34/s elapsed=291s eta=146s
+  [110/150] rate=0.37/s elapsed=299s eta=109s
+  [120/150] rate=0.38/s elapsed=318s eta=80s
+  [130/150] rate=0.37/s elapsed=354s eta=55s
+  [140/150] rate=0.38/s elapsed=364s eta=26s
+  [150/150] rate=0.37/s elapsed=410s eta=0s
+Series saved to /home/robyn/sti_notification/experiments/23_rel_init_prev_check/outputs/series.pkl
+
+=== RESULT ===
+Sims ok: 150/150
+Sustaining: 41/150
+Sustainers in ZIMPHIA detect_f band [0.4%, 1.6%]: 0
+PRIMARY FAILS - bifurcation likely structural
