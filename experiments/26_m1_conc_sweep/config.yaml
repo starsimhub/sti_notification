@@ -1,0 +1,33 @@
+# Exp 26 — m1_conc sweep at v3 base config
+n_agents: 10000
+start: 1985
+stop: 2040
+n_workers: 18
+seeds: [101, 102, 103]
+m1_conc_grid: [0.05, 0.08, 0.10, 0.12, 0.15, 0.20]
+
+# v3 base config (all knobs other than m1_conc fixed)
+base_config:
+  syph.beta_m2f:                 0.20
+  syph.time_to_undetectable:     20.0
+  syph.p_symp_primary_f:         0.50
+  syph.p_symp_primary_m:         0.80
+  syph.rel_init_prev:            0.20
+  syph_symp_test.rel_test:       1.30
+  structuredsexual.prop_f0:      0.85   # v3 fix
+  structuredsexual.client_shares: 0.20  # exp 24 / stisim default (NOT cut)
+  structuredsexual.dur_sw:       15.0
+  hiv.beta_m2f:                  0.025
+  ng.beta_m2f:                   0.10
+  ct.beta_m2f:                   0.10
+  tv.beta_m2f:                   0.20
+
+symp_test_csv: ../24_concentrated_sustained_handpick/data/symp_test_prob_concentrated.csv
+anc_probs: [0.20, 0.30, 0.40, 0.35, 0.55, 0.70, 0.85]
+
+targets:
+  fsw_prev_2019:   [0.20, 0.40]
+  nontrep_f_2016:  [0.004, 0.016]
+  trep_f_2016:     [0.027, 0.05]
+  primary_share:   [0.50, 0.65]
+  secondary_share: [0.25, 0.40]
