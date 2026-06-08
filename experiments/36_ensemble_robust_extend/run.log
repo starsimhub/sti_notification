@@ -1,0 +1,60 @@
+/home/robyn/stisim/stisim/diseases/hiv.py:658: RuntimeWarning: invalid value encountered in cast
+  self.ti_zero[uids] = ti + dur_post_art.astype(int)
+[36m
+
+——————————————————————————————————
+Exp 36 — Robust ensemble extension
+——————————————————————————————————
+[0m
+Phase 1 sustained: 545
+Already in exp 35 Phase 2: 175
+Extension set: 370 draws → 1110 sims
+
+Extension: running 1110 sims on 24 workers...
+  [  50/1110] 167s  eta=3546s
+  [ 100/1110] 298s  eta=3009s
+  [ 150/1110] 420s  eta=2691s
+  [ 200/1110] 544s  eta=2477s
+  [ 250/1110] 671s  eta=2307s
+  [ 300/1110] 797s  eta=2153s
+  [ 350/1110] 923s  eta=2005s
+  [ 400/1110] 1052s  eta=1866s
+  [ 450/1110] 1181s  eta=1732s
+  [ 500/1110] 1314s  eta=1603s
+  [ 550/1110] 1439s  eta=1465s
+  [ 600/1110] 1575s  eta=1339s
+  [ 650/1110] 1711s  eta=1211s
+  [ 700/1110] 1847s  eta=1082s
+  [ 750/1110] 1975s  eta=948s
+  [ 800/1110] 2104s  eta=815s
+  [ 850/1110] 2235s  eta=684s
+  [ 900/1110] 2365s  eta=552s
+  [ 950/1110] 2490s  eta=419s
+  [1000/1110] 2618s  eta=288s
+  [1050/1110] 2741s  eta=157s
+  [1100/1110] 2870s  eta=26s
+  [1110/1110] 2900s  eta=0s
+  done in 2900.4s
+[36m
+
+—————————————————————————————————————
+COMBINING + SELECTING ROBUST ENSEMBLE
+—————————————————————————————————————
+[0m
+Combined 3-seed records: 1635 (target 1635 = 1635)
+
+=== ROBUST ENSEMBLE (sustained 3/3 AND mean n_pass >= 5) ===
+  draws: 23
+
+=== ROBUST ENSEMBLE STATS ===
+  median nontrep_f_2016                 = 0.134  range [0.112, 0.161]
+  median trep_f_2016                    = 0.223  range [0.202, 0.251]
+  median fsw_prev_2019                  = 0.636  range [0.395, 0.735]
+  median hiv_pos_trep_2016              = 0.422  range [0.381, 0.452]
+  median hiv_trep_ratio_2016            = 3.293  range [3.042, 3.908]
+  median primary_share                  = 0.581  range [0.539, 0.639]
+  median secondary_share                = 0.398  range [0.340, 0.434]
+  median n_pass_mean                    = 5.000  range [5.000, 5.667]
+
+=== ALL 3/3 SUSTAINED (no n_pass filter) ===
+  draws: 145

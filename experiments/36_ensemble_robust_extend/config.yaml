@@ -1,0 +1,42 @@
+# Exp 36 — Robust ensemble extension
+n_agents: 10000
+n_seeds_per_draw: 3
+n_workers: 24
+start: 1985
+stop: 2040
+
+# Source data
+exp35_phase1_results: ../35_ensemble_build/outputs/phase1_results.jsonl
+exp35_phase2_results: ../35_ensemble_build/outputs/ensemble_results.jsonl
+exp35_priors:         ../35_ensemble_build/outputs/phase1_priors.csv
+
+# Extension targets
+candidate_set: sustained-in-Phase1 (n=545)
+already_done:  exp35 Phase 2 (n=175)
+extension:     n=370 draws × 3 seeds = 1110 sims
+
+# Seed scheme (consistent with exp 35 Phase 2)
+seed_formula: 100000 + draw_idx * 10 + seed_index    # seed_index in {0, 1, 2}
+
+# Ensemble selection (post-combine)
+robust_filter:
+  - sustained 3/3
+  - mean n_pass >= 4         # working ensemble (~125 draws expected)
+
+premium_filter:
+  - sustained 3/3
+  - mean n_pass >= 5         # premium subset for headline (~23 expected)
+
+# Same 9 targets as exp 32-34
+targets:
+  fsw_prev_2019:        [0.20, 0.40]
+  nontrep_f_2016:       [0.01, 0.05]
+  trep_f_2016:          [0.05, 0.10]
+  primary_share:        [0.45, 0.65]
+  secondary_share:      [0.25, 0.45]
+  early_latent_share_max: 0.15
+  sustained:            true
+  hiv_pos_trep_2016:    [0.05, 0.09]
+  hiv_pos_neg_trep_ratio_2016: [3.0, 6.0]
+
+stisim_branch: feat/syph-detectable-state
