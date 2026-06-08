@@ -1,0 +1,42 @@
+# Exp 34 — LHS with general-population network levers (20 priors)
+n_agents: 10000
+n_draws: 300
+n_seeds_per_draw: 1
+n_workers: 24
+start: 1985
+stop: 2040
+prior_seed: 42
+
+# 20-dim prior from priors.py (exp 33's 17 + 3 new general-pop knobs):
+#   ... 17 from exp 33 ...
+#   syph.rel_trans_latent_half_life    # NEW [0.25, 2.0] yr (linear)
+#   structuredsexual.f1_conc           # NEW [0.05, 0.30]
+#   structuredsexual.m2_conc           # NEW [2.0, 8.0]
+
+stisim_branch: feat/syph-detectable-state
+stisim_patches:
+  - trep BoolState (80% persistence, window-period clearing)
+  - SyphTx clears nontrep on early-stage treatment
+  - dur_early 22-24 months
+  - set_latent_trans starts at rel_trans_secondary level
+  - MFPars.fsw_mf_conc_mult + StructuredSexual post-hoc scaling
+
+set_pars_local_patches:
+  - rel_trans_latent_half_life passed as ss.years(value)
+
+symp_test_csv: ../24_concentrated_sustained_handpick/data/symp_test_prob_concentrated.csv
+anc_probs: [0.20, 0.30, 0.40, 0.35, 0.55, 0.70, 0.85]
+
+targets:                                       # same 9 targets as exp 33
+  fsw_prev_2019:        [0.20, 0.40]
+  nontrep_f_2016:       [0.01, 0.05]
+  trep_f_2016:          [0.05, 0.10]
+  primary_share:        [0.45, 0.65]
+  secondary_share:      [0.25, 0.45]
+  early_latent_share_max: 0.15
+  sustained:            true                   # MANDATORY — no decaying draws
+  hiv_pos_trep_2016:    [0.05, 0.09]
+  hiv_pos_neg_trep_ratio_2016: [3.0, 6.0]
+
+definitive_pass: n_pass >= 7 AND sustained
+acceptance_filter: sustained == true            # gate before ensemble selection

@@ -79,6 +79,9 @@ def set_pars_local(sim, pars):
                         if par_name == 'time_to_undetectable':
                             mod.pars[par_name] = ss.lognorm_ex(
                                 ss.years(float(value)), ss.years(float(value)))
+                        elif par_name == 'rel_trans_latent_half_life':
+                            # ss.dur required so starsim does the timestep conversion
+                            mod.pars[par_name] = ss.years(float(value))
                         elif par_name == 'p_symp_primary_f':
                             mod.pars['p_symp_primary'][0] = float(value)
                         elif par_name == 'p_symp_primary_m':
