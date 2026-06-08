@@ -20,6 +20,14 @@ Parameters opened over time:
   trep; opening these to test whether the HIV→syph coupling
   closes that gap. AIDS variants held at 1.0 (small CD4<200
   population).
+- exp 33 (2026-06-07): structuredsexual.fsw_mf_conc_mult. Default
+  1.0 in stisim — FSW inherit f2_conc=1.0 for non-commercial
+  partnerships. Exp 32's transmission matrix showed F_fsw → M_other
+  carries 8% of plateau transmissions (FSW→non-client males), and
+  the M_other → F_other downstream amplification keeps general-pop
+  prev hot. Lever multiplies FSW MF concurrency; range [0.1, 1.0]
+  spans "FSW partner only with clients" to no change. AIDS connector
+  variants still held at 1.0.
 
 Condom effectiveness, p_symp_secondary, p_symp_care, and most
 network parameters remain fixed (set in model.py).
@@ -44,9 +52,10 @@ calib_pars = sc.objdict({
     'ct.beta_m2f':                  ('CT β (M→F)',               0.02,  0.30,  True),
     'tv.beta_m2f':                  ('TV β (M→F)',               0.02,  0.60,  True),
     # Network shape
-    'structuredsexual.prop_f0':     ('Prop F low-risk',          0.55,  0.90,  False),
-    'structuredsexual.m1_conc':     ('M1 concurrency',           0.05,  0.30,  False),
-    'structuredsexual.dur_sw':      ('FSW duration (yrs)',        2,     15,    False),
+    'structuredsexual.prop_f0':         ('Prop F low-risk',          0.55,  0.90,  False),
+    'structuredsexual.m1_conc':         ('M1 concurrency',           0.05,  0.30,  False),
+    'structuredsexual.dur_sw':          ('FSW duration (yrs)',        2,     15,    False),
+    'structuredsexual.fsw_mf_conc_mult':('FSW MF concurrency mult',   0.1,   1.0,   False),
     # HIV-syph coupling (exp 32+)
     'hiv_syph.rel_sus_syph_hiv':    ('HIV→syph rel_sus',          1.0,   3.0,   True),
     'hiv_syph.rel_trans_syph_hiv':  ('HIV→syph rel_trans',        1.0,   2.5,   True),
