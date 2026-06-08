@@ -1,0 +1,57 @@
+# Exp 37 — Ensemble data extraction for publication figures
+n_agents: 10000
+n_seeds_per_draw: 3
+n_workers: 24
+start: 1985
+stop: 2040
+seed_base: 100000        # consistent with exp 35/36 Phase 2 scheme
+
+ensemble_source: ../36_ensemble_robust_extend/outputs/full_summary.csv
+ensemble_filter:
+  - pass_sustained == 1.0
+  - n_pass_mean >= 4
+expected_ensemble_size: ~125
+
+priors_source: ../35_ensemble_build/outputs/phase1_priors.csv
+
+# Snapshot years align with ZIMPHIA survey rounds
+snapshot_years: [2016, 2020]
+
+extracted_time_series:
+  hiv: [prevalence, prevalence_f, prevalence_m, new_infections]
+  ng:  [prevalence, prevalence_f, prevalence_m, prevalence_f_25_30, new_infections]
+  ct:  [prevalence, prevalence_f, prevalence_m, prevalence_f_25_30, new_infections]
+  tv:  [prevalence, prevalence_f, prevalence_m, new_infections]
+  syph:
+    - new_infections
+    - prevalence, prevalence_f, prevalence_m, prevalence_sw, prevalence_client
+    - trep_prevalence_15_64{,_f,_m}
+    - nontrep_prevalence_15_64{,_f,_m}
+    - active_prevalence{,_f,_m}
+    - sexually_transmissible_prevalence{,_f,_m}
+    - symptomatic_prevalence{,_f,_m}
+    - primary_prevalence{,_f,_m}
+
+snapshot_bases:
+  hiv: [prevalence]
+  ng: [prevalence]
+  ct: [prevalence]
+  tv: [prevalence]
+  syph: [trep_prevalence, nontrep_prevalence, active_prevalence,
+         sexually_transmissible_prevalence, symptomatic_prevalence,
+         primary_prevalence]
+
+stisim_branch: feat/syph-detectable-state
+stisim_patches:
+  - sexually_transmissible/symptomatic/primary prevalence (45f2979)
+  - rename symptomatic property -> visibly_symptomatic
+  - (all prior patches from exp 28-34)
+
+fetal_health: false       # skipping APO/congenital outputs for PN work
+
+outputs:
+  - time_series.parquet         # raw per-(draw, seed, year)
+  - snapshots.parquet           # raw per-(draw, seed, year, sex, age_bin) at 2016/2020
+  - ensemble_ts_quantiles.parquet      # median + 80%/95% CI bands per (year, result)
+  - ensemble_snapshots_quantiles.parquet  # median + CI per (year, sex, age_bin, result)
+  - draws_used.csv              # the 125 draws + priors

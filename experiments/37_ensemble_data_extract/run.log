@@ -1,0 +1,28 @@
+[36m
+
+—————————————————————————————————
+Exp 37 — ensemble data extraction
+—————————————————————————————————
+[0m
+Ensemble: 125 draws (sustained 3/3 + mean n_pass >= 4)
+Total sims: 375 (125 draws x 3 seeds)
+Running on 24 workers...
+  [ 30/375] 133s  eta=1527s  ok=30 err=0
+  [ 60/375] 201s  eta=1056s  ok=60 err=0
+  [ 90/375] 269s  eta=853s  ok=90 err=0
+  [120/375] 345s  eta=733s  ok=120 err=0
+  [150/375] 460s  eta=690s  ok=150 err=0
+  [180/375] 532s  eta=577s  ok=180 err=0
+  [210/375] 607s  eta=477s  ok=210 err=0
+  [240/375] 694s  eta=390s  ok=240 err=0
+  [270/375] 786s  eta=306s  ok=270 err=0
+  [300/375] 862s  eta=215s  ok=300 err=0
+  [330/375] 940s  eta=128s  ok=330 err=0
+  [360/375] 1021s  eta=43s  ok=360 err=0
+  [375/375] 1057s  eta=0s  ok=375 err=0
+
+Done in 1057.3s. OK: 375, errors: 0
+  time_series -> time_series.parquet: 882000 rows
+  snapshots -> snapshots.parquet: 120000 rows
+  ts quantiles -> ensemble_ts_quantiles.parquet: 2352 rows
+  snap quantiles -> ensemble_snapshots_quantiles.parquet: 320 rows
