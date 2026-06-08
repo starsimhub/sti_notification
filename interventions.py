@@ -541,24 +541,51 @@ def make_testing(ng, ct, tv, bv, poc=None, pn_pars=None, stop=2040):
         outcome_treatment_map=outcome_treatment_map,
     )
 
-    # Index cases: women & men whose NG or CT treatment fired this step,
-    # excluding those who were themselves notified one step prior (avoid recursion).
-    def just_treated(sim):
-        ng_treated = sim.interventions.ng_tx.ti_treated == sim.interventions.ng_tx.ti
-        ct_treated = sim.interventions.ct_tx.ti_treated == sim.interventions.ct_tx.ti
-        if 'pn' in sim.interventions:
-            pn = sim.interventions.pn
+    # Baseline PN eligibility: anyone whose STI tx fired this step (NG/CT/TV/BV
+    # discharge-syndromic, or syph from GUD/ANC). Excludes agents who were
+    # themselves notified one step prior, to avoid feedback recursion.
+    def baseline_pn_eligibility(sim):
+        intv = sim.interventions
+        masks = []
+        for name in ('ng_tx', 'ct_tx', 'metronidazole', 'syph_tx'):
+            tx = intv.get(name)
+            if tx is not None:
+                masks.append(tx.ti_treated == tx.ti)
+        if not masks:
+            return ss.uids()
+        combined = masks[0]
+        for m in masks[1:]:
+            combined = combined | m
+        if 'pn' in intv:
+            pn = intv['pn']
             previous_index = pn.ti_notified == (pn.ti - 1)
-            return ((ng_treated | ct_treated) & ~previous_index).uids
-        return (ng_treated | ct_treated).uids
+            combined = combined & ~previous_index
+        return combined.uids
+
+    # Baseline rates: per-edge notification + per-(edge, partner-sex) attendance.
+    # Stable = marital; casual partnerships have lower notify + attend rates.
+    BASELINE_NOTIFY = {'stable': 0.20, 'casual': 0.10}
+    BASELINE_ATTEND = {'stable': {'f': 0.80, 'm': 0.50},
+                       'casual': {'f': 0.50, 'm': 0.25}}
 
     def make_pn():
+        # pn_pars may override the rate dicts or add other PartnerNotification
+        # kwargs (e.g. previous-channel params for intervention scenarios).
+        overrides = pn_pars or {}
+        notify = overrides.pop('notify_rates', BASELINE_NOTIFY)
+        attend = overrides.pop('attendance_rates', BASELINE_ATTEND)
         return SyndromicPN(
-            eligibility=just_treated,
+            eligibility=baseline_pn_eligibility,
             syndromic_vds=syndromic_vds,
             syndromic_uds=syndromic_uds,
             name='pn', label='pn',
-            **(pn_pars or {}),
+            pars=dict(
+                p_notify_current=ss.bernoulli(p=sti.pn_rates(notify)),
+                p_attends_current=ss.bernoulli(p=sti.pn_rates(attend)),
+                p_notify_previous=ss.bernoulli(p=0),    # current channel only
+                p_attends_previous=ss.bernoulli(p=0),
+            ),
+            **overrides,
         )
 
     intvs = [syndromic_vds, syndromic_uds, ng_tx, ct_tx, metronidazole]
@@ -577,7 +604,7 @@ def make_testing(ng, ct, tv, bv, poc=None, pn_pars=None, stop=2040):
         )
         intvs.append(panel)
 
-    if pn_pars is not None:
-        intvs.append(make_pn())
+    # Baseline PN is always on. Override rates or extend behavior via pn_pars.
+    intvs.append(make_pn())
 
     return intvs

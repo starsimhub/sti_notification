@@ -36,6 +36,14 @@ Parameters opened over time:
   of trep+ in the data); f1_conc and m2_conc are the casual
   concurrency rates for medium-risk women and clients (currently
   fixed at 0.15 and 4.4).
+- exp 38 (2026-06-08): baseline partner notification added to all
+  sims; opening pn.p_notify_stable and pn.p_notify_casual as priors
+  so the calibration finds rates consistent with data. Also dropping
+  four weak priors that showed max|r|<0.20 with sustained-cluster
+  metrics in exp 34 (kept as fixed at model.py defaults):
+  syph.rel_trans_latent_half_life (model.py: 6 months),
+  structuredsexual.m1_conc (0.20), structuredsexual.f1_conc (0.15),
+  structuredsexual.fsw_mf_conc_mult (1.0 = no-op).
 
 Condom effectiveness, p_symp_secondary, p_symp_care, and most
 network parameters remain fixed (set in model.py).
@@ -48,10 +56,9 @@ calib_pars = sc.objdict({
     # HIV
     'hiv.beta_m2f':                 ('HIV β (M→F)',              0.005, 0.05,  False),
     # Syphilis
-    'syph.beta_m2f':                    ('Syph β (M→F)',             0.10,  0.35,  True),
-    'syph.rel_trans_primary':           ('Primary rel_trans',         1.0,   10.0,  True),
-    'syph.rel_trans_latent_half_life':  ('Latent rel_trans half-life (y)', 0.25, 2.0, False),
-    'syph.time_to_undetectable':        ('RPR decline (yrs)',        10,    30,    False),
+    'syph.beta_m2f':                ('Syph β (M→F)',             0.10,  0.35,  True),
+    'syph.rel_trans_primary':       ('Primary rel_trans',         1.0,   10.0,  True),
+    'syph.time_to_undetectable':    ('RPR decline (yrs)',        10,    30,    False),
     'syph.p_symp_primary_f':        ('F chancre visible (prob)', 0.10,  0.60,  False),
     'syph.p_symp_primary_m':        ('M chancre visible (prob)', 0.50,  0.95,  False),
     'syph.rel_init_prev':           ('Syph rel init prev',       0.02,  1.00,  True),
@@ -61,13 +68,13 @@ calib_pars = sc.objdict({
     'ct.beta_m2f':                  ('CT β (M→F)',               0.02,  0.30,  True),
     'tv.beta_m2f':                  ('TV β (M→F)',               0.02,  0.60,  True),
     # Network shape
-    'structuredsexual.prop_f0':         ('Prop F low-risk',          0.55,  0.90,  False),
-    'structuredsexual.m1_conc':         ('M1 concurrency',           0.05,  0.30,  False),
-    'structuredsexual.f1_conc':         ('F1 concurrency',           0.05,  0.30,  False),
-    'structuredsexual.m2_conc':         ('M2 concurrency',           2.0,   8.0,   False),
-    'structuredsexual.dur_sw':          ('FSW duration (yrs)',        2,     15,    False),
-    'structuredsexual.fsw_mf_conc_mult':('FSW MF concurrency mult',   0.1,   1.0,   False),
+    'structuredsexual.prop_f0':     ('Prop F low-risk',          0.55,  0.90,  False),
+    'structuredsexual.m2_conc':     ('M2 concurrency',           2.0,   8.0,   False),
+    'structuredsexual.dur_sw':      ('FSW duration (yrs)',       2,     15,    False),
     # HIV-syph coupling (exp 32+)
     'hiv_syph.rel_sus_syph_hiv':    ('HIV→syph rel_sus',          1.0,   3.0,   True),
     'hiv_syph.rel_trans_syph_hiv':  ('HIV→syph rel_trans',        1.0,   2.5,   True),
+    # Baseline partner notification (exp 38+)
+    'pn.p_notify_stable':           ('Stable PN notify prob',    0.05,  0.50,  False),
+    'pn.p_notify_casual':           ('Casual PN notify prob',    0.02,  0.20,  False),
 })

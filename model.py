@@ -128,10 +128,16 @@ def make_sim(seed=1, n_agents=5e3, start=1985, stop=2030,
     # auto-connector machinery (hiv_*, etc.) still runs.
     custom = [ss.FetalHealth(), sti_fetal()] if fetal_health else None
 
+    # The Zimbabwe demographics CSV in data/ encodes age-cohort values in
+    # thousands of people, so starsim's auto-derived total_pop comes out as
+    # ~8686 (literal). Override to the actual 1985 Zimbabwe population
+    # (~8.7M) so per-agent count outputs (new_infections, n_alive, etc.)
+    # scale to absolute people rather than thousands-of-thousands.
     simpars = dict(
         rand_seed=seed, n_agents=n_agents,
         start=start, stop=stop,
         use_migration=False, verbose=verbose,
+        total_pop=8.7e6,
     )
     # Coinfection connectors auto-added by sti.Sim. GUDPlaceholder is named
     # 'gudp' so the buggy `gud_syph` auto-connector isn't matched.

@@ -1,0 +1,57 @@
+# Exp 38 — Recalibration with baseline PN
+n_agents: 10000
+
+# Phase 1
+phase1_n_draws: 1500
+phase1_prior_seed: 44              # fresh; orthogonal to exps 35/36 (43) and exps 32-34 (42)
+phase1_n_seeds_per_draw: 1
+
+# Phase 2
+phase2_n_seeds_per_draw: 3
+phase2_seed_base: 100000
+
+n_workers: 24
+start: 1985
+stop: 2040
+
+ensemble:
+  primary_filter:
+    - sustained == true
+    - n_pass >= 5
+  backfill_filter:
+    - sustained == true
+    - n_pass >= 4
+  target_size: 100
+
+# 18-dim prior space (see priors.py docstring + exp 38 entry).
+# Dropped from exp 34's 20-dim set: rel_trans_latent_half_life, m1_conc,
+# f1_conc, fsw_mf_conc_mult (max|r| < 0.20 vs sustained-cluster metrics).
+# Added: pn.p_notify_stable, pn.p_notify_casual.
+
+baseline_pn:
+  notify_stable: 0.20        # default — overridden per-draw via prior
+  notify_casual: 0.10        # default — overridden per-draw via prior
+  attend_stable_f: 0.80      # fixed
+  attend_stable_m: 0.50      # fixed
+  attend_casual_f: 0.50      # fixed
+  attend_casual_m: 0.25      # fixed
+
+scaling:
+  total_pop: 8.7e6           # NEW in model.py: Zim 1985 ~8.7M; per-agent
+                             # counts now scale to absolute people
+
+targets:                     # same 9 as exp 33/34/35
+  fsw_prev_2019:        [0.20, 0.40]
+  nontrep_f_2016:       [0.01, 0.05]
+  trep_f_2016:          [0.05, 0.10]
+  primary_share:        [0.45, 0.65]
+  secondary_share:      [0.25, 0.45]
+  early_latent_share_max: 0.15
+  sustained:            true
+  hiv_pos_trep_2016:    [0.05, 0.09]
+  hiv_pos_neg_trep_ratio_2016: [3.0, 6.0]
+
+stisim_branch: feat/baseline-pn
+stisim_patches:
+  - PartnerNotification edge-type/sex stratification + pn_rates helper (45f2979 → 7afa9a1)
+  - All prior patches from feat/syph-detectable-state
