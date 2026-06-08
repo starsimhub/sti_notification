@@ -1,0 +1,93 @@
+/home/robyn/stisim/stisim/diseases/hiv.py:658: RuntimeWarning: invalid value encountered in cast
+  self.ti_zero[uids] = ti + dur_post_art.astype(int)
+/home/robyn/stisim/stisim/diseases/hiv.py:658: RuntimeWarning: invalid value encountered in cast
+  self.ti_zero[uids] = ti + dur_post_art.astype(int)
+/home/robyn/stisim/stisim/diseases/hiv.py:658: RuntimeWarning: invalid value encountered in cast
+  self.ti_zero[uids] = ti + dur_post_art.astype(int)
+/home/robyn/stisim/stisim/diseases/hiv.py:658: RuntimeWarning: invalid value encountered in cast
+  self.ti_zero[uids] = ti + dur_post_art.astype(int)
+/home/robyn/stisim/stisim/diseases/hiv.py:658: RuntimeWarning: invalid value encountered in cast
+  self.ti_zero[uids] = ti + dur_post_art.astype(int)
+/home/robyn/stisim/stisim/diseases/hiv.py:658: RuntimeWarning: invalid value encountered in cast
+  self.ti_zero[uids] = ti + dur_post_art.astype(int)
+[36m
+
+——————————————————————————————————————————
+PHASE 1: 1500-draw LHS, seed=43, 20 priors
+——————————————————————————————————————————
+[0m
+
+Phase 1: running 1500 sims on 24 workers...
+  [  50/1500] 174s  eta=5040s
+  [ 100/1500] 293s  eta=4106s
+  [ 150/1500] 417s  eta=3755s
+  [ 200/1500] 540s  eta=3513s
+  [ 250/1500] 662s  eta=3310s
+  [ 300/1500] 784s  eta=3135s
+  [ 350/1500] 908s  eta=2983s
+  [ 400/1500] 1038s  eta=2855s
+  [ 450/1500] 1170s  eta=2729s
+  [ 500/1500] 1298s  eta=2595s
+  [ 550/1500] 1423s  eta=2458s
+  [ 600/1500] 1549s  eta=2324s
+  [ 650/1500] 1677s  eta=2194s
+  [ 700/1500] 1799s  eta=2055s
+  [ 750/1500] 1922s  eta=1922s
+  [ 800/1500] 2054s  eta=1797s
+  [ 850/1500] 2185s  eta=1671s
+  [ 900/1500] 2317s  eta=1545s
+  [ 950/1500] 2445s  eta=1416s
+  [1000/1500] 2568s  eta=1284s
+  [1050/1500] 2692s  eta=1154s
+  [1100/1500] 2817s  eta=1024s
+  [1150/1500] 2944s  eta=896s
+  [1200/1500] 3071s  eta=768s
+  [1250/1500] 3199s  eta=640s
+  [1300/1500] 3324s  eta=511s
+  [1350/1500] 3449s  eta=383s
+  [1400/1500] 3583s  eta=256s
+  [1450/1500] 3710s  eta=128s
+  [1500/1500] 3834s  eta=0s
+  done in 3834.1s
+[36m
+
+——————————————————
+ENSEMBLE SELECTION
+——————————————————
+[0m
+  Phase 1 ok:              1500/1500
+  sustained:               545
+  sustained AND 5+/9:      175
+  sustained AND ==4/9:     299
+  ENSEMBLE size:           175
+[36m
+
+—————————————————————————————————
+PHASE 2: 175 candidates × 3 seeds
+—————————————————————————————————
+[0m
+
+Phase 2: running 525 sims on 24 workers...
+  [  50/525] 179s  eta=1703s
+  [ 100/525] 303s  eta=1289s
+  [ 150/525] 431s  eta=1078s
+  [ 200/525] 554s  eta=901s
+  [ 250/525] 682s  eta=750s
+  [ 300/525] 812s  eta=609s
+  [ 350/525] 944s  eta=472s
+  [ 400/525] 1077s  eta=337s
+  [ 450/525] 1208s  eta=201s
+  [ 500/525] 1331s  eta=67s
+  [ 525/525] 1397s  eta=0s
+  done in 1397.3s
+
+Wrote per-draw summary to /home/robyn/sti_notification/experiments/35_ensemble_build/outputs/ensemble_summary.csv
+
+=== ENSEMBLE STATS (per-draw means across 3 seeds) ===
+  draws:                  175
+  median nontrep_f:       0.080
+  median trep_f:          0.149
+  median fsw_prev_2019:   0.366
+  median HIV ratio:       4.551
+  median n_pass:          3.67
+  draws sustained 3/3:    39

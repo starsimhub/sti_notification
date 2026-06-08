@@ -1,0 +1,45 @@
+# Exp 35 — Decision-analysis ensemble build
+n_agents: 10000
+
+# Phase 1: candidate discovery
+phase1_n_draws: 1500
+phase1_prior_seed: 43          # fresh; orthogonal to exp 34's 42
+phase1_n_seeds_per_draw: 1
+
+# Phase 2: ensemble re-run
+phase2_n_seeds_per_draw: 3
+phase2_seed_base: 100000       # offset to avoid Phase 1 collisions
+
+n_workers: 24
+start: 1985
+stop: 2040
+
+# 20-dim prior from priors.py (same as exp 34)
+# See priors.py docstring for full list.
+
+stisim_branch: feat/syph-detectable-state
+
+symp_test_csv: ../24_concentrated_sustained_handpick/data/symp_test_prob_concentrated.csv
+anc_probs: [0.20, 0.30, 0.40, 0.35, 0.55, 0.70, 0.85]
+
+# Ensemble selection filters
+ensemble:
+  primary_filter:
+    - sustained == true
+    - n_pass >= 5
+  backfill_filter:               # used if primary <100
+    - sustained == true
+    - n_pass >= 4
+  target_size: 100
+
+# Same 9 targets as exp 33/34
+targets:
+  fsw_prev_2019:        [0.20, 0.40]
+  nontrep_f_2016:       [0.01, 0.05]
+  trep_f_2016:          [0.05, 0.10]
+  primary_share:        [0.45, 0.65]
+  secondary_share:      [0.25, 0.45]
+  early_latent_share_max: 0.15
+  sustained:            true
+  hiv_pos_trep_2016:    [0.05, 0.09]
+  hiv_pos_neg_trep_ratio_2016: [3.0, 6.0]
