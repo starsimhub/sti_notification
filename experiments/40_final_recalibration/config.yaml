@@ -1,0 +1,59 @@
+# Exp 40 — Final recalibration with marital coital-decay + client wife displacement
+n_agents: 10000
+
+# Phase 1
+phase1_n_draws: 1500
+phase1_prior_seed: 45              # fresh; orthogonal to seeds 42-44
+phase1_n_seeds_per_draw: 1
+
+# Phase 2
+phase2_n_seeds_per_draw: 3
+phase2_seed_base: 100000
+
+n_workers: 24
+start: 1985
+stop: 2040
+
+ensemble:
+  primary_filter:
+    - sustained == true
+    - n_pass >= 5
+  backfill_filter:
+    - sustained == true
+    - n_pass >= 4
+  target_size: 100
+
+# 19-dim prior space (see priors.py docstring + exp 40 entry).
+# Net change from exp 38's 18-dim:
+#   Dropped: pn.p_notify_stable, pn.p_notify_casual (max|r| ~0.06)
+#   Added:   hiv.rel_init_prev, structuredsexual.stable_act_decay,
+#            structuredsexual.client_marital_act_mult
+# Tightened: hiv.beta_m2f upper 0.05 → 0.03
+# Widened:   ct.beta_m2f [0.02, 0.30] → [0.05, 0.50]
+
+baseline_pn:
+  notify_stable: 0.20        # fixed (PN priors dropped after exp 38)
+  notify_casual: 0.10        # fixed
+  attend_stable_f: 0.80      # fixed
+  attend_stable_m: 0.50      # fixed
+  attend_casual_f: 0.50      # fixed
+  attend_casual_m: 0.25      # fixed
+
+scaling:
+  total_pop: 8.7e6           # in model.py (since exp 38)
+
+targets:                     # same 9 as exp 33-38
+  fsw_prev_2019:        [0.20, 0.40]
+  nontrep_f_2016:       [0.01, 0.05]
+  trep_f_2016:          [0.05, 0.10]
+  primary_share:        [0.45, 0.65]
+  secondary_share:      [0.25, 0.45]
+  early_latent_share_max: 0.15
+  sustained:            true
+  hiv_pos_trep_2016:    [0.05, 0.09]
+  hiv_pos_neg_trep_ratio_2016: [3.0, 6.0]
+
+stisim_branch: feat/marital-act-decay
+stisim_patches:
+  - MFNetwork stable_act_decay + StructuredSexual client_marital_act_mult (6ee584b)
+  - All prior patches from feat/baseline-pn

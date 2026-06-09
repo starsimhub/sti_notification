@@ -44,6 +44,20 @@ Parameters opened over time:
   syph.rel_trans_latent_half_life (model.py: 6 months),
   structuredsexual.m1_conc (0.20), structuredsexual.f1_conc (0.15),
   structuredsexual.fsw_mf_conc_mult (1.0 = no-op).
+- exp 40 (2026-06-08): final calibration attempt — bundled changes:
+    * Drop pn.p_notify_stable / pn.p_notify_casual (max|r| ~0.06 in
+      exp 38; fixed at calibrated medians in interventions.py instead).
+    * HIV: lower hiv.beta_m2f upper from 0.05 to 0.03 (exp 38 ensemble
+      median was 0.013, comfortably in the new range), open
+      hiv.rel_init_prev in [0.3, 1.5] to address the 3-5pp HIV
+      overshoot Robyn flagged on exp 39 figures.
+    * CT: raise ct.beta_m2f range from [0.02, 0.30] to [0.05, 0.50]
+      to chase the 5x under-calibration vs surveillance data.
+    * Syph leakage (new mechanism via stisim feat/marital-act-decay):
+      open structuredsexual.stable_act_decay in [0.02, 0.20] (per-yr
+      linear decay of stable-edge coital frequency) and
+      structuredsexual.client_marital_act_mult in [0.3, 1.0]
+      (multiplier on stable-edge acts when male partner is a client).
 
 Condom effectiveness, p_symp_secondary, p_symp_care, and most
 network parameters remain fixed (set in model.py).
@@ -53,8 +67,9 @@ import sciris as sc
 
 
 calib_pars = sc.objdict({
-    # HIV
-    'hiv.beta_m2f':                 ('HIV β (M→F)',              0.005, 0.05,  False),
+    # HIV (exp 40: lower beta upper to 0.03; open rel_init_prev)
+    'hiv.beta_m2f':                 ('HIV β (M→F)',              0.005, 0.03,  False),
+    'hiv.rel_init_prev':            ('HIV rel init prev',         0.3,   1.5,   False),
     # Syphilis
     'syph.beta_m2f':                ('Syph β (M→F)',             0.10,  0.35,  True),
     'syph.rel_trans_primary':       ('Primary rel_trans',         1.0,   10.0,  True),
@@ -63,9 +78,9 @@ calib_pars = sc.objdict({
     'syph.p_symp_primary_m':        ('M chancre visible (prob)', 0.50,  0.95,  False),
     'syph.rel_init_prev':           ('Syph rel init prev',       0.02,  1.00,  True),
     'syph_symp_test.rel_test':      ('Syph symp care-seek mult', 0.30,  1.50,  False),
-    # Discharging STIs
+    # Discharging STIs (exp 40: raise CT range to chase under-calibration)
     'ng.beta_m2f':                  ('NG β (M→F)',               0.02,  0.30,  True),
-    'ct.beta_m2f':                  ('CT β (M→F)',               0.02,  0.30,  True),
+    'ct.beta_m2f':                  ('CT β (M→F)',               0.05,  0.50,  True),
     'tv.beta_m2f':                  ('TV β (M→F)',               0.02,  0.60,  True),
     # Network shape
     'structuredsexual.prop_f0':     ('Prop F low-risk',          0.55,  0.90,  False),
@@ -74,7 +89,8 @@ calib_pars = sc.objdict({
     # HIV-syph coupling (exp 32+)
     'hiv_syph.rel_sus_syph_hiv':    ('HIV→syph rel_sus',          1.0,   3.0,   True),
     'hiv_syph.rel_trans_syph_hiv':  ('HIV→syph rel_trans',        1.0,   2.5,   True),
-    # Baseline partner notification (exp 38+)
-    'pn.p_notify_stable':           ('Stable PN notify prob',    0.05,  0.50,  False),
-    'pn.p_notify_casual':           ('Casual PN notify prob',    0.02,  0.20,  False),
+    # Stable-edge coital decay + client wife-displacement (exp 40+, requires
+    # stisim feat/marital-act-decay branch)
+    'structuredsexual.stable_act_decay':        ('Stable coital decay (/yr)', 0.02, 0.20, False),
+    'structuredsexual.client_marital_act_mult': ('Client wife act mult',      0.3,  1.0,  False),
 })

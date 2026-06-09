@@ -1,0 +1,195 @@
+/home/robyn/stisim/stisim/diseases/hiv.py:658: RuntimeWarning: invalid value encountered in cast
+  self.ti_zero[uids] = ti + dur_post_art.astype(int)
+/home/robyn/stisim/stisim/diseases/hiv.py:658: RuntimeWarning: invalid value encountered in cast
+  self.ti_zero[uids] = ti + dur_post_art.astype(int)
+/home/robyn/stisim/stisim/diseases/hiv.py:658: RuntimeWarning: invalid value encountered in cast
+  self.ti_zero[uids] = ti + dur_post_art.astype(int)
+/home/robyn/stisim/stisim/diseases/hiv.py:658: RuntimeWarning: invalid value encountered in cast
+  self.ti_zero[uids] = ti + dur_post_art.astype(int)
+[36m
+
+——————————————————————————————————————————
+PHASE 1: 5000-draw LHS, seed=45, 19 priors
+——————————————————————————————————————————
+[0m
+
+Phase 1: running 5000 sims on 24 workers...
+  [  50/5000] 181s  eta=17896s
+  [ 100/5000] 309s  eta=15159s
+  [ 150/5000] 438s  eta=14156s
+  [ 200/5000] 562s  eta=13486s
+  [ 250/5000] 694s  eta=13194s
+  [ 300/5000] 819s  eta=12831s
+  [ 350/5000] 955s  eta=12683s
+  [ 400/5000] 1081s  eta=12436s
+  [ 450/5000] 1210s  eta=12231s
+  [ 500/5000] 1341s  eta=12067s
+  [ 550/5000] 1472s  eta=11911s
+  [ 600/5000] 1609s  eta=11800s
+  [ 650/5000] 1737s  eta=11622s
+  [ 700/5000] 1869s  eta=11482s
+  [ 750/5000] 2001s  eta=11338s
+  [ 800/5000] 2127s  eta=11166s
+  [ 850/5000] 2270s  eta=11084s
+  [ 900/5000] 2403s  eta=10948s
+  [ 950/5000] 2532s  eta=10796s
+  [1000/5000] 2662s  eta=10646s
+  [1050/5000] 2789s  eta=10493s
+  [1100/5000] 2916s  eta=10339s
+  [1150/5000] 3047s  eta=10200s
+  [1200/5000] 3179s  eta=10067s
+  [1250/5000] 3310s  eta=9930s
+  [1300/5000] 3439s  eta=9789s
+  [1350/5000] 3567s  eta=9645s
+  [1400/5000] 3703s  eta=9522s
+  [1450/5000] 3837s  eta=9394s
+  [1500/5000] 3963s  eta=9248s
+  [1550/5000] 4098s  eta=9120s
+  [1600/5000] 4230s  eta=8988s
+  [1650/5000] 4362s  eta=8856s
+  [1700/5000] 4497s  eta=8730s
+  [1750/5000] 4625s  eta=8590s
+  [1800/5000] 4758s  eta=8458s
+  [1850/5000] 4885s  eta=8318s
+  [1900/5000] 5014s  eta=8181s
+  [1950/5000] 5145s  eta=8047s
+  [2000/5000] 5275s  eta=7913s
+  [2050/5000] 5407s  eta=7781s
+  [2100/5000] 5535s  eta=7644s
+  [2150/5000] 5671s  eta=7517s
+  [2200/5000] 5803s  eta=7385s
+  [2250/5000] 5937s  eta=7256s
+  [2300/5000] 6069s  eta=7125s
+  [2350/5000] 6199s  eta=6990s
+  [2400/5000] 6337s  eta=6865s
+  [2450/5000] 6465s  eta=6728s
+  [2500/5000] 6594s  eta=6594s
+  [2550/5000] 6721s  eta=6458s
+  [2600/5000] 6856s  eta=6329s
+  [2650/5000] 6988s  eta=6197s
+  [2700/5000] 7113s  eta=6060s
+  [2750/5000] 7247s  eta=5929s
+  [2800/5000] 7377s  eta=5796s
+  [2850/5000] 7509s  eta=5664s
+  [2900/5000] 7652s  eta=5541s
+  [2950/5000] 7784s  eta=5409s
+  [3000/5000] 7910s  eta=5273s
+  [3050/5000] 8040s  eta=5140s
+  [3100/5000] 8171s  eta=5008s
+  [3150/5000] 8302s  eta=4876s
+  [3200/5000] 8431s  eta=4742s
+  [3250/5000] 8557s  eta=4607s
+  [3300/5000] 8689s  eta=4476s
+  [3350/5000] 8825s  eta=4347s
+  [3400/5000] 8960s  eta=4217s
+  [3450/5000] 9089s  eta=4083s
+  [3500/5000] 9226s  eta=3954s
+  [3550/5000] 9351s  eta=3820s
+  [3600/5000] 9487s  eta=3689s
+  [3650/5000] 9616s  eta=3556s
+  [3700/5000] 9746s  eta=3424s
+  [3750/5000] 9873s  eta=3291s
+  [3800/5000] 10001s  eta=3158s
+  [3850/5000] 10141s  eta=3029s
+  [3900/5000] 10274s  eta=2898s
+  [3950/5000] 10405s  eta=2766s
+  [4000/5000] 10533s  eta=2633s
+  [4050/5000] 10667s  eta=2502s
+  [4100/5000] 10797s  eta=2370s
+  [4150/5000] 10928s  eta=2238s
+  [4200/5000] 11055s  eta=2106s
+  [4250/5000] 11187s  eta=1974s
+  [4300/5000] 11319s  eta=1843s
+  [4350/5000] 11451s  eta=1711s
+  [4400/5000] 11579s  eta=1579s
+  [4450/5000] 11709s  eta=1447s
+  [4500/5000] 11839s  eta=1315s
+  [4550/5000] 11969s  eta=1184s
+  [4600/5000] 12100s  eta=1052s
+  [4650/5000] 12237s  eta=921s
+  [4700/5000] 12376s  eta=790s
+  [4750/5000] 12506s  eta=658s
+  [4800/5000] 12631s  eta=526s
+  [4850/5000] 12767s  eta=395s
+  [4900/5000] 12895s  eta=263s
+  [4950/5000] 13023s  eta=132s
+  [5000/5000] 13156s  eta=0s
+  done in 13155.9s
+[36m
+
+——————————————————
+ENSEMBLE SELECTION
+——————————————————
+[0m
+  Phase 1 ok:              5000/5000
+  sustained:               1765
+  sustained AND 5+/9:      767
+  sustained AND ==4/9:     720
+  ENSEMBLE size:           767
+[36m
+
+—————————————————————————————————
+PHASE 2: 767 candidates × 3 seeds
+—————————————————————————————————
+[0m
+
+Phase 2: running 2301 sims on 24 workers...
+  [  50/2301] 179s  eta=8054s
+  [ 100/2301] 315s  eta=6925s
+  [ 150/2301] 444s  eta=6369s
+  [ 200/2301] 575s  eta=6045s
+  [ 250/2301] 705s  eta=5786s
+  [ 300/2301] 836s  eta=5573s
+  [ 350/2301] 970s  eta=5410s
+  [ 400/2301] 1108s  eta=5266s
+  [ 450/2301] 1237s  eta=5090s
+  [ 500/2301] 1372s  eta=4940s
+  [ 550/2301] 1498s  eta=4770s
+  [ 600/2301] 1633s  eta=4630s
+  [ 650/2301] 1776s  eta=4512s
+  [ 700/2301] 1909s  eta=4365s
+  [ 750/2301] 2042s  eta=4223s
+  [ 800/2301] 2180s  eta=4091s
+  [ 850/2301] 2315s  eta=3951s
+  [ 900/2301] 2448s  eta=3811s
+  [ 950/2301] 2581s  eta=3670s
+  [1000/2301] 2712s  eta=3528s
+  [1050/2301] 2841s  eta=3385s
+  [1100/2301] 2972s  eta=3245s
+  [1150/2301] 3106s  eta=3109s
+  [1200/2301] 3234s  eta=2967s
+  [1250/2301] 3372s  eta=2835s
+  [1300/2301] 3503s  eta=2698s
+  [1350/2301] 3659s  eta=2577s
+  [1400/2301] 3780s  eta=2433s
+  [1450/2301] 3914s  eta=2297s
+  [1500/2301] 4040s  eta=2157s
+  [1550/2301] 4172s  eta=2021s
+  [1600/2301] 4314s  eta=1890s
+  [1650/2301] 4449s  eta=1755s
+  [1700/2301] 4582s  eta=1620s
+  [1750/2301] 4727s  eta=1488s
+  [1800/2301] 4857s  eta=1352s
+  [1850/2301] 4992s  eta=1217s
+  [1900/2301] 5123s  eta=1081s
+  [1950/2301] 5256s  eta=946s
+  [2000/2301] 5387s  eta=811s
+  [2050/2301] 5522s  eta=676s
+  [2100/2301] 5651s  eta=541s
+  [2150/2301] 5785s  eta=406s
+  [2200/2301] 5923s  eta=272s
+  [2250/2301] 6058s  eta=137s
+  [2300/2301] 6188s  eta=3s
+  [2301/2301] 6190s  eta=0s
+  done in 6190.4s
+
+Wrote per-draw summary to /home/robyn/sti_notification/experiments/40_final_recalibration/outputs/ensemble_summary.csv
+
+=== ENSEMBLE STATS (per-draw means across 3 seeds) ===
+  draws:                  767
+  median nontrep_f:       0.080
+  median trep_f:          0.137
+  median fsw_prev_2019:   0.373
+  median HIV ratio:       3.565
+  median n_pass:          3.67
+  draws sustained 3/3:    203
