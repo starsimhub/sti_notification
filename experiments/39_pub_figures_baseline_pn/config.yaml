@@ -1,0 +1,18 @@
+# Exp 39 — Publication figures from exp 38 baseline-PN ensemble
+n_agents: 10000
+n_workers: 24
+start: 1985
+stop: 2040
+n_seeds: 3
+seed_base: 100000   # matches exp 38 — same seeds, deterministic
+
+ensemble_source: experiments/38_recalibration_baseline_pn/outputs/ensemble_summary.csv
+ensemble_priors: experiments/38_recalibration_baseline_pn/outputs/ensemble_draws.csv
+ensemble_filter:
+  - pass_sustained == 1.0
+  - n_pass_mean >= 4
+
+snapshot_years: [2016, 2020]
+
+# Compared to exp 37: added prevalence_15_49 to HIV time series.
+# Per-agent counts now scale correctly thanks to total_pop=8.7e6 in model.py.

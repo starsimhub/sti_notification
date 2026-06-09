@@ -1,0 +1,26 @@
+[36m
+
+————————————————————————————————————————————————————————
+Exp 39 — pub-figure data extraction from exp 38 ensemble
+————————————————————————————————————————————————————————
+[0m
+Ensemble: 101 draws (sustained 3/3 + mean n_pass >= 4)
+Total sims: 303 (101 draws x 3 seeds)
+Running on 24 workers...
+  [ 30/303] 129s  eta=1170s  ok=30 err=0
+  [ 60/303] 198s  eta=801s  ok=60 err=0
+  [ 90/303] 266s  eta=629s  ok=90 err=0
+  [120/303] 344s  eta=525s  ok=120 err=0
+  [150/303] 457s  eta=466s  ok=150 err=0
+  [180/303] 531s  eta=363s  ok=180 err=0
+  [210/303] 602s  eta=266s  ok=210 err=0
+  [240/303] 693s  eta=182s  ok=240 err=0
+  [270/303] 787s  eta=96s  ok=270 err=0
+  [300/303] 862s  eta=9s  ok=300 err=0
+  [303/303] 866s  eta=0s  ok=303 err=0
+
+Done in 866.2s. OK: 303, errors: 0
+  time_series -> time_series.parquet: 729624 rows
+  snapshots -> snapshots.parquet: 96960 rows
+  ts quantiles -> ensemble_ts_quantiles.parquet: 2408 rows
+  snap quantiles -> ensemble_snapshots_quantiles.parquet: 320 rows
