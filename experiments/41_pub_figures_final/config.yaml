@@ -1,0 +1,15 @@
+# Exp 41 — Publication figures from the exp 40 final ensemble
+n_agents: 10000
+n_workers: 24
+start: 1985
+stop: 2040
+n_seeds: 3
+seed_base: 100000   # matches exp 40
+
+ensemble_source: experiments/40_final_recalibration/outputs/ensemble_summary.csv
+ensemble_priors: experiments/40_final_recalibration/outputs/phase1_priors.csv
+ensemble_filter:
+  - pass_sustained == 1.0
+  - n_pass_mean >= 4
+
+snapshot_years: [2016, 2020]

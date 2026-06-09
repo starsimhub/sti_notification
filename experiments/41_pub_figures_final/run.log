@@ -1,0 +1,37 @@
+/home/robyn/stisim/stisim/diseases/hiv.py:658: RuntimeWarning: invalid value encountered in cast
+  self.ti_zero[uids] = ti + dur_post_art.astype(int)
+[36m
+
+————————————————————————————————————————————————————————
+Exp 39 — pub-figure data extraction from exp 38 ensemble
+————————————————————————————————————————————————————————
+[0m
+Ensemble: 200 draws (sustained 3/3 + mean n_pass >= 4)
+Total sims: 600 (200 draws x 3 seeds)
+Running on 24 workers...
+  [ 30/600] 133s  eta=2526s  ok=30 err=0
+  [ 60/600] 204s  eta=1837s  ok=60 err=0
+  [ 90/600] 274s  eta=1554s  ok=90 err=0
+  [120/600] 345s  eta=1381s  ok=120 err=0
+  [150/600] 469s  eta=1408s  ok=150 err=0
+  [180/600] 538s  eta=1255s  ok=180 err=0
+  [210/600] 617s  eta=1145s  ok=210 err=0
+  [240/600] 691s  eta=1036s  ok=240 err=0
+  [270/600] 805s  eta=984s  ok=270 err=0
+  [300/600] 877s  eta=877s  ok=300 err=0
+  [330/600] 962s  eta=787s  ok=330 err=0
+  [360/600] 1035s  eta=690s  ok=360 err=0
+  [390/600] 1143s  eta=615s  ok=390 err=0
+  [420/600] 1218s  eta=522s  ok=420 err=0
+  [450/600] 1301s  eta=434s  ok=450 err=0
+  [480/600] 1377s  eta=344s  ok=480 err=0
+  [510/600] 1474s  eta=260s  ok=510 err=0
+  [540/600] 1553s  eta=173s  ok=540 err=0
+  [570/600] 1640s  eta=86s  ok=570 err=0
+  [600/600] 1717s  eta=0s  ok=600 err=0
+
+Done in 1717.1s. OK: 600, errors: 0
+  time_series -> time_series.parquet: 1444800 rows
+  snapshots -> snapshots.parquet: 192000 rows
+  ts quantiles -> ensemble_ts_quantiles.parquet: 2408 rows
+  snap quantiles -> ensemble_snapshots_quantiles.parquet: 320 rows
