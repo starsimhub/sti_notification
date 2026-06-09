@@ -1,0 +1,12 @@
+{
+  "p1_n_draws": 1500,
+  "p1_seed": 44,
+  "p1_n_ok": 1500,
+  "n_sustained": 570,
+  "n_sustained_5plus": 272,
+  "n_backfill_used": 80,
+  "ensemble_size": 312,
+  "ensemble_target": 100,
+  "n_robust": 101,
+  "backfill_seed": 44
+}

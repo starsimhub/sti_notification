@@ -1,0 +1,89 @@
+/home/robyn/stisim/stisim/diseases/hiv.py:658: RuntimeWarning: invalid value encountered in cast
+  self.ti_zero[uids] = ti + dur_post_art.astype(int)
+[36m
+
+——————————————————————————————————————————
+PHASE 1: 1500-draw LHS, seed=44, 18 priors
+——————————————————————————————————————————
+[0m
+
+Phase 1: running 1500 sims on 24 workers...
+  [  50/1500] 175s  eta=5065s
+  [ 100/1500] 302s  eta=4222s
+  [ 150/1500] 427s  eta=3841s
+  [ 200/1500] 550s  eta=3574s
+  [ 250/1500] 676s  eta=3382s
+  [ 300/1500] 800s  eta=3198s
+  [ 350/1500] 928s  eta=3048s
+  [ 400/1500] 1053s  eta=2895s
+  [ 450/1500] 1183s  eta=2761s
+  [ 500/1500] 1310s  eta=2620s
+  [ 550/1500] 1445s  eta=2496s
+  [ 600/1500] 1574s  eta=2362s
+  [ 650/1500] 1707s  eta=2233s
+  [ 700/1500] 1838s  eta=2100s
+  [ 750/1500] 1964s  eta=1964s
+  [ 800/1500] 2090s  eta=1829s
+  [ 850/1500] 2223s  eta=1700s
+  [ 900/1500] 2346s  eta=1564s
+  [ 950/1500] 2476s  eta=1434s
+  [1000/1500] 2609s  eta=1304s
+  [1050/1500] 2740s  eta=1174s
+  [1100/1500] 2869s  eta=1043s
+  [1150/1500] 2996s  eta=912s
+  [1200/1500] 3128s  eta=782s
+  [1250/1500] 3259s  eta=652s
+  [1300/1500] 3402s  eta=523s
+  [1350/1500] 3575s  eta=397s
+  [1400/1500] 3748s  eta=268s
+  [1450/1500] 3917s  eta=135s
+  [1500/1500] 4077s  eta=0s
+  done in 4077.2s
+[36m
+
+——————————————————
+ENSEMBLE SELECTION
+——————————————————
+[0m
+  Phase 1 ok:              1500/1500
+  sustained:               570
+  sustained AND 5+/9:      272
+  sustained AND ==4/9:     224
+  ENSEMBLE size:           272
+[36m
+
+—————————————————————————————————
+PHASE 2: 272 candidates × 3 seeds
+—————————————————————————————————
+[0m
+
+Phase 2: running 816 sims on 24 workers...
+  [  50/816] 233s  eta=3568s
+  [ 100/816] 400s  eta=2866s
+  [ 150/816] 568s  eta=2521s
+  [ 200/816] 735s  eta=2263s
+  [ 250/816] 903s  eta=2045s
+  [ 300/816] 1061s  eta=1825s
+  [ 350/816] 1228s  eta=1634s
+  [ 400/816] 1398s  eta=1454s
+  [ 450/816] 1571s  eta=1277s
+  [ 500/816] 1748s  eta=1105s
+  [ 550/816] 1927s  eta=932s
+  [ 600/816] 2111s  eta=760s
+  [ 650/816] 2279s  eta=582s
+  [ 700/816] 2448s  eta=406s
+  [ 750/816] 2619s  eta=230s
+  [ 800/816] 2789s  eta=56s
+  [ 816/816] 2846s  eta=0s
+  done in 2846.3s
+
+Wrote per-draw summary to /home/robyn/sti_notification/experiments/38_recalibration_baseline_pn/outputs/ensemble_summary.csv
+
+=== ENSEMBLE STATS (per-draw means across 3 seeds) ===
+  draws:                  272
+  median nontrep_f:       0.087
+  median trep_f:          0.142
+  median fsw_prev_2019:   0.404
+  median HIV ratio:       3.967
+  median n_pass:          3.67
+  draws sustained 3/3:    93

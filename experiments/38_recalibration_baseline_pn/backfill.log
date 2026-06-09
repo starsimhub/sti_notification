@@ -1,0 +1,14 @@
+Backfill pool (sustained AND n_pass==4, not in ensemble): 184
+Picked 40 candidates for backfill.
+
+Backfill: running 120 sims on 24 workers...
+  [ 30/120] 124s eta=371s
+  [ 60/120] 191s eta=191s
+  [ 90/120] 258s eta=86s
+  [120/120] 334s eta=0s
+  done in 334.5s
+
+Rewrote /home/robyn/sti_notification/experiments/38_recalibration_baseline_pn/outputs/ensemble_summary.csv: 312 draws
+Robust (sustained 3/3 AND n_pass_mean>=4): 101
+
+Final: 312 draws total, 101 robust
