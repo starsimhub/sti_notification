@@ -1,5 +1,20 @@
 # Calibration record
 
+> ⚠️ **Superseded — recalibration in progress (2026-06-10).** The
+> 200-draw ensemble described here was calibrated against a model whose
+> syphilis syndromic-management baseline was structurally incorrect:
+> the symptomatic-channel dx product was `gud` (stage-specific
+> clinical accuracy, ~0.9 primary / 0.2 secondary) when it should have
+> been `syndromic_gud` (presumptive 0.8 universal), and the rash
+> channel was given the same product when a separate weaker
+> `syndromic_rash` (0.1) channel is closer to real-world syndromic
+> care. Diagnostic on draw 17 (3 seeds) showed FSW prevalence shifts
+> of +14pp under the corrected baseline. A structural fix (Fix C —
+> two-channel model) is being implemented and the calibration is being
+> redone. Until that lands on main, downstream scenario work should
+> treat the artifacts here as historical reference only, not the
+> production baseline.
+
 This directory is the institutional record of the STIsim Zimbabwe joint
 calibration (HIV + syphilis + NG + CT + TV) carried out between
 March–June 2026 in support of the partner-notification (PN) and
