@@ -1,0 +1,121 @@
+# Assumptions and limitations
+
+What's *fixed*, what we *know we can't do*, and what to *watch for*.
+Read this before extending the model or interpreting downstream
+results.
+
+## Fixed parameters (not opened for calibration)
+
+| Parameter | Value | Why fixed |
+|---|---|---|
+| Condom effectiveness | STIsim defaults | Strong literature evidence; not jointly identifiable from prevalence. |
+| `p_symp` per disease | STIsim defaults | Symptom-fraction is a clinical property, calibrating it against prevalence introduces a confound. |
+| `p_symp_care` | 0.75 | Set deliberately based on Zimbabwe care-seeking surveys; sensitivity would be a separate analysis. |
+| Symptomatic care-seeking rates | Per `data/symp_test_prob_concentrated.csv` | Derived from surveillance, not a degree of freedom. |
+| ANC syph testing probability ramp | 0.05 → 0.90 over 1990 → 2020 (`ANC_PROBS_REALISTIC`) | Programmatic / policy fact, not biology. Tested sensitivity in exp 22; relaxing it does not recover ZIMPHIA absolute prev. |
+| Baseline partner-notification rates | Stable 0.20 / casual 0.10 (`SyndromicPN` defaults) | The ensemble represents *with-baseline-PN* state of the world; scenarios contrast against this. |
+| n_agents | 10,000 | Stochastic-extinction floor at this scale; smaller populations bifurcate too easily, larger populations were too slow within the project timeline. |
+
+## Structural limitations of the model
+
+### Syphilis absolute prevalence has a structural ceiling
+
+This is the most important limitation. **The minimum-sustaining force
+of infection for endemic syph in this model corresponds to
+treponemal+ ≈ 20% and non-treponemal+ ≈ 12% — 7–14× the ZIMPHIA
+data.** Three independent structural attempts to drive this down
+failed:
+
+- **Observability patch (exp 16, 17).** Mapped to RDT-detectable
+  prevalence — closed part of the gap but absolute level still hot.
+- **Care-seeking ramp variation (exp 22).** Softened the ANC ramp;
+  sustainability gate failed before band was reached.
+- **Marital coital-decay mechanism (exp 40).** The mechanism is
+  identifiable (`stable_act_decay` median 0.10/yr, `client_marital_act_mult`
+  median 0.66) but the calibrator compensates by raising other
+  transmission knobs — net change on absolute prev: third decimal.
+
+Mechanism (best diagnosis): high-risk → low-risk leakage routes are
+large in absolute terms (~24% of all transmissions in exp 38) but
+structurally locked in; reducing one route gets compensated by
+another. The general-population M↔F engine self-sustains independent
+of FSW seeding (32% of plateau transmissions in exp 32).
+
+**Implication for downstream work.** Frame syph results as
+*relative-effect* contrasts (PN scenario A vs B). Do not make absolute
+claims about Zimbabwe syph burden.
+
+### Stochastic sustained/decay bifurcation
+
+Even within the final ensemble, draws sit near a sustained/decay
+attractor boundary. 73% of Phase-1 single-seed sustained draws are
+not robust 3/3 in Phase 2 (exp 35, 36). The robust subset is hotter
+than the fragile subset (FSW median 0.636 vs target 0.20–0.40). This
+is a known property of ABMs at 10k agents and is not unique to syph
+or to this calibration.
+
+**Implication.** Results above ~10k agents may behave differently —
+larger populations would suppress stochastic extinction and could
+shift the basin of attraction. Not tested.
+
+### CT calibration is weak
+
+Model CT prevalence in women 25–29 sits ~2× above surveillance (~25%
+median vs ~12% data). The 80% CI brackets the data, so it survives
+the ensemble filter, but the median is not a good fit. Cause:
+candidate explanations are (a) the CT beta prior was permissive on
+the low side, or (b) symptomatic care-seeking parameters drain the CT
+pool too fast.
+
+**Implication.** Acceptable for PN scenarios where CT impact is a
+secondary outcome. If CT-specific claims become central, run a
+targeted CT diagnostic before publishing.
+
+### TV is mostly in band, slightly under post-2020
+
+Model TV runs about 2 pp below surveillance from 2020 onward. Within
+80% CI. Not a known structural issue.
+
+## Bounded confidence in the HIV result
+
+- HIV whole-pop and 15–49 medians sit in the UNAIDS / ZIMPHIA bands
+  on both denominators.
+- HIV incidence is in the right order of magnitude but **declines
+  slightly more slowly than UNAIDS post-2015.** The ART roll-out
+  ramp baked into the model lags the actual ramp. This is partly
+  absorbed by `rel_init_prev` but not fully closed.
+
+**Implication.** Late-period absolute HIV incidence values from the
+model are noisier than the prevalence values. Use carefully if
+downstream work compares HIV incidence across scenarios in 2020+.
+
+## Known abandoned hypotheses
+
+These are documented here so future researchers don't retrace dead
+ends. Full per-experiment context on `archive/calibration-2026-06`.
+
+| Hypothesis | Experiment | Outcome |
+|---|---|---|
+| Widening the syph beta prior recovers basins of sustained transmission. | 01–05 | Beta is not the bottleneck — network is. |
+| Exogenous case imports / FOI floor will prevent extinction without ruining the fit. | 15 | Imports of 1.4% collapsed the bifurcation onto the hot branch (17.7% median). Rejected. |
+| Waning immunity drives the early-burnout dynamics. | 16 diagnostic | Observability was the real bottleneck, not waning immunity. |
+| `rel_trans_primary = 5` produces a more realistic primary-driven epidemic. | 29 | Fragility: 2/3 seeds collapse. Abandoned. |
+| FSW MF-concurrency multiplier seeds the general-population engine. | 33 | Sweep [0.1, 1.0]: zero correlation with non-trep_f outcomes. Hypothesis falsified. |
+| Marital coital-decay mechanism breaks the M_client → F_other syph leakage. | 40 | Identifiable but compensated for by other knobs. No effect on absolute prev. |
+| Coupled-model approach: pool extinct + sustaining sims to produce average prev in the data band. | 40 (open thought, never implemented) | Not pursued — would require infrastructure outside STIsim. |
+
+## What no one has answered
+
+Open questions left for future work:
+
+- **Coupled-model / population-mixing approach.** Robyn's idea (exp 40)
+  to pool 1 sustaining + 4 extinct sims as a 50k-agent "uber-population"
+  whose average prev hits the ~2% data band. Mathematically appealing,
+  not yet tested.
+- **Is the CT under-calibration a recent regression or always present?**
+  Worth comparing exp 36 vs exp 38 CT trajectories to localise.
+- **HIV incidence ramp post-2015.** Could a sharper ART roll-out
+  parameterisation close the remaining ~10–20% gap to UNAIDS?
+
+These are useful directions but not blockers for the PN decision
+analysis.
