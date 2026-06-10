@@ -415,13 +415,30 @@ def make_syph_testing(stop=2040, symp_test_prob=None, rdt_year=2012,
         anc_years = ANC_YEARS
 
     syph_dx_df = pd.read_csv(f'data/syph_dx.csv')
-    gud_dx = sti.SyphDx(syph_dx_df[syph_dx_df.name == 'gud'], name='SyphDx_gud')
-    rpr_dx = sti.SyphDx(syph_dx_df[syph_dx_df.name == 'rpr'], name='SyphDx_rpr')
+    # Two-channel syndromic syph dx:
+    #   - Ulcer channel (chancre_visible | gudp.symptomatic) uses
+    #     syndromic_gud (universal 0.8): real-world syndromic
+    #     management of GUD presents is presumptive treatment of any
+    #     ulcer-presenter (true syph or HSV/chancroid), regardless of
+    #     stage. The gudp.symptomatic pool gives the false-positive
+    #     presumptive-treatment population AND the latent-syph
+    #     incidental-treatment pathway (latents who happen to have a
+    #     concurrent non-syph ulcer get treated for syph too).
+    #   - Rash channel (rash_visible) uses syndromic_rash (0.1
+    #     universal): secondary-syph rash presenters rarely make it
+    #     to STI-clinic syph treatment under real-world syndromic
+    #     flows. Modelled as a weak fallback.
+    gud_dx  = sti.SyphDx(syph_dx_df[syph_dx_df.name == 'syndromic_gud'],
+                         name='SyphDx_gud')
+    rash_dx = sti.SyphDx(syph_dx_df[syph_dx_df.name == 'syndromic_rash'],
+                         name='SyphDx_rash')
+    rpr_dx  = sti.SyphDx(syph_dx_df[syph_dx_df.name == 'rpr'],  name='SyphDx_rpr')
     dual_dx = sti.SyphDx(syph_dx_df[syph_dx_df.name == 'dual'], name='SyphDx_dual')
 
     def syph_dx_eligibility(sim):
         """Treat anyone newly diagnosed positive by any syph test this step."""
         tests = [sim.interventions.syph_symp_test,
+                 sim.interventions.syph_rash_test,
                  sim.interventions.syph_anc_rpr,
                  sim.interventions.syph_anc_rdt]
         pos = tests[0].ti_positive == tests[0].ti
@@ -431,10 +448,11 @@ def make_syph_testing(stop=2040, symp_test_prob=None, rdt_year=2012,
 
     syph_tx = sti.SyphTx(name='syph_tx', label='syph_tx', eligibility=syph_dx_eligibility)
 
-    # --- Symptomatic channel (unchanged) ---
+    # --- Ulcer channel: chancre + non-syph GUD presenters ---
     def syph_symp_eligibility(sim):
         syph = sim.diseases.syph
-        return syph.chancre_visible | syph.rash_visible
+        gudp = sim.diseases.gudp
+        return syph.chancre_visible | gudp.symptomatic
 
     # dt_scale=False: the CSV values are per-symptomatic-episode (visible
     # chancres last ~1 month, the symptomatic window matches a single dt
@@ -446,6 +464,18 @@ def make_syph_testing(stop=2040, symp_test_prob=None, rdt_year=2012,
         product=gud_dx,
         test_prob_data=symp_test_prob,
         eligibility=syph_symp_eligibility,
+        dt_scale=False,
+    )
+
+    # --- Rash channel: secondary syph rash presenters (weak) ---
+    def syph_rash_eligibility(sim):
+        return sim.diseases.syph.rash_visible
+
+    syph_rash_test = sti.SyphTest(
+        name='syph_rash_test', label='syph_rash_test',
+        product=rash_dx,
+        test_prob_data=symp_test_prob,
+        eligibility=syph_rash_eligibility,
         dt_scale=False,
     )
 
@@ -482,7 +512,8 @@ def make_syph_testing(stop=2040, symp_test_prob=None, rdt_year=2012,
     )
     syph_anc_rdt.start = rdt_year
 
-    return [syph_anc_timer, syph_symp_test, syph_anc_rpr, syph_anc_rdt, syph_tx]
+    return [syph_anc_timer, syph_symp_test, syph_rash_test,
+            syph_anc_rpr, syph_anc_rdt, syph_tx]
 
 
 def make_testing(ng, ct, tv, bv, poc=None, pn_pars=None, stop=2040):
