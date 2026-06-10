@@ -39,6 +39,7 @@ if __name__ == '__main__':
         '--ts-quantiles', str(OUT / 'ensemble_ts_quantiles.parquet'),
         '--snap-quantiles', str(OUT / 'ensemble_snapshots_quantiles.parquet'),
         '--fig-dir', str(FIG),
+        '--n-draws', '169',
     ]
     print('\nRunning:', ' '.join(plot), flush=True)
     sys.exit(subprocess.call(plot, env=env, cwd=str(REPO)))

@@ -1,0 +1,35 @@
+Running: /home/robyn/miniconda/envs/starsim/bin/python /home/robyn/sti_notification/calibration/artifacts/scripts/extract_summary.py --draws-csv /home/robyn/sti_notification/experiments/02_full_recalibration_fixc/outputs/draws_used.csv --out-dir /home/robyn/sti_notification/experiments/03_pub_figures_fixc/outputs --n-seeds 3 --n-workers 60
+Loaded 169 draws from /home/robyn/sti_notification/experiments/02_full_recalibration_fixc/outputs/draws_used.csv
+Total sims: 507 (169 × 3 seeds)
+Running on 60 workers...
+  [ 30/507] 86s eta=1360s ok=30 err=0
+  [ 60/507] 89s eta=660s ok=60 err=0
+  [ 90/507] 170s eta=788s ok=90 err=0
+  [120/507] 178s eta=575s ok=120 err=0
+  [150/507] 254s eta=606s ok=150 err=0
+  [180/507] 267s eta=484s ok=180 err=0
+  [210/507] 339s eta=480s ok=210 err=0
+  [240/507] 352s eta=392s ok=240 err=0
+  [270/507] 474s eta=416s ok=270 err=0
+  [300/507] 508s eta=351s ok=300 err=0
+  [330/507] 628s eta=337s ok=330 err=0
+  [360/507] 2883s eta=1177s ok=360 err=0
+  [390/507] 3204s eta=961s ok=390 err=0
+  [420/507] 3310s eta=686s ok=420 err=0
+  [450/507] 3829s eta=485s ok=450 err=0
+  [480/507] 3887s eta=219s ok=480 err=0
+  [507/507] 3961s eta=0s ok=507 err=0
+
+Done in 3961.5s. OK: 507, errors: 0
+  ts quantiles -> ensemble_ts_quantiles.parquet: 2408 rows
+  snap quantiles -> ensemble_snapshots_quantiles.parquet: 320 rows
+
+Running: /home/robyn/miniconda/envs/starsim/bin/python /home/robyn/sti_notification/calibration/artifacts/scripts/plot_figures.py --ts-quantiles /home/robyn/sti_notification/experiments/03_pub_figures_fixc/outputs/ensemble_ts_quantiles.parquet --snap-quantiles /home/robyn/sti_notification/experiments/03_pub_figures_fixc/outputs/ensemble_snapshots_quantiles.parquet --fig-dir /home/robyn/sti_notification/experiments/03_pub_figures_fixc/figures
+Writing figures to /home/robyn/sti_notification/experiments/03_pub_figures_fixc/figures/
+  → fig1_syph_timeseries.png
+  → fig2_syph_stage_definitions.png
+  → fig3_syph_age_sex_2016.png
+  → fig4_hiv_timeseries.png
+  → fig5_sti_timeseries.png
+
+Done. 5 figures.
