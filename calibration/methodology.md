@@ -29,6 +29,17 @@ STIsim 1.5.5 / Starsim 3.3.2. Model definition lives in
   [`data/symp_test_prob_concentrated.csv`](../data/). Baseline partner
   notification active at stable 0.20 / casual 0.10 per the
   `SyndromicPN` defaults.
+- **Symptomatic syph dx (Fix C, PR #5).** Two-channel syndromic-
+  management model: agents with visible chancre or current non-syph
+  GUD (`syph.chancre_visible | gudp.symptomatic`) are eligible for
+  the `syndromic_gud` product (0.8 universal — presumptive treatment
+  of any ulcer-presenter), and agents with visible rash
+  (`syph.rash_visible`) are eligible for the `syndromic_rash` product
+  (0.1 on secondary, 0 elsewhere — weak rash channel). The original
+  calibration used the `gud` product (stage-specific 0.9 primary /
+  0.2 secondary) on `chancre_visible | rash_visible`; that baseline
+  was discovered to be structurally incorrect during scenario scoping
+  and replaced via PR #5. See *Method evolution* §Phase D below.
 
 ## Data
 
@@ -155,12 +166,59 @@ Method switch: abandon emulation, run large LHS sweeps directly, use
    save annualised time series + 2016/2020 age × sex snapshots,
    compute ensemble quantiles, generate figures.
 
-Final ensemble: exp 40 (parameter LHS) + exp 41 (publication figures).
+First ensemble: exp 40 (parameter LHS) + exp 41 (publication figures)
+on the `gud`-product syndromic baseline.
 The LHS approach surfaced the structural ceiling on syphilis absolute
 prevalence (none of the 20-dimensional sweeps recovered the ZIMPHIA
 2.7%) and the structural identifiability of the HIV–syph coupling
 (rel_sus / rel_trans levers brought the HIV+/HIV− trep ratio into band
 at 90% pass rate).
+
+### Phase D. Fix C structural correction + recalibration (June 2026)
+
+During post-calibration scenario scoping, the researcher noticed that
+the syph syndromic-channel dx product was `gud` (stage-specific
+clinical accuracy: 0.9 primary / 0.2 secondary / 0.05 elsewhere) when
+real-world Zimbabwe syndromic GUD management is presumptive treatment
+of any ulcer-presenter at ~0.8 universal regardless of true infection
+state. Two diagnostic runs on a single saved draw showed structural
+shifts of 4–14 pp on key syph metrics under candidate corrections,
+invalidating the saved 200-draw ensemble.
+
+Fix C (PR #5) restructured the syph syndromic-management baseline
+into a **two-channel model** in [`../interventions.py`](../interventions.py):
+
+- **Ulcer channel.** Eligibility `chancre_visible | gudp.symptomatic`
+  → `syndromic_gud` product (0.8 universal). Presumptive treatment of
+  any ulcer-presenter, including non-syph GUD presenters (which adds
+  a small latent-syph-via-coincident-non-syph-ulcer treatment pathway).
+- **Rash channel.** Eligibility `rash_visible` → `syndromic_rash`
+  product (0.1 on secondary, 0 elsewhere). Weak fallback reflecting
+  the empirical observation that secondary-syph rash rarely makes it
+  to syph treatment via general-clinic syndromic flows.
+
+The recalibration cycle (3 experiments on `archive/recalibration-2026-06-fixc`):
+
+1. **Exp 01 — coverage check** (50 prior draws): all targets covered
+   on all-draw bands; on the sustained-only subset (22/50 = 44%),
+   syph absolute prev sits above ZIMPHIA but the nontrep+ unconstrained
+   median improved 32% under Fix C (12.6% → 8.6%) vs the old
+   calibration. HIV coverage maintained.
+2. **Exp 02 — full recalibration**: 2000-draw Phase 1 (49% sustained,
+   333 candidates) + 999-sim Phase 2 → **169 robust draws**. HIV+/HIV−
+   trep ratio band pass rate improved 90% → 94%. **Syph absolute prev
+   structural ceiling re-asserted under multi-target filter** at
+   essentially the same equilibrium (trep+ 23.5%, nontrep+ 12.7%).
+   The 32% nontrep+ improvement seen on the unconstrained sustained
+   subset was traded away by the calibrator in favour of multi-target
+   satisfaction.
+3. **Exp 03 — publication figures** from the 169-draw ensemble.
+
+**Verdict.** Fix C is the structurally correct baseline. It improves
+HIV coupling and sustainability rate but does not close the syph
+absolute-prev ceiling — confirming the ceiling is a genuine model
+property (minimum-sustaining FoI for endemic syph in this network
+structure), not an artefact of the wrong syndromic dx.
 
 ## Acceptance criteria
 
@@ -197,8 +255,9 @@ claims are added.
   - `feat/syph-detectable-state` — `detectable_prevalence` result
     added during the exp 16/17 observability fix.
 - **Python** 3.11, conda env `starsim`.
-- **Compute.** IDM Azure VM ("Applied Math" subscription), 24-core
-  batch parallelism via `multiprocessing.Pool`.
+- **Compute.** IDM Azure VM ("Applied Math" subscription), 80-physical-
+  core AMD EPYC. Original calibration ran at 24-worker batches; Fix C
+  recalibration ran at 60-worker batches.
 
 See [`recalibration_guide.md`](recalibration_guide.md) for the exact
 environment recipe.

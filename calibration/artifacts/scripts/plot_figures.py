@@ -23,6 +23,7 @@ REPO_ROOT  = THIS.parents[3]
 DATA       = REPO_ROOT / 'data'
 
 YEAR_LO, YEAR_HI = 1990, 2040
+# ENSEMBLE_N / ENSEMBLE_LABEL get set in main() from --n-draws CLI arg.
 ENSEMBLE_N = 200
 ENSEMBLE_LABEL = f'{ENSEMBLE_N}-draw ensemble'
 
@@ -356,10 +357,17 @@ def main():
     ap.add_argument('--fig-dir', type=Path,
                     default=artifacts / 'figures',
                     help='Output directory for the 5 PNGs.')
+    ap.add_argument('--n-draws', type=int, default=200,
+                    help='Number of draws in the ensemble; used in figure '
+                         'suptitle labels (default 200).')
     args = ap.parse_args()
 
+    global ENSEMBLE_N, ENSEMBLE_LABEL
+    ENSEMBLE_N = args.n_draws
+    ENSEMBLE_LABEL = f'{ENSEMBLE_N}-draw ensemble'
+
     args.fig_dir.mkdir(parents=True, exist_ok=True)
-    print(f'Writing figures to {args.fig_dir}/')
+    print(f'Writing figures to {args.fig_dir}/ (label: {ENSEMBLE_LABEL})')
 
     ts = pd.read_parquet(args.ts_quantiles)
     snap = pd.read_parquet(args.snap_quantiles)
