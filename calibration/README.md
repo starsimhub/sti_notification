@@ -1,28 +1,16 @@
 # Calibration record
 
-> ⚠️ **Superseded — recalibration in progress (2026-06-10).** The
-> 200-draw ensemble described here was calibrated against a model whose
-> syphilis syndromic-management baseline was structurally incorrect:
-> the symptomatic-channel dx product was `gud` (stage-specific
-> clinical accuracy, ~0.9 primary / 0.2 secondary) when it should have
-> been `syndromic_gud` (presumptive 0.8 universal), and the rash
-> channel was given the same product when a separate weaker
-> `syndromic_rash` (0.1) channel is closer to real-world syndromic
-> care. Diagnostic on draw 17 (3 seeds) showed FSW prevalence shifts
-> of +14pp under the corrected baseline. A structural fix (Fix C —
-> two-channel model) is being implemented and the calibration is being
-> redone. Until that lands on main, downstream scenario work should
-> treat the artifacts here as historical reference only, not the
-> production baseline.
-
 This directory is the institutional record of the STIsim Zimbabwe joint
 calibration (HIV + syphilis + NG + CT + TV) carried out between
 March–June 2026 in support of the partner-notification (PN) and
-care-seeking decision analysis.
+care-seeking decision analysis. The current published baseline is a
+**169-draw posterior ensemble** produced after a structural correction
+to the syph syndromic-dx baseline ("Fix C", PR #5) on a fresh
+recalibration cycle.
 
-It is documentation, not an active workspace. The development branch
-where the calibration was actually performed is preserved as an
-archival artefact (see [Provenance](#provenance) below); this folder
+It is documentation, not an active workspace. Both the original
+development branch and the post-Fix-C recalibration cycle are preserved
+as archival artefacts (see [Provenance](#provenance) below); this folder
 contains only the durable outputs and the knowledge required to
 understand, defend, or reproduce them.
 
@@ -34,7 +22,7 @@ understand, defend, or reproduce them.
 | [`methodology.md`](methodology.md) | Detailed methodology: data, model, parameters, method evolution, acceptance criteria. |
 | [`assumptions.md`](assumptions.md) | Fixed assumptions, structural limitations, known risks. |
 | [`recalibration_guide.md`](recalibration_guide.md) | When to recalibrate, and how — step-by-step. |
-| [`artifacts/`](artifacts/) | The 200-draw parameter ensemble, ensemble quantile summaries, publication figures, and the scripts that reproduce them. |
+| [`artifacts/`](artifacts/) | The 169-draw parameter ensemble, ensemble quantile summaries, publication figures, and the scripts that reproduce them. |
 
 Start with `calibration_summary.md` for the headline result. Read
 `recalibration_guide.md` if the question is "do we need to redo this?"
@@ -42,35 +30,43 @@ or "how would I redo this?"
 
 ## What landed on main from this work
 
-- Final model code: [`model.py`](../model.py),
-  [`priors.py`](../priors.py),
+- Final model code with Fix C two-channel syndromic syph dx:
+  [`model.py`](../model.py), [`priors.py`](../priors.py),
   [`interventions.py`](../interventions.py).
 - Locked input data: [`data/`](../data/).
-- The 200-draw posterior ensemble: `artifacts/draws_used.csv` +
-  ensemble quantile parquets.
+- The **169-draw posterior ensemble** on Fix C:
+  `artifacts/draws_used.csv` + ensemble quantile parquets.
 - Five publication figures used in the manuscript: `artifacts/figures/`.
-- The three workflow scripts that take `draws_used.csv` →
-  per-sim results → ensemble quantiles → figures, in
-  `artifacts/scripts/`.
+- The workflow scripts that take `draws_used.csv` → per-sim results
+  → ensemble quantiles → figures, in `artifacts/scripts/`.
 
-What did not land: the 41-experiment development history, ~290 MB of
-intermediate parquets/CSVs/figures, and the dead-end branches. Those
-are preserved on the archival branch (see below).
+What did not land: 44 numbered experiments worth of development
+history (41 from the original cycle + 3 from the Fix C recalibration),
+intermediate parquets/CSVs/figures, dead-end branches. Those are
+preserved on the two archival tags (see below).
 
 ## Provenance
 
-The calibration was developed on branch `calibration/zimbabwe` across
-41 numbered experiments under `experiments/`. After the final
-ensemble was produced and the publication figures regenerated (exp 40
-and exp 41), that branch was tagged `archive/calibration-2026-06` and
-preserved as a historical artefact. Future development should not
-merge or extend it; any recalibration starts from `main` per
+Two archival cycles preserved as tags:
+
+| Tag | What it contains | When tagged |
+|---|---|---|
+| `archive/calibration-2026-06` | Branch `calibration/zimbabwe`: 41 experiments, original calibration pipeline. Used the (later-discovered-as-incorrect) `gud` dx product for syph syndromic management. Produced a 200-draw ensemble that was on `main` briefly before being superseded. | 2026-06-09 |
+| `archive/recalibration-2026-06-fixc` | Branch `recalibration/zimbabwe-2026-06`: 3 experiments (coverage check, full 2000-draw recalibration, publication figures) on the Fix C corrected baseline. Produced the **current published 169-draw ensemble**. | 2026-06-10 |
+
+Future development should not merge or extend either archival branch;
+any recalibration starts from `main` per
 [`recalibration_guide.md`](recalibration_guide.md).
 
 To inspect the full development history:
 
 ```bash
+# Original calibration cycle
 git checkout archive/calibration-2026-06
+ls experiments/
+
+# Fix C recalibration cycle
+git checkout archive/recalibration-2026-06-fixc
 ls experiments/
 ```
 

@@ -22,8 +22,8 @@ results.
 
 This is the most important limitation. **The minimum-sustaining force
 of infection for endemic syph in this model corresponds to
-treponemal+ ≈ 20% and non-treponemal+ ≈ 12% — 7–14× the ZIMPHIA
-data.** Three independent structural attempts to drive this down
+treponemal+ ≈ 23% and non-treponemal+ ≈ 13% — 9–16× the ZIMPHIA
+data.** Four independent structural attempts to drive this down
 failed:
 
 - **Observability patch (exp 16, 17).** Mapped to RDT-detectable
@@ -34,25 +34,66 @@ failed:
   identifiable (`stable_act_decay` median 0.10/yr, `client_marital_act_mult`
   median 0.66) but the calibrator compensates by raising other
   transmission knobs — net change on absolute prev: third decimal.
+- **Fix C two-channel syndromic dx (recalibration exp 02, 2026-06-10).**
+  Replaced the `gud` product (stage-specific 0.9 primary / 0.2
+  secondary) with `syndromic_gud` (0.8 universal) on a broader
+  ulcer-eligible pool, and added a weak `syndromic_rash` (0.1)
+  channel. Coverage-check sustained-subset showed nontrep+ improving
+  by 32% (12.6% → 8.6%) — but the multi-target calibration filter
+  on 2000 LHS draws pushed nontrep+ back up to 12.7%. Essentially
+  unchanged equilibrium prev under a structurally distinct baseline.
 
 Mechanism (best diagnosis): high-risk → low-risk leakage routes are
 large in absolute terms (~24% of all transmissions in exp 38) but
 structurally locked in; reducing one route gets compensated by
 another. The general-population M↔F engine self-sustains independent
-of FSW seeding (32% of plateau transmissions in exp 32).
+of FSW seeding (32% of plateau transmissions in exp 32). The Fix C
+recalibration confirms the ceiling is a property of the model's
+transmission structure and treatment-flow geometry, not of any
+specific syndromic dx assumption.
 
 **Implication for downstream work.** Frame syph results as
 *relative-effect* contrasts (PN scenario A vs B). Do not make absolute
 claims about Zimbabwe syph burden.
 
+### FSW prevalence target/result mismatch
+
+The calibration's FSW prevalence target band (0.20–0.40 at 2019) and
+the model's `prevalence_sw` result are **not measuring the same
+thing**. `prevalence_sw` is `cond_prob(self.infected, fsw)` in
+[STIsim's syphilis module](https://github.com/InstituteforDiseaseModeling/stisim/blob/main/stisim/diseases/syphilis.py),
+where `self.infected` covers **every disease stage** — exposed,
+primary, secondary, early latent, late latent, and tertiary. The
+target band almost certainly comes from a survey that uses a
+specific test type (treponemal serology, non-treponemal serology,
+or active-infection-by-clinical-criteria), each of which counts a
+narrower or broader pool of agents.
+
+This mismatch is why the 169-draw ensemble's FSW pass rate is 1%
+(against a model median of 0.67 vs target [0.20, 0.40]). The model
+result is dominated in equilibrium by late latent + tertiary carriers
+who are not actively transmitting and would not test positive on
+non-treponemal serology — but the calibration is comparing it to a
+band that probably refers to either trep+ or active-disease serology.
+
+**Implication.** Treat the FSW pass rate (1%) as not directly
+interpretable. For downstream scenario work, use the right model
+result for the FSW target: `sexually_transmissible_prevalence_sw` for
+"transmissible at the bedside", or a future `trep_prevalence_sw` /
+`nontrep_prevalence_sw` if those are added to STIsim. Identified
+2026-06-10 during the Fix C recalibration close-out; not fixed in the
+current ensemble.
+
 ### Stochastic sustained/decay bifurcation
 
 Even within the final ensemble, draws sit near a sustained/decay
-attractor boundary. 73% of Phase-1 single-seed sustained draws are
-not robust 3/3 in Phase 2 (exp 35, 36). The robust subset is hotter
-than the fragile subset (FSW median 0.636 vs target 0.20–0.40). This
-is a known property of ABMs at 10k agents and is not unique to syph
-or to this calibration.
+attractor boundary. In the Fix C recalibration: 49% of Phase 1
+single-seed draws sustained (vs 35% in the original calibration —
+the corrected baseline is more stable but the bifurcation is still
+present). The robust subset is hotter than the fragile subset (FSW
+median 0.67 vs the [0.20, 0.40] target — though see the FSW target
+mismatch caveat above). This is a known property of ABMs at 10k
+agents and is not unique to syph or to this calibration.
 
 **Implication.** Results above ~10k agents may behave differently —
 larger populations would suppress stochastic extinction and could
@@ -92,7 +133,9 @@ downstream work compares HIV incidence across scenarios in 2020+.
 ## Known abandoned hypotheses
 
 These are documented here so future researchers don't retrace dead
-ends. Full per-experiment context on `archive/calibration-2026-06`.
+ends. Full per-experiment context on `archive/calibration-2026-06`
+(original cycle) and `archive/recalibration-2026-06-fixc` (Fix C
+recalibration cycle).
 
 | Hypothesis | Experiment | Outcome |
 |---|---|---|
@@ -103,6 +146,7 @@ ends. Full per-experiment context on `archive/calibration-2026-06`.
 | FSW MF-concurrency multiplier seeds the general-population engine. | 33 | Sweep [0.1, 1.0]: zero correlation with non-trep_f outcomes. Hypothesis falsified. |
 | Marital coital-decay mechanism breaks the M_client → F_other syph leakage. | 40 | Identifiable but compensated for by other knobs. No effect on absolute prev. |
 | Coupled-model approach: pool extinct + sustaining sims to produce average prev in the data band. | 40 (open thought, never implemented) | Not pursued — would require infrastructure outside STIsim. |
+| Fix C two-channel syndromic dx (syndromic_gud + syndromic_rash) breaks the ceiling. | recal exp 02 | Improves HIV coupling (90% → 94% pass), improves sustainability (35% → 49%), and unconstrained sustained-subset shows 32% nontrep+ reduction; multi-target calibration filter trades that back. Net effect on equilibrium prev: essentially nil. |
 
 ## What no one has answered
 

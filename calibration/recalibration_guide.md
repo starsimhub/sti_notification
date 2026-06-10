@@ -48,13 +48,21 @@ The reproducibility check is automated by
 
 ### Compute
 
-A 24-core Linux VM is the reference configuration. On IDM's "Applied
-Math" Azure subscription, any of the calibration-suitable VMs (zebra,
-gerbil, hedgehog, dugong, paracetherium, agouti120, capybara,
-chinchilla120, covaguest, raccoon, woodchuck) is sufficient. The
-final ensemble (200 draws × 3 seeds) takes ~30 min wall on 24
-workers. The full pipeline (5,000 LHS Phase 1 → Phase 2 → publication
-extraction) takes ~28 hours wall.
+A multi-core Linux VM on IDM's "Applied Math" Azure subscription
+(zebra, gerbil, hedgehog, dugong, paracetherium, agouti120, capybara,
+chinchilla120, covaguest, raccoon, woodchuck). Choose worker count
+based on shared use:
+
+| Configuration | Wall time (full pipeline) |
+|---|---|
+| 24 workers (original calibration, 5000 LHS) | ~25h Phase 1 + ~2h Phase 2 + ~30 min figures = ~28h |
+| 60 workers (Fix C recalibration, 2000 LHS) | ~45 min Phase 1 + ~25 min Phase 2 + ~12 min figures = ~1.5h |
+
+Smaller LHS (2000 draws on Fix C, vs 5000 in the original) was
+viable because the corrected baseline produces a higher Phase 1
+sustainability rate (49% vs 35%), so fewer LHS draws are needed to
+reach the ~200 robust-draw target. The Fix C cycle produced 169
+robust draws — slightly under target, fine for downstream use.
 
 Disk: ~15 GB free for the full intermediate parquet outputs (Phase 1
 trajectory data, Phase 2 per-(draw, seed) sims, snapshots).
@@ -161,7 +169,8 @@ bracketed, fix the prior or the model before continuing.
 
 #### Step 3b — Re-engineer priors and targets if needed
 
-Read the per-experiment SUMMARYs on `archive/calibration-2026-06` for
+Read the per-experiment SUMMARYs on `archive/calibration-2026-06` and
+`archive/recalibration-2026-06-fixc` for
 the engineering decisions:
 
 - exp 17 / 20 — opening `time_to_undetectable`.

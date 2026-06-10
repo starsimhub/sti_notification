@@ -8,10 +8,15 @@ strategies for STI undertreatment in sub-Saharan Africa.
 
 **Period.** March – June 2026. 41 experiments. Solo (Robyn).
 
-**Deliverable consumed by downstream work.** A 200-draw posterior
-ensemble of model parameters, each draw run under 3 random seeds (600
-sims total), suitable for propagating parameter uncertainty into the
-PN counterfactual scenarios.
+**Deliverable consumed by downstream work.** A **169-draw posterior
+ensemble** of model parameters, each draw run under 3 random seeds
+(507 sims total), suitable for propagating parameter uncertainty into
+the PN counterfactual scenarios. (Originally a 200-draw ensemble from
+the first calibration cycle; replaced after a structural correction
+to the syph syndromic-dx baseline — "Fix C", PR #5 — invalidated the
+earlier ensemble and triggered a recalibration. The current ensemble
+is the Fix C recalibration product; see [methodology.md](methodology.md)
+§Method evolution.)
 
 ## Headline result
 
@@ -38,18 +43,16 @@ PN coverage) rather than absolute prevalence claims.
 - A draws-level (not point-estimate) artifact, because the downstream
   decision analysis needs to propagate parameter uncertainty.
 
-## Final calibration result, by target
+## Final calibration result, by target (Fix C 169-draw ensemble)
 
 | Target | Data | Model median (80% CI) | Verdict |
 |---|---|---|---|
-| HIV whole-pop 2010 | UNAIDS ~12% | 12.5% (9.9–14.5) | In band |
-| HIV whole-pop 2020 | UNAIDS ~11% | 11.3% (8.4–13.2) | In band |
-| HIV 15–49 2016 | ZIMPHIA 15.9% | 18.4% (13.6–21.5) | CI covers |
-| HIV 15–49 2020 | ZIMPHIA 14.8% | 16.9% (11.9–20.2) | CI covers |
-| HIV+/HIV– trep ratio | 3.0–6.0 | 90% of draws inside band | Pass |
-| Syph trep 15–64 2016 | ZIMPHIA 2.7% | 19.6% (17.4–21.3) | ~7× over (structural) |
-| Syph nontrep 15–64 2016 | ZIMPHIA 0.8% | 11.8% (9.4–14.4) | ~14× over (structural) |
-| Syph FSW prev 2019 | 20–40% | 61% median | ~1.5× over (structural) |
+| HIV whole-pop 2010–2020 mean | UNAIDS ~11–13% | 12.7% (10.1–14.3) | In band (53% of draws inside the tight [9, 13]% band) |
+| HIV 15–49 2016 | ZIMPHIA 15.9% | covered | In band |
+| HIV+/HIV– trep ratio 2016 | 3.0–6.0 | **94% of draws inside band** | Pass (up from 90% in the original calibration) |
+| Syph trep+ 15–64 2016 | ZIMPHIA 2.7% | 23.5% (20.3–26.6) | ~9× over (structural — see below) |
+| Syph nontrep+ 15–64 2016 | ZIMPHIA 0.8% | 12.7% (9.2–16.6) | ~16× over (structural) |
+| Syph FSW prev 2019 | 20–40% | 67% median (54–76) | ~1.7× over; target/result mismatch — see [assumptions.md](assumptions.md) |
 | Syph stage shares | primary ~55 / sec ~35 / latent ~10 | 96–100% draws in band | Pass |
 | NG prev 2010+ | ~1.5–2% | 1.5–2% median | Pass |
 | TV prev 2010+ | ~10% | ~10% to 2010, ~8% by 2025 | Mostly in band |
@@ -78,16 +81,33 @@ PN coverage) rather than absolute prevalence claims.
    final ensemble (exp 40).
 
 4. **Syphilis absolute prevalence was accepted as a structural
-   ceiling.** Three independent attempts to drive it down (observability
-   patch, care-seeking ramp, marital coital-decay) confirmed the
-   minimum-sustaining force of infection corresponds to an equilibrium
-   trep+ ≈ 20% and nontrep+ ≈ 12% — well above ZIMPHIA. Recorded as
-   a model limitation rather than a calibration failure.
+   ceiling — confirmed under two distinct syndromic baselines.**
+   Three structural attempts inside the original calibration
+   (observability patch, care-seeking ramp, marital coital-decay) all
+   failed to close the gap. The Fix C recalibration cycle then
+   restructured the syph syndromic-dx baseline entirely (two-channel
+   ulcer + rash model) and re-ran a fresh 2000-draw LHS; the same
+   structural ceiling re-asserted itself at trep+ ≈ 23%, nontrep+ ≈ 13%.
+   That's two structurally-distinct baselines producing essentially
+   the same equilibrium prev band. Recorded as a model limitation,
+   not a calibration failure.
 
 5. **Baseline PN was switched on for the final ensemble.** Exp 38
    onwards runs PN at stable=0.20 / casual=0.10 by default; the
    ensemble therefore represents a world with PN already active, and
    downstream scenarios contrast against this baseline.
+
+6. **Structural correction to syph syndromic dx (Fix C).** Discovered
+   during post-calibration scenario scoping: the original calibration's
+   symptomatic-channel dx product was `gud` (stage-specific clinical
+   accuracy: ~0.9 primary / 0.2 secondary) when real-world Zimbabwe
+   syndromic GUD management is presumptive treatment at ~0.8 universal.
+   Fix C (PR #5) restructured this into a two-channel model: ulcer
+   eligibility (chancre or non-syph GUD) → `syndromic_gud` (0.8) and
+   rash eligibility → `syndromic_rash` (0.1 weak fallback). The
+   correction is semantically right; the recalibration confirms it
+   doesn't change the equilibrium prev band but does improve HIV
+   coupling pass rate (90% → 94%) and sustainability rate (35% → 49%).
 
 ## Final priors
 
@@ -112,7 +132,7 @@ care-seeking rates were held fixed throughout. See
 
 ## Final outputs
 
-- `artifacts/draws_used.csv` — 200 robust posterior draws × 19 priors.
+- `artifacts/draws_used.csv` — **169 robust posterior draws × 19 priors**.
   Each row is a parameter set that produced a sustained, plausible
   simulation across all 3 seeds.
 - `artifacts/ensemble_ts_quantiles.parquet` — ensemble median + 80%/95%
@@ -121,56 +141,75 @@ care-seeking rates were held fixed throughout. See
   per (year, disease, result, sex, age_bin) at 2016 and 2020.
 - `artifacts/figures/` — 5 publication figures (HIV time series, syph
   time series, syph stage definitions, syph age × sex 2016, other STIs).
-- `artifacts/scripts/` — the three workflow scripts that take
-  `draws_used.csv` → per-sim results → ensemble quantiles → figures.
+- `artifacts/scripts/` — the workflow scripts that take
+  `draws_used.csv` → per-sim results → ensemble quantiles → figures,
+  plus `reproduce_check.py` for drift detection.
 
-Raw per-sim parquets (~13 MB) were not migrated to main; they live on
-the archival branch only. They can be regenerated in ~30 minutes on a
-24-worker machine from `draws_used.csv` and the workflow scripts.
+Raw per-sim parquets (~10 MB) were not migrated to main; they live on
+the archival tags only. They can be regenerated in ~15 minutes on a
+60-worker machine from `draws_used.csv` and the workflow scripts.
 
 ## Scale
 
-- ~17,000 simulations across the 41 experiments (single sim ≈ 1 min at
-  10k agents over 1985–2040).
-- Final ensemble pipeline: ~25 hours wall for the 5000-draw LHS phase
-  (exp 40 phase 1, 24 workers), ~2 hours wall for the 3-seed Phase 2,
-  ~30 min wall for the publication-figure regeneration (exp 41).
-- Hardware: an IDM Azure VM in the "Applied Math" subscription, 24
-  workers per batch.
+- ~17,000 simulations across the original 41 experiments (single sim
+  ≈ 1.5 min at 10k agents over 1985–2040).
+- ~3,500 additional simulations across the 3 Fix C recalibration
+  experiments (50 prior predictive + 2000 LHS Phase 1 + ~1000 Phase 2
+  + 500 publication extraction).
+- Original ensemble pipeline (5000 LHS at 24 workers): ~25h Phase 1 +
+  ~2h Phase 2.
+- Fix C recalibration pipeline (2000 LHS at 60 workers): ~45 min Phase 1
+  + ~25 min Phase 2 + ~12 min publication regen ≈ ~1.5h total.
+- Hardware: an IDM Azure VM in the "Applied Math" subscription, 80
+  physical cores / 160 logical threads.
 
 ## Rationale for adoption
 
-The 200-draw ensemble is the smallest object that
+The 169-draw ensemble is the smallest object that
 (a) reproduces every published figure,
 (b) supports the decision analysis with propagated uncertainty,
-(c) is small enough to live in git (74 KB for the parameter table),
-and (d) can be re-simulated end-to-end without checking out the
-archival branch.
+(c) is small enough to live in git (62 KB for the parameter table),
+and (d) can be re-simulated end-to-end without checking out either
+archival tag.
 
-Everything else from the 41 experiments — intermediate sweeps,
-abandoned likelihood formulations, the eight HM waves, the bimodal
-trajectory selection results, the per-experiment figures — is
-preserved on `archive/calibration-2026-06` for any future
-investigation but is not required for downstream use.
+Everything else from the development cycles — intermediate sweeps,
+abandoned likelihood formulations, the eight HM waves of the original
+calibration, the Fix C coverage check, the per-experiment figures — is
+preserved on the two archival tags
+(`archive/calibration-2026-06` and
+`archive/recalibration-2026-06-fixc`) for any future investigation but
+is not required for downstream use.
 
 ## Limitations
 
 See [`assumptions.md`](assumptions.md) for the full list. The
 manuscript-critical limitations are:
 
-1. **Syphilis absolute prevalence overstates by 7–14× across age and
-   sex.** Frame results as relative-effect contrasts; do not make
-   absolute claims about syphilis burden.
-2. **Stochastic bifurcation.** Even within the final ensemble, draws
+1. **Syphilis absolute prevalence overstates by 9–16× across age and
+   sex** — confirmed under two structurally distinct syndromic
+   baselines (the original `gud` product and Fix C's two-channel
+   syndromic_gud + syndromic_rash model). Frame results as
+   relative-effect contrasts; do not make absolute claims about
+   syphilis burden.
+2. **FSW prevalence target/result mismatch.** The calibration's
+   FSW prev target band (0.20–0.40) and the model's `prevalence_sw`
+   result are not measuring the same thing — `prevalence_sw` counts
+   any current syph stage (including latent/tertiary), while the
+   target band almost certainly refers to a serology- or
+   active-infection-based measurement in the source data. See
+   [assumptions.md](assumptions.md) for the full discussion; treat
+   the FSW pass rate (1%) as not directly interpretable until the
+   target alignment is fixed.
+3. **Stochastic bifurcation.** Even within the final ensemble, draws
    sit near a sustained/decay attractor boundary; behaviour at scale
    beyond 10k agents was not tested.
-3. **CT under-calibration.** Model CT median sits 2× above
+4. **CT under-calibration.** Model CT median sits ~2× above
    surveillance, with the 80% CI covering data. Acceptable for now;
    diagnose if downstream CT-specific claims are needed.
 
 ## Next step
 
 Decision-analysis scenarios — counterfactual PN coverage,
-care-seeking intensity — propagated through the 200-draw ensemble per
+care-seeking intensity — propagated through the 169-draw ensemble per
 the `decision-analysis` workflow (posterior predictive → NMB → CEAC →
 EVPI / EVSI). Tracked in a separate scenario branch off main.
