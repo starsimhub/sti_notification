@@ -305,53 +305,184 @@ class SyndromicPN(sti.PartnerNotification):
         return
 
 
-def make_syph_testing(stop=2040, anc_test_prob=0.5, symp_test_prob=0.5):
+class SyphilisANCTimer(ss.Intervention):
+    """Schedule one ANC syph test event per pregnancy at a realistic week.
+
+    In Zimbabwe many pregnant women do not attend ANC in tri1 as WHO
+    recommends; visits are spread across weeks 8-32 of gestation. This
+    intervention draws a single visit-week for each newly-conceived
+    woman from Uniform(8, 32) and marks her as ANC-test-eligible on
+    that timestep. Downstream `SyphTest` interventions read from
+    ``today_uids`` to fire the actual test.
+
+    States:
+        ti_anc_visit (FloatArr): timestep on which the woman will
+            attend her ANC visit. NaN if not pregnant / not scheduled.
+
+    Properties:
+        today_uids: UIDs whose ti_anc_visit == current ti and who are
+            still alive + still pregnant.
+
+    Pars:
+        visit_week_low  (int): lower bound of visit-week draw. Default 8.
+        visit_week_high (int): upper bound. Default 32.
+    """
+
+    def __init__(self, pars=None, name='syph_anc_timer', **kwargs):
+        super().__init__(name=name)
+        self.define_pars(
+            visit_week=ss.uniform(low=8, high=32),  # CRN-safe Dist
+        )
+        self.update_pars(pars=pars, **kwargs)
+        self.define_states(
+            ss.FloatArr('ti_anc_visit', default=np.nan,
+                        label='ti of scheduled ANC visit'),
+        )
+        return
+
+    def _schedule(self, uids):
+        """Draw a visit-week per woman and convert to a future ti."""
+        if len(uids) == 0:
+            return
+        preg = self.sim.demographics.pregnancy
+        # CRN-safe per-agent draw; ss.uniform().rvs keys on uids.
+        weeks = self.pars.visit_week.rvs(uids)
+        # Convert weeks → ti steps. preg.ti_pregnant[uids] is the
+        # conception ti; visit_ti = conception_ti + round(weeks / weeks_per_step).
+        # dt_year is the timestep duration in years; *52 → weeks per step.
+        weeks_per_step = self.t.dt_year * 52.0 if self.t.dt_year else 4.33
+        steps_to_visit = np.round(weeks / max(weeks_per_step, 1e-6)).astype(int)
+        self.ti_anc_visit[uids] = preg.ti_pregnant[uids] + steps_to_visit
+
+    def init_post(self):
+        super().init_post()
+        # Cover the cohort already pregnant at sim start so they don't
+        # miss out. Treat them like newly-conceived for scheduling.
+        if hasattr(self.sim.demographics, 'pregnancy'):
+            preg = self.sim.demographics.pregnancy
+            self._schedule(preg.pregnant.uids)
+
+    def step(self):
+        if not hasattr(self.sim.demographics, 'pregnancy'):
+            return
+        preg = self.sim.demographics.pregnancy
+        new_preg = preg.pregnant.uids[preg.ti_pregnant[preg.pregnant.uids] == self.ti]
+        self._schedule(new_preg)
+
+    @property
+    def today_uids(self):
+        if not hasattr(self.sim.demographics, 'pregnancy'):
+            return ss.uids()
+        preg = self.sim.demographics.pregnancy
+        candidates = self.ti_anc_visit.notnan.uids
+        if len(candidates) == 0:
+            return ss.uids()
+        due = candidates[self.ti_anc_visit[candidates] == self.ti]
+        if len(due) == 0:
+            return ss.uids()
+        # Still pregnant + still alive at this ti
+        return due[preg.pregnant[due] & self.sim.people.alive[due]]
+
+
+ANC_PROBS_REALISTIC = [0.20, 0.30, 0.40, 0.35, 0.55, 0.70, 0.85]
+ANC_PROBS_POC = [0.05, 0.10, 0.15, 0.15, 0.20, 0.20, 0.20]
+ANC_YEARS = [1980, 1990, 1999, 2008, 2012, 2018, 2040]
+
+
+def make_syph_testing(stop=2040, symp_test_prob=None, rdt_year=2012,
+                      anc_probs=None, anc_years=None):
     """
     Symptomatic + ANC syphilis testing pathways.
 
-    Two STITest interventions feed into a single SyphTx:
-      1. Symptomatic test: agents with chancre or rash visible (fires when
-         care is sought).
-      2. ANC test: pregnant women in the first trimester.
+    Three channels feed into a single SyphTx:
+      1. Symptomatic test (GUD): agents with chancre or rash visible.
+      2. ANC RPR screen (1980-rdt_year): serology for pregnant women.
+      3. ANC dual RDT screen (rdt_year-stop): treponemal rapid test.
 
-    Both use the `gud` SyphDx product from data/syph_dx.csv (90% sensitivity
-    for primary syph; lower for other stages).
+    Args:
+        anc_probs: per-visit ANC testing probabilities at the calendar
+                   years in ``anc_years``. Default = ANC_PROBS_REALISTIC
+                   (peak 70% by 2018, 85% by 2040 — defensible Zimbabwe
+                   coverage matching reported EMTCT scale-up). For
+                   bifurcation analysis use ANC_PROBS_POC, the
+                   non-defensible proof-of-concept ramp from exps 22-23.
     """
+    if symp_test_prob is None:
+        symp_test_prob = pd.read_csv('data/symp_test_prob_soc.csv')
+    if anc_probs is None:
+        anc_probs = ANC_PROBS_REALISTIC
+    if anc_years is None:
+        anc_years = ANC_YEARS
+
     syph_dx_df = pd.read_csv(f'data/syph_dx.csv')
     gud_dx = sti.SyphDx(syph_dx_df[syph_dx_df.name == 'gud'], name='SyphDx_gud')
+    rpr_dx = sti.SyphDx(syph_dx_df[syph_dx_df.name == 'rpr'], name='SyphDx_rpr')
+    dual_dx = sti.SyphDx(syph_dx_df[syph_dx_df.name == 'dual'], name='SyphDx_dual')
 
     def syph_dx_eligibility(sim):
-        """Treat anyone newly diagnosed positive by either syph test this step."""
-        sympt = sim.interventions.syph_symp_test
-        anct = sim.interventions.syph_anc_test
-        return ((sympt.ti_positive == sympt.ti) | (anct.ti_positive == anct.ti)).uids
+        """Treat anyone newly diagnosed positive by any syph test this step."""
+        tests = [sim.interventions.syph_symp_test,
+                 sim.interventions.syph_anc_rpr,
+                 sim.interventions.syph_anc_rdt]
+        pos = tests[0].ti_positive == tests[0].ti
+        for t in tests[1:]:
+            pos = pos | (t.ti_positive == t.ti)
+        return pos.uids
 
     syph_tx = sti.SyphTx(name='syph_tx', label='syph_tx', eligibility=syph_dx_eligibility)
 
+    # --- Symptomatic channel (unchanged) ---
     def syph_symp_eligibility(sim):
         syph = sim.diseases.syph
         return syph.chancre_visible | syph.rash_visible
 
+    # dt_scale=False: the CSV values are per-symptomatic-episode (visible
+    # chancres last ~1 month, the symptomatic window matches a single dt
+    # step). With dt_scale=True (stisim default) these would have been
+    # divided by 12 → effectively no symptomatic treatment of primary syph,
+    # which was a silent bug.
     syph_symp_test = sti.SyphTest(
         name='syph_symp_test', label='syph_symp_test',
         product=gud_dx,
         test_prob_data=symp_test_prob,
         eligibility=syph_symp_eligibility,
+        dt_scale=False,
     )
+
+    # --- ANC channels (era-gated) ---
+    # SyphilisANCTimer schedules a single ANC-visit timestep per pregnancy
+    # at a realistic gestational week. The SyphTest products read from its
+    # today_uids and (with dt_scale=False) the listed anc_probs values are
+    # the per-visit testing probability.
+    syph_anc_timer = SyphilisANCTimer()
 
     def anc_eligibility(sim):
-        if not hasattr(sim.demographics, 'pregnancy'):
+        sched = sim.interventions.get('syph_anc_timer')
+        if sched is None:
             return ss.uids()
-        return sim.demographics.pregnancy.tri1_uids
+        return sched.today_uids
 
-    syph_anc_test = sti.SyphTest(
-        name='syph_anc_test', label='syph_anc_test',
-        product=gud_dx,
-        test_prob_data=anc_test_prob,
+    syph_anc_rpr = sti.SyphTest(
+        name='syph_anc_rpr', label='syph_anc_rpr',
+        product=rpr_dx,
+        years=anc_years,
+        test_prob_data=anc_probs,
         eligibility=anc_eligibility,
+        dt_scale=False,
     )
+    syph_anc_rpr.stop = rdt_year
 
-    return [syph_symp_test, syph_anc_test, syph_tx]
+    syph_anc_rdt = sti.SyphTest(
+        name='syph_anc_rdt', label='syph_anc_rdt',
+        product=dual_dx,
+        years=anc_years,
+        test_prob_data=anc_probs,
+        eligibility=anc_eligibility,
+        dt_scale=False,
+    )
+    syph_anc_rdt.start = rdt_year
+
+    return [syph_anc_timer, syph_symp_test, syph_anc_rpr, syph_anc_rdt, syph_tx]
 
 
 def make_testing(ng, ct, tv, bv, poc=None, pn_pars=None, stop=2040):
@@ -410,24 +541,51 @@ def make_testing(ng, ct, tv, bv, poc=None, pn_pars=None, stop=2040):
         outcome_treatment_map=outcome_treatment_map,
     )
 
-    # Index cases: women & men whose NG or CT treatment fired this step,
-    # excluding those who were themselves notified one step prior (avoid recursion).
-    def just_treated(sim):
-        ng_treated = sim.interventions.ng_tx.ti_treated == sim.interventions.ng_tx.ti
-        ct_treated = sim.interventions.ct_tx.ti_treated == sim.interventions.ct_tx.ti
-        if 'pn' in sim.interventions:
-            pn = sim.interventions.pn
+    # Baseline PN eligibility: anyone whose STI tx fired this step (NG/CT/TV/BV
+    # discharge-syndromic, or syph from GUD/ANC). Excludes agents who were
+    # themselves notified one step prior, to avoid feedback recursion.
+    def baseline_pn_eligibility(sim):
+        intv = sim.interventions
+        masks = []
+        for name in ('ng_tx', 'ct_tx', 'metronidazole', 'syph_tx'):
+            tx = intv.get(name)
+            if tx is not None:
+                masks.append(tx.ti_treated == tx.ti)
+        if not masks:
+            return ss.uids()
+        combined = masks[0]
+        for m in masks[1:]:
+            combined = combined | m
+        if 'pn' in intv:
+            pn = intv['pn']
             previous_index = pn.ti_notified == (pn.ti - 1)
-            return ((ng_treated | ct_treated) & ~previous_index).uids
-        return (ng_treated | ct_treated).uids
+            combined = combined & ~previous_index
+        return combined.uids
+
+    # Baseline rates: per-edge notification + per-(edge, partner-sex) attendance.
+    # Stable = marital; casual partnerships have lower notify + attend rates.
+    BASELINE_NOTIFY = {'stable': 0.20, 'casual': 0.10}
+    BASELINE_ATTEND = {'stable': {'f': 0.80, 'm': 0.50},
+                       'casual': {'f': 0.50, 'm': 0.25}}
 
     def make_pn():
+        # pn_pars may override the rate dicts or add other PartnerNotification
+        # kwargs (e.g. previous-channel params for intervention scenarios).
+        overrides = pn_pars or {}
+        notify = overrides.pop('notify_rates', BASELINE_NOTIFY)
+        attend = overrides.pop('attendance_rates', BASELINE_ATTEND)
         return SyndromicPN(
-            eligibility=just_treated,
+            eligibility=baseline_pn_eligibility,
             syndromic_vds=syndromic_vds,
             syndromic_uds=syndromic_uds,
             name='pn', label='pn',
-            **(pn_pars or {}),
+            pars=dict(
+                p_notify_current=ss.bernoulli(p=sti.pn_rates(notify)),
+                p_attends_current=ss.bernoulli(p=sti.pn_rates(attend)),
+                p_notify_previous=ss.bernoulli(p=0),    # current channel only
+                p_attends_previous=ss.bernoulli(p=0),
+            ),
+            **overrides,
         )
 
     intvs = [syndromic_vds, syndromic_uds, ng_tx, ct_tx, metronidazole]
@@ -446,7 +604,7 @@ def make_testing(ng, ct, tv, bv, poc=None, pn_pars=None, stop=2040):
         )
         intvs.append(panel)
 
-    if pn_pars is not None:
-        intvs.append(make_pn())
+    # Baseline PN is always on. Override rates or extend behavior via pn_pars.
+    intvs.append(make_pn())
 
     return intvs

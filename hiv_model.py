@@ -36,10 +36,10 @@ def get_testing_products():
 
 def make_hiv():
     return sti.HIV(
-        beta_m2f=0.035,
+        beta_m2f=0.008,
         eff_condom=0.95,
         init_prev_data=pd.read_csv('data/init_prev_hiv.csv'),
-        rel_init_prev=3.,
+        rel_init_prev=1.,
     )
 
 

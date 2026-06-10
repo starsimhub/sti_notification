@@ -14,6 +14,7 @@ import stisim as sti
 from interventions import make_testing, make_syph_testing
 from hiv_model import make_hiv, make_hiv_intvs
 from connectors import sti_fetal
+from analyzers import SyphTransmissionEvents
 
 LOCATION = 'zimbabwe'
 DATA_DIR = 'data'
@@ -41,10 +42,16 @@ def make_ulcerative_stis():
     init_prev_path = f'{DATA_DIR}/init_prev_syph.csv'
     init_prev_latent_path = f'{DATA_DIR}/init_prev_latent_syph.csv'
     syph = sti.Syphilis(
-        beta_m2f=0.05,
-        beta_m2c=1.,
+        beta_m2f=0.15,
+        beta_m2c=0.075,
         eff_condom=0.5,
-        rel_trans_latent_half_life=ss.years(1),
+        rel_trans_primary=5,
+        rel_trans_secondary=1,
+        rel_trans_latent=0.1,
+        rel_trans_latent_half_life=ss.months(6),
+        p_symp_primary=[0.3, 0.8],
+        anc_detection=1.,
+        rel_init_prev=0.2,
         init_prev_data=pd.read_csv(init_prev_path) if os.path.exists(init_prev_path) else None,
         init_prev_latent_data=pd.read_csv(init_prev_latent_path) if os.path.exists(init_prev_latent_path) else None,
     )
@@ -62,37 +69,58 @@ def make_diseases(which='all', care_seek_mult=1.0):
         analyzers.append(sti.sw_stats(diseases=['ng', 'ct', 'tv']))
     if which in ('ulcerative', 'all'):
         d.syph, d.gudp = make_ulcerative_stis()
+        # Original analyzer kept for back-compat (tracks syph.infected, 15-49)
+        analyzers.append(sti.coinfection_stats('syph', 'hiv', name='syph_hiv_coinfection'))
+        # ZIMPHIA-matched: trep and nontrep at 15-64
+        analyzers.append(sti.coinfection_stats(
+            'syph', 'hiv', disease1_infected_state_name='trep',
+            age_limits=[15, 64], name='syph_hiv_trep'))
+        analyzers.append(sti.coinfection_stats(
+            'syph', 'hiv', disease1_infected_state_name='nontrep',
+            age_limits=[15, 64], name='syph_hiv_nontrep'))
+        # Transmission event recorder (Lorenz + transmission matrix)
+        analyzers.append(SyphTransmissionEvents())
     return d, analyzers
 
 
 def make_networks(dur_recall=ss.years(0.25)):
     sexual = sti.StructuredSexual(
         prop_f0=0.67, prop_m0=0.55,
-        prop_f2=0.025, prop_m2=0.05,
-        f1_conc=0.05,
+        prop_f2=0.10, prop_m2=0.20,
+        concurrency_dist=ss.nbinom(n=2, p=0.5),
+        f1_conc=0.15, m1_conc=0.20,
+        f2_conc=1.0, m2_conc=4.4,
         recall_prior=True,
         condom_data=pd.read_csv(f'{DATA_DIR}/condom_use.csv'),
+        fsw_shares=ss.bernoulli(p=0.10),
+        client_shares=ss.bernoulli(p=0.20),
+        sw_seeking_rate=ss.permonth(20),
     )
     return [sexual, sti.PriorPartners(dur_recall=dur_recall), ss.MaternalNet()]
 
 
-def make_interventions(diseases, which='all', poc=None, pn_pars=None, stop=2040):
+def make_interventions(diseases, which='all', poc=None, pn_pars=None, stop=2040,
+                       syph_symp_test_prob=None, syph_anc_probs=None):
     intvs = make_hiv_intvs()
     if which in ('discharging', 'all'):
         intvs += make_testing(diseases.ng, diseases.ct, diseases.tv, diseases.bv,
                               poc=poc, pn_pars=pn_pars, stop=stop)
     if which in ('ulcerative', 'all'):
-        intvs += make_syph_testing(stop=stop)
+        intvs += make_syph_testing(stop=stop, symp_test_prob=syph_symp_test_prob,
+                                   anc_probs=syph_anc_probs)
     return intvs
 
 
 def make_sim(seed=1, n_agents=5e3, start=1985, stop=2030,
              pn_pars=None, poc=None, which='all', dur_recall=ss.years(0.25),
-             fetal_health=True, care_seek_mult=1.0):
+             fetal_health=True, care_seek_mult=1.0, verbose=1/12,
+             syph_symp_test_prob=None, syph_anc_probs=None):
 
     diseases, analyzers = make_diseases(which, care_seek_mult=care_seek_mult)
     networks = make_networks(dur_recall)
-    interventions = make_interventions(diseases, which=which, poc=poc, pn_pars=pn_pars, stop=stop)
+    interventions = make_interventions(diseases, which=which, poc=poc, pn_pars=pn_pars, stop=stop,
+                                       syph_symp_test_prob=syph_symp_test_prob,
+                                       syph_anc_probs=syph_anc_probs)
 
     # FetalHealth tracks adverse birth outcomes (LBW, SGA, SVN, timing); the
     # sti_fetal connector translates STI infections + treatments into
@@ -100,10 +128,16 @@ def make_sim(seed=1, n_agents=5e3, start=1985, stop=2030,
     # auto-connector machinery (hiv_*, etc.) still runs.
     custom = [ss.FetalHealth(), sti_fetal()] if fetal_health else None
 
+    # The Zimbabwe demographics CSV in data/ encodes age-cohort values in
+    # thousands of people, so starsim's auto-derived total_pop comes out as
+    # ~8686 (literal). Override to the actual 1985 Zimbabwe population
+    # (~8.7M) so per-agent count outputs (new_infections, n_alive, etc.)
+    # scale to absolute people rather than thousands-of-thousands.
     simpars = dict(
         rand_seed=seed, n_agents=n_agents,
         start=start, stop=stop,
-        use_migration=False, verbose=1/12,
+        use_migration=False, verbose=verbose,
+        total_pop=8.7e6,
     )
     # Coinfection connectors auto-added by sti.Sim. GUDPlaceholder is named
     # 'gudp' so the buggy `gud_syph` auto-connector isn't matched.
