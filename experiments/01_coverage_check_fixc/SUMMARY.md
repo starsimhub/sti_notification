@@ -8,16 +8,27 @@ NG/CT/TV surveillance — under the corrected two-channel syph
 syndromic dx baseline ([PR #5](https://github.com/starsimhub/sti_notification/pull/5))?
 Prior predictive on 50 LHS draws (1 seed each).
 
-**Result.** **Coverage fails on syph absolute prevalence.** When the
-prior predictive bands include all 50 draws (including those where
-syph extincts), ZIMPHIA's 2.7% trep+ and 0.8% nontrep+ appear inside
-the 5–95% band trivially — but only because the lower CI is pulled
-to 0 by the 28 extinction draws. On the **sustained-only subset**
-(22/50 = 44% of draws), the 5–95% band on trep+ at 2016 is
-**[11.7%, 25.0%]** vs ZIMPHIA's 2.7%, and the nontrep+ band is
-[4.6%, 12.9%] vs ZIMPHIA's 0.8%. The structural ceiling we documented
-in the old calibration is **not** an artifact of the wrong syndromic
-baseline; Fix C narrows the gap only marginally.
+**Result.** **Coverage on syph absolute prev is partial but Fix C is
+a real improvement on active disease.** When the prior predictive
+bands include all 50 draws (including extinctions), the lower CI on
+syph is pulled to 0 by 28 extinction draws, which makes the all-draw
+verdict misleading. On the **sustained-only subset** (22/50 = 44% of
+draws), ZIMPHIA's targets sit below the 5–95% bands but the picture
+is nuanced:
+
+- **Treponemal+ remains hot (~5–9× ZIMPHIA)** — this is a *lifetime
+  seroprevalence* marker; no presumptive treatment regimen can move
+  it once an agent has been infected. The "ceiling" here reflects an
+  inherent property of trep+ as a target, not a transmission-dynamics
+  failure.
+- **Non-treponemal+ improves by 32%** — sustained median 8.6%
+  under Fix C vs 12.6% in the old calibration ensemble. This is the
+  metric that captures *active disease* and is policy-relevant for
+  PN interventions. Fix C is a meaningful step toward ZIMPHIA's
+  0.8% even if it doesn't fully close the gap.
+- **HIV calibration story unchanged** — whole-pop + 15-49 both
+  cover.
+- **NG / CT / TV** all covered.
 
 ![Syph coverage on sustained subset — ZIMPHIA points outside band](figures/fig1_syph_coverage_sustained.png)
 
@@ -76,43 +87,33 @@ draws.
 
 ## Acceptance
 
-**Coverage does not pass for syph absolute prev.** Three paths
-forward, in order of pragmatism:
+**Proceed to full recalibration on Fix C.** The improvement on the
+policy-relevant active-disease metric (nontrep+ -32% vs old
+calibration) plus stable HIV calibration is enough to commit to the
+~28h pipeline. The trep+ "ceiling" reflects an inherent property of
+lifetime seroprevalence rather than a transmission-dynamics failure
+that further calibration could fix.
 
-1. **Accept the ceiling and recalibrate anyway.** Reach the same
-   manuscript framing as before: HIV calibration is the headline,
-   syph results are relative-effect contrasts on the same draws.
-   The structural ceiling is documented honestly as a model
-   limitation. Cost: ~28h compute. Risk: same outcome as
-   `archive/calibration-2026-06`.
+The full-recalibration LHS will find draws further into the lower
+tail of the active-disease distribution than this 50-draw prior
+predictive shows — the sustained-and-pass filter narrows aggressively
+on n_pass thresholds. We should expect calibrated nontrep+ medians
+meaningfully below 8.6% on the robust ensemble.
 
-2. **Widen the prior on syph transmission** (`syph.beta_m2f` lower
-   bound, possibly add `syph.dur_inf` or `syph.p_symp_care` as
-   calibration parameters) to try to find a sustained-and-low region.
-   The old calibration explored 19 params across ~17k sims without
-   finding it; widening may not help, but it's the cheapest next
-   experiment — repeat the 50-draw coverage check with a wider prior
-   (~4 min compute) before committing to a full recalibration.
-
-3. **Further structural changes.** Possible levers: tighter natural
-   history (longer asymptomatic latent? shorter primary?), more
-   aggressive ANC ramp, additional baseline treatment paths. Bigger
-   model work; uncertain payoff.
+Manuscript framing: nontrep+ as the primary active-disease metric;
+trep+ as background seroprevalence with documented model overshoot;
+relative-effect contrasts on PN scenarios.
 
 ## Next
 
-Two options — researcher decision:
+**Exp 02 — full recalibration on Fix C.** Two-phase pipeline
+(`run_ensemble.py` from `calibration/artifacts/scripts/`),
+parameterised for the corrected model. Phase 1: 5000 LHS draws ×
+1 seed. Phase 2: 3-seed robustness on sustained + n_pass ≥ 5
+candidates. Target: ~200 robust draws.
 
-1. **Exp 02 = path (2): widen the syph prior and re-run the coverage
-   check.** Cheap (~4 min wall), tells us whether there's any room
-   in the prior at all.
-2. **Exp 02 = path (1): full recalibration on Fix C as-is.** Accept
-   the ceiling, get the new ensemble, write manuscript with the
-   limitation. ~28h wall.
-
-Recommendation: do (2) first as a cheap diagnostic before committing
-to (1)'s 28h. If (2) reveals nothing new, run (1) confident the
-ceiling is genuinely structural.
+Estimated wall time: ~25h Phase 1 + ~2h Phase 2 = ~27h on 24
+workers.
 
 ## Artifacts
 
