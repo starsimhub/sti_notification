@@ -11,7 +11,7 @@ import sciris as sc
 import pandas as pd
 import stisim as sti
 
-from interventions import make_testing, make_syph_testing
+from interventions import make_testing, make_syph_testing, make_pn
 from hiv_model import make_hiv, make_hiv_intvs
 from connectors import sti_fetal
 from analyzers import SyphTransmissionEvents
@@ -24,10 +24,17 @@ def make_discharging_stis(care_seek_mult=1.0):
     """
     Build NG/CT/TV/BV disease modules. ``care_seek_mult`` scales the
     symptomatic care-seeking probability for NG/CT/TV (clipped to [0,1]),
-    used as a scenario lever for the outreach sweep.
+    used as a scenario lever for demand-generation sweeps. Accepts:
+      * scalar: applied equally to F and M
+      * (mult_f, mult_m) tuple: sex-specific scaling
     """
+    if hasattr(care_seek_mult, '__len__'):
+        mult_f, mult_m = float(care_seek_mult[0]), float(care_seek_mult[1])
+    else:
+        mult_f = mult_m = float(care_seek_mult)
     def scaled(care_pair):
-        return [min(1.0, c * care_seek_mult) for c in care_pair]
+        return [min(1.0, care_pair[0] * mult_f),
+                min(1.0, care_pair[1] * mult_m)]
     ng = sti.Gonorrhea(eff_condom=0.7, beta_m2f=0.12, p_symp=[0.13, 0.65],
                       p_symp_care=scaled([0.49, 0.83]))
     ct = sti.Chlamydia(eff_condom=0.8, beta_m2f=0.15, p_symp=[0.30, 0.54],
@@ -99,28 +106,70 @@ def make_networks(dur_recall=ss.years(0.25)):
     return [sexual, sti.PriorPartners(dur_recall=dur_recall), ss.MaternalNet()]
 
 
-def make_interventions(diseases, which='all', poc=None, pn_pars=None, stop=2040,
-                       syph_symp_test_prob=None, syph_anc_probs=None):
+def make_interventions(diseases, which='all', poc=None, poc_syph=None,
+                       pn_pars=None, stop=2040,
+                       syph_symp_test_prob=None, syph_anc_probs=None,
+                       fsw_outreach=False, fsw_coverage_per_step=0.10):
+    """Orchestrate intervention construction.
+
+    Layout (top to bottom in the returned list):
+      1. HIV interventions
+      2. NG/CT/TV testing + treatment (from make_testing)
+      3. Syph testing + treatment (from make_syph_testing)
+      4. PN intervention (from make_pn), shared across all diseases
+
+    PN is built once at this level with explicit pn_pars routing — it
+    is NOT built inside make_testing or make_syph_testing. POCPN /
+    SyndromicPN look up the per-disease tests / panels they route to
+    by name at step time.
+
+    poc controls the NG/CT/TV SymptomaticTesting panel; poc_syph
+    controls the syph ulcer-channel product swap (syndromic_gud →
+    gud2) at intv_year. Separated so an experiment can enable one
+    without the other. If poc_syph is None, it falls back to poc.
+    """
+    if poc_syph is None:
+        poc_syph = poc
     intvs = make_hiv_intvs()
     if which in ('discharging', 'all'):
         intvs += make_testing(diseases.ng, diseases.ct, diseases.tv, diseases.bv,
-                              poc=poc, pn_pars=pn_pars, stop=stop)
+                              poc=poc, stop=stop,
+                              fsw_outreach=fsw_outreach,
+                              fsw_coverage_per_step=fsw_coverage_per_step)
+    # Insert PN AFTER make_testing but BEFORE make_syph_testing. This
+    # order matters: POCPN.notify_attendees fires syph_pn_test.step on
+    # attending partners, which sets ti_positive. syph_tx (last
+    # intervention in make_syph_testing) reads ti_positive == ti to
+    # decide who to treat. If PN ran AFTER syph_tx, those PN-driven
+    # syph positives would never be treated — same-step they're missed
+    # (syph_tx already ran), next-step they're stale (ti_positive value
+    # no longer matches syph_tx.ti). NG/CT/TV cascades survive that bug
+    # because their treatments key off persistent tx.eligibility rather
+    # than per-step ti_positive.
+    if which in ('discharging', 'all'):
+        intvs.append(make_pn(poc=poc, pn_pars=pn_pars))
     if which in ('ulcerative', 'all'):
         intvs += make_syph_testing(stop=stop, symp_test_prob=syph_symp_test_prob,
-                                   anc_probs=syph_anc_probs)
+                                   anc_probs=syph_anc_probs, poc=bool(poc_syph))
     return intvs
 
 
 def make_sim(seed=1, n_agents=5e3, start=1985, stop=2030,
-             pn_pars=None, poc=None, which='all', dur_recall=ss.years(0.25),
+             pn_pars=None, poc=None, poc_syph=None, which='all',
+             dur_recall=ss.years(0.25),
              fetal_health=True, care_seek_mult=1.0, verbose=1/12,
-             syph_symp_test_prob=None, syph_anc_probs=None):
+             syph_symp_test_prob=None, syph_anc_probs=None,
+             fsw_outreach=False, fsw_coverage_per_step=0.10):
 
     diseases, analyzers = make_diseases(which, care_seek_mult=care_seek_mult)
     networks = make_networks(dur_recall)
-    interventions = make_interventions(diseases, which=which, poc=poc, pn_pars=pn_pars, stop=stop,
+    interventions = make_interventions(diseases, which=which, poc=poc,
+                                       poc_syph=poc_syph,
+                                       pn_pars=pn_pars, stop=stop,
                                        syph_symp_test_prob=syph_symp_test_prob,
-                                       syph_anc_probs=syph_anc_probs)
+                                       syph_anc_probs=syph_anc_probs,
+                                       fsw_outreach=fsw_outreach,
+                                       fsw_coverage_per_step=fsw_coverage_per_step)
 
     # FetalHealth tracks adverse birth outcomes (LBW, SGA, SVN, timing); the
     # sti_fetal connector translates STI infections + treatments into
