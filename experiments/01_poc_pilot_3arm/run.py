@@ -113,6 +113,25 @@ def build_sim(seed, sim_pars, poc, pn_pars, fsw_outreach=False,
                    fsw_outreach=fsw_outreach,
                    care_seek_mult=care_seek_mult)
     set_pars_local(sim, sim_pars)
+
+    # Apply syph care-seeking multiplier as a MULTIPLIER on top of the
+    # post-set_pars_local rel_test (which includes per-draw calibrated
+    # rel_test for syph_symp_test). Constructing with rel_test=mult
+    # would lose to set_pars_local overwriting it; multiplying here
+    # composes the two cleanly.
+    if hasattr(care_seek_mult, '__len__'):
+        syph_mult = float(care_seek_mult[0])
+    else:
+        syph_mult = float(care_seek_mult)
+    if syph_mult != 1.0:
+        # sti.Sim stores interventions in a list pre-init; iterate by
+        # name match (same convention as set_pars_local).
+        target_names = {'syph_symp_test', 'syph_symp_test_poc',
+                        'syph_rash_test'}
+        for intv in sim.pars['interventions']:
+            if getattr(intv, 'name', None) in target_names:
+                intv.pars.rel_test = float(intv.pars.rel_test) * syph_mult
+
     for mod in sim.pars['diseases']:
         if getattr(mod, 'name', None) == 'syph':
             mod.store_sw = True
@@ -268,16 +287,20 @@ def extract_endpoints(sim, arm_label, draw_idx, seed):
     care_timing = (sim.analyzers.get('care_timing')
                    if hasattr(sim.analyzers, 'get') else None)
     if care_timing is not None:
+        # Multi-window: read every {d}_inf_treated_within_{N}mo result
+        # the analyzer produces. Default windows are (3, 6) but accept
+        # any. Episode treatment rate = treated_within_window / new_inf.
         for d in ('ng', 'ct', 'tv', 'syph'):
-            key = f'{d}_inf_treated_within_window'
-            if key in care_timing.results:
-                rows[f'{d}_cured_within_3mo_2027_2040'] = sum_over_window(
+            for w in getattr(care_timing, 'windows_months', [3, 6]):
+                key = f'{d}_inf_treated_within_{w}mo'
+                if key not in care_timing.results:
+                    continue
+                rows[f'{d}_treated_within_{w}mo_2027_2040'] = sum_over_window(
                     care_timing.results[key], INTV_YEAR, END_YEAR)
-                # Episode coverage = cured_in_window / new_inf
-                num = rows.get(f'{d}_cured_within_3mo_2027_2040')
+                num = rows.get(f'{d}_treated_within_{w}mo_2027_2040')
                 den = rows.get(f'{d}_new_inf_2027_2040')
                 if num is not None and den is not None and den > 0:
-                    rows[f'{d}_prop_cured_3mo'] = float(num) / float(den)
+                    rows[f'{d}_prop_treated_{w}mo'] = float(num) / float(den)
 
     return rows
 

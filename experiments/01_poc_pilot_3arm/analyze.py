@@ -228,23 +228,21 @@ def write_summary(df, arms):
                   f'reaches further into casual partnerships with lower '
                   f'STI co-prev → wasted-fraction creeps up.')
 
-    # Strict 3-month cure rate vs lax event-ratio — the lax metric
-    # overstated coverage because it counted re-infections and treatments
-    # of pre-window infections. Highlight the gap.
+    # Per-episode treatment rate at 3 + 6 months. This is the metric the
+    # downstream figures use — the per-event "tx_success/new_inf" ratio
+    # is no longer reported in the headline.
     md.append('')
-    md.append('Per-episode "treated within 3 months of acquisition" metric '
-              '(`CareTimingAnalyzer`): much stricter than the lax '
-              '`tx_success/new_inf` event-ratio (which double-counts '
-              're-infections + pre-window cures). Compare A vs E3:')
+    md.append('Per-episode "treated within N months of acquisition" '
+              '(`CareTimingAnalyzer`, A vs E3):')
     for d in ('ng', 'ct', 'tv', 'syph'):
-        lax_a = arm_mean(df, 'A_soc', f'{d}_prop_treated')
-        strict_a = arm_mean(df, 'A_soc', f'{d}_prop_cured_3mo')
-        lax_e3 = arm_mean(df, 'E3_d_careseek_3x', f'{d}_prop_treated')
-        strict_e3 = arm_mean(df, 'E3_d_careseek_3x', f'{d}_prop_cured_3mo')
-        if all(np.isfinite([lax_a, strict_a, lax_e3, strict_e3])):
-            md.append(f'  - **{d.upper()}:** A lax {fmt_pct(lax_a)} → '
-                      f'strict {fmt_pct(strict_a)} ; E3 lax '
-                      f'{fmt_pct(lax_e3)} → strict {fmt_pct(strict_e3)}.')
+        rate_3a = arm_mean(df, 'A_soc', f'{d}_prop_treated_3mo')
+        rate_6a = arm_mean(df, 'A_soc', f'{d}_prop_treated_6mo')
+        rate_3e = arm_mean(df, 'E3_d_careseek_3x', f'{d}_prop_treated_3mo')
+        rate_6e = arm_mean(df, 'E3_d_careseek_3x', f'{d}_prop_treated_6mo')
+        if all(np.isfinite([rate_3a, rate_6a, rate_3e, rate_6e])):
+            md.append(f'  - **{d.upper()} (A → E3):** 3-mo '
+                      f'{fmt_pct(rate_3a)} → {fmt_pct(rate_3e)} ; 6-mo '
+                      f'{fmt_pct(rate_6a)} → {fmt_pct(rate_6e)}.')
 
     md.append('')
     md.append('**Syph APO:** stisim\'s `new_congenital` ~33-36K cases per '
@@ -286,10 +284,8 @@ def write_summary(df, arms):
             (f'{disease}_tx_unnec_2027_2040', '  unnecessary',           'M'),
             (f'{disease}_n_infected_end',     'n_infected (point, 2040)','K'),
             (prev_col,                        prev_label,                'prev'),
-            (f'{disease}_prop_treated',       'Prop new inf treated (event-ratio, lax)','prev'),
-            (f'{disease}_prop_treated_f',     '  — F',                   'prev'),
-            (f'{disease}_prop_treated_m',     '  — M',                   'prev'),
-            (f'{disease}_prop_cured_3mo',     'Prop new inf cured w/in 3mo (per-episode, strict)','prev'),
+            (f'{disease}_prop_treated_3mo',   '3-month treatment rate',  'prev'),
+            (f'{disease}_prop_treated_6mo',   '6-month treatment rate',  'prev'),
         ]:
             cells = [label]
             for a in arms:

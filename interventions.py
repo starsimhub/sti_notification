@@ -832,6 +832,15 @@ def make_syph_testing(stop=2040, symp_test_prob=None, rdt_year=2012,
     # step). With dt_scale=True (stisim default) these would have been
     # divided by 12 → effectively no symptomatic treatment of primary syph,
     # which was a silent bug.
+    # rel_test scales the per-step test probability inside SyphTest
+    # (stisim base STITest line ~195: test_prob *= self.pars.rel_test,
+    # then clipped to [0, 1]). For care-seeking demand-gen we apply
+    # care_seek_mult as a MULTIPLIER on top of whatever rel_test ends
+    # up at — which matters because the calibration pipeline overrides
+    # syph_symp_test.rel_test via set_pars_local after construction.
+    # The applied scaling happens in build_sim (run.py) post-init, NOT
+    # here at construction time. ANC pathway is not scaled — ANC is
+    # opportunistic, not care-seeking-driven.
     syph_symp_test = sti.SyphTest(
         name='syph_symp_test', label='syph_symp_test',
         product=gud_dx,

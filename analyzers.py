@@ -107,50 +107,58 @@ class SyphTransmissionEvents(ss.Analyzer):
 
 
 class CareTimingAnalyzer(ss.Analyzer):
-    """Per-episode "treated within N months of acquisition" metric.
+    """Per-episode "treated within N months of acquisition" metric, for
+    one or more windows simultaneously (3mo + 6mo, etc.).
 
     Stricter than ``tx_success / new_inf`` (which counts ALL successful
     treatments and ALL new infections in window — re-infections inflate
     both num and denom, and treatments of pre-window infections inflate
     only the numerator). This metric is per-episode:
 
-      ``inf_treated_within_window`` = "agent was newly infected at time
-      T then successfully treated within ``window_months`` of T".
+      ``{d}_inf_treated_within_{N}mo`` = "agent was newly infected at
+      time T then successfully treated within N months of T".
 
     For each disease tracks a per-agent ``ti_last_inf`` (overwritten on
     every new infection event for that agent), then on each step
     inspects every linked treatment's ``outcomes[disease].successful``
     uids; for each successful uid checks whether
-    ``(ti - ti_last_inf) <= window_steps``. If yes, increments the
-    result; if no, the infection was "old" (treated after delay).
+    ``(ti - ti_last_inf) <= window_steps_N`` for each window N. If yes,
+    increments the corresponding result. A cure at 4 months counts for
+    the 6mo result but not the 3mo result.
 
     Args:
-        disease_names: list of disease names to track (e.g.
-            ['ng', 'ct', 'tv', 'syph']).
+        disease_names: list of disease names to track.
         treatment_disease_map: dict mapping treatment intervention name
-            to disease name (e.g. {'ng_tx': 'ng', 'ct_tx': 'ct',
-            'metronidazole': 'tv', 'syph_tx': 'syph'}).
-        window_months: cure-timing window in months (default 3).
+            to disease name.
+        windows_months: list of cure-timing windows in months
+            (default [3, 6]).
         name: analyzer name (default 'care_timing').
 
     Reads:
-        sim.diseases[d].ti_infected per step (newly-infected detection)
-        sim.interventions[tx].outcomes[d].successful per step (cure events)
+        sim.diseases[d].ti_infected per step.
+        sim.interventions[tx].outcomes[d].successful per step.
 
-    Writes:
-        results[f'{d}_inf_treated_within_window'] per disease, indexed
-        by the timestep on which the CURE happened (not the infection
-        timestep — that's the trade-off for streaming aggregation).
-        Sum over window for the numerator; pair with
-        sim.results[d].new_infections for the denominator.
+    Writes (per disease, per window):
+        results[f'{d}_inf_treated_within_{N}mo'], indexed by the
+        timestep on which the CURE happened. Sum over window for the
+        numerator; pair with sim.results[d].new_infections for the
+        denominator.
+
+    Backwards-compat: accepts ``window_months=`` (singular) as well;
+    converted to a one-element list internally.
     """
     def __init__(self, disease_names, treatment_disease_map,
-                 window_months=3, name='care_timing', *args, **kwargs):
+                 windows_months=None, window_months=None,
+                 name='care_timing', *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.name = name
         self.disease_names = list(disease_names)
         self.treatment_disease_map = dict(treatment_disease_map)
-        self.window_months = window_months
+        if windows_months is None and window_months is not None:
+            windows_months = [int(window_months)]
+        if windows_months is None:
+            windows_months = [3, 6]
+        self.windows_months = [int(w) for w in windows_months]
         states = [ss.FloatArr(f'{d}_ti_last_inf', default=np.nan)
                   for d in self.disease_names]
         self.define_states(*states)
@@ -159,25 +167,23 @@ class CareTimingAnalyzer(ss.Analyzer):
         super().init_results()
         results = sc.autolist()
         for d in self.disease_names:
-            results += [
-                ss.Result(f'{d}_inf_treated_within_window', dtype=int,
-                          label=(f'{d} infections cured within '
-                                 f'{self.window_months}mo'),
-                          auto_plot=False),
-            ]
+            for w in self.windows_months:
+                results += [
+                    ss.Result(f'{d}_inf_treated_within_{w}mo', dtype=int,
+                              label=(f'{d} infections treated within '
+                                     f'{w}mo of acquisition'),
+                              auto_plot=False),
+                ]
         self.define_results(*results)
 
     def step(self):
         sim = self.sim
         ti = self.ti
-        # Convert window from months to integer timesteps. dt_year is
-        # the fractional year per step (1/12 for monthly).
         dt_year = sim.t.dt_year if sim.t.dt_year else 1/12
-        n_steps_window = max(1, int(round(self.window_months / 12.0 / dt_year)))
+        window_steps = {w: max(1, int(round(w / 12.0 / dt_year)))
+                        for w in self.windows_months}
 
         # 1. Update ti_last_inf for agents newly infected this step.
-        #    Overwrites any prior value — re-infections start a new
-        #    clock automatically.
         for d in self.disease_names:
             disease = sim.diseases.get(d)
             if disease is None:
@@ -187,10 +193,7 @@ class CareTimingAnalyzer(ss.Analyzer):
             if len(new_inf):
                 ti_arr[new_inf] = ti
 
-        # 2. For each tracked treatment, read its outcomes[disease]
-        #    .successful and check window. Note: stisim base STITreatment
-        #    populates outcomes inside step(); analyzers fire AFTER
-        #    interventions, so by here the outcomes are set for this ti.
+        # 2. For each tracked treatment, check window membership.
         for tx_name, d in self.treatment_disease_map.items():
             tx = sim.interventions.get(tx_name)
             if tx is None:
@@ -207,8 +210,11 @@ class CareTimingAnalyzer(ss.Analyzer):
                 continue
             ti_arr = getattr(self, f'{d}_ti_last_inf')
             last_inf = ti_arr[succ]
-            in_window = (~np.isnan(last_inf)) & ((ti - last_inf) <= n_steps_window)
-            n_in = int(in_window.sum())
-            if n_in:
-                self.results[f'{d}_inf_treated_within_window'][ti] += n_in
+            valid = ~np.isnan(last_inf)
+            gap = ti - last_inf
+            for w, n_steps in window_steps.items():
+                in_window = valid & (gap <= n_steps)
+                n_in = int(in_window.sum())
+                if n_in:
+                    self.results[f'{d}_inf_treated_within_{w}mo'][ti] += n_in
         return
