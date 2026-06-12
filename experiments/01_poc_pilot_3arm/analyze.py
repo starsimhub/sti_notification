@@ -34,9 +34,9 @@ ARM_LABEL = {
     'C2_poc_pn_2x':        'C2: POC, PN 2×',
     'C3_poc_pn_3x':        'C3: POC, PN 3×',
     'D_poc_pn_3x_fsw_out': 'D: C3 + FSW outreach (~70%/yr)',
-    'E1_d_careseek_1_5x':  'E1: D + care-seeking ×1.5',
-    'E2_d_careseek_2x':    'E2: D + care-seeking ×2',
-    'E3_d_careseek_3x':    'E3: D + care-seeking ×3 (ceiling)',
+    'E1_d_careseek_1_5x':  'E1: D + care-seeking ×1.5 (NG/CT/TV/syph)',
+    'E2_d_careseek_2x':    'E2: D + care-seeking ×2 (NG/CT/TV/syph)',
+    'E3_d_careseek_3x':    'E3: D + care-seeking ×3 ceiling (NG/CT/TV/syph)',
 }
 
 DISEASES = ['syph', 'ng', 'ct', 'tv', 'bv']
@@ -163,19 +163,27 @@ def write_summary(df, arms):
                       f'{parts}. E2 vs A: '
                       f'{fmt_pct_change(rel_e2_vs_a)} relative.')
 
-    a_pev = arm_mean(df, 'A_soc', 'syph_sti_prev_end')
-    b_pev = arm_mean(df, 'B_poc_baseline', 'syph_sti_prev_end')
-    c3_pev = arm_mean(df, 'C3_poc_pn_3x', 'syph_sti_prev_end')
-    d_pev = arm_mean(df, 'D_poc_pn_3x_fsw_out', 'syph_sti_prev_end')
-    if all(np.isfinite([a_pev, b_pev, c3_pev, d_pev])):
+    pev = {a: arm_mean(df, k, 'syph_sti_prev_end')
+           for a, k in (('A','A_soc'), ('B','B_poc_baseline'),
+                        ('C3','C3_poc_pn_3x'),
+                        ('D','D_poc_pn_3x_fsw_out'),
+                        ('E2','E2_d_careseek_2x'),
+                        ('E3','E3_d_careseek_3x'))}
+    if all(np.isfinite(list(pev.values()))):
+        parts = ' → '.join(f'{fmt_pct(v)} ({k})' for k, v in pev.items())
+        rel_e3_vs_a = pev['E3']/pev['A'] - 1 if pev['A'] else float('nan')
         md.append(f'  - **Syph sexually-transmissible prevalence at 2040** '
                   f'(primary + secondary + early latent — WHO early '
-                  f'infectious syphilis): {fmt_pct(a_pev)} (A) → '
-                  f'{fmt_pct(b_pev)} (B) → {fmt_pct(c3_pev)} (C3) → '
-                  f'{fmt_pct(d_pev)} (D). Total syph prev not reported — '
-                  f'the calibration ensemble overshoots total syph prev '
-                  f'(latent/tertiary), so the policy-relevant slice is '
-                  f'the sexually-transmissible fraction.')
+                  f'infectious syphilis): {parts}. E3 vs A: '
+                  f'{fmt_pct_change(rel_e3_vs_a)} relative. The E-arms '
+                  f'care-seeking multiplier scales syph symp_test_prob '
+                  f'in addition to NG/CT/TV `p_symp_care` — so syph '
+                  f'finally responds to demand-gen, in contrast to the '
+                  f'earlier flat C3→D→E2 (where E only scaled NG/CT/TV). '
+                  f'Total syph prev not reported — the calibration '
+                  f'ensemble overshoots total syph prev (latent/tertiary), '
+                  f'so the policy-relevant slice is the sexually-'
+                  f'transmissible fraction.')
 
     a_su = arm_mean(df, 'A_soc', 'syph_tx_unnec_2027_2040')
     b_su = arm_mean(df, 'B_poc_baseline', 'syph_tx_unnec_2027_2040')

@@ -144,7 +144,8 @@ def make_networks(dur_recall=ss.years(0.25)):
 def make_interventions(diseases, which='all', poc=None, poc_syph=None,
                        pn_pars=None, stop=2040,
                        syph_symp_test_prob=None, syph_anc_probs=None,
-                       fsw_outreach=False, fsw_coverage_per_step=0.10):
+                       fsw_outreach=False, fsw_coverage_per_step=0.10,
+                       syph_care_seek_mult=1.0):
     """Orchestrate intervention construction.
 
     Layout (top to bottom in the returned list):
@@ -184,7 +185,20 @@ def make_interventions(diseases, which='all', poc=None, poc_syph=None,
     if which in ('discharging', 'all'):
         intvs.append(make_pn(poc=poc, pn_pars=pn_pars))
     if which in ('ulcerative', 'all'):
-        intvs += make_syph_testing(stop=stop, symp_test_prob=syph_symp_test_prob,
+        # Scale syph symptomatic care-seeking (used by syph_symp_test and
+        # syph_rash_test as test_prob_data). The CSV's symp_test_prob
+        # column is the per-step probability of seeking care + getting
+        # tested given visible syph symptoms. Multiply by
+        # syph_care_seek_mult, clip to 1.0. Note: ANC pathway is not
+        # touched — ANC testing is opportunistic at the visit, not
+        # care-seeking-driven.
+        scaled_prob = syph_symp_test_prob
+        if syph_care_seek_mult != 1.0 and syph_symp_test_prob is not None:
+            scaled_prob = syph_symp_test_prob.copy()
+            scaled_prob['symp_test_prob'] = (
+                scaled_prob['symp_test_prob'] * float(syph_care_seek_mult)
+            ).clip(upper=1.0)
+        intvs += make_syph_testing(stop=stop, symp_test_prob=scaled_prob,
                                    anc_probs=syph_anc_probs, poc=bool(poc_syph))
     return intvs
 
@@ -194,7 +208,20 @@ def make_sim(seed=1, n_agents=5e3, start=1985, stop=2030,
              dur_recall=ss.years(0.25),
              fetal_health=True, care_seek_mult=1.0, verbose=1/12,
              syph_symp_test_prob=None, syph_anc_probs=None,
-             fsw_outreach=False, fsw_coverage_per_step=0.10):
+             fsw_outreach=False, fsw_coverage_per_step=0.10,
+             syph_care_seek_mult=None):
+    """syph_care_seek_mult scales the syph symptomatic-test probability
+    (the care-seeking rate for visibly-symptomatic syph patients) by
+    multiplying the symp_test_prob CSV column. ANC remains untouched —
+    ANC is opportunistic, not care-seeking-driven. If None, mirrors
+    care_seek_mult (scalar; first element of a (F, M) tuple) so a
+    single `care_seek_mult=2.0` scales NG/CT/TV and syph together."""
+
+    if syph_care_seek_mult is None:
+        if hasattr(care_seek_mult, '__len__'):
+            syph_care_seek_mult = float(care_seek_mult[0])
+        else:
+            syph_care_seek_mult = float(care_seek_mult)
 
     diseases, analyzers = make_diseases(which, care_seek_mult=care_seek_mult)
     networks = make_networks(dur_recall)
@@ -204,7 +231,8 @@ def make_sim(seed=1, n_agents=5e3, start=1985, stop=2030,
                                        syph_symp_test_prob=syph_symp_test_prob,
                                        syph_anc_probs=syph_anc_probs,
                                        fsw_outreach=fsw_outreach,
-                                       fsw_coverage_per_step=fsw_coverage_per_step)
+                                       fsw_coverage_per_step=fsw_coverage_per_step,
+                                       syph_care_seek_mult=syph_care_seek_mult)
 
     # FetalHealth tracks adverse birth outcomes (LBW, SGA, SVN, timing); the
     # sti_fetal connector translates STI infections + treatments into

@@ -13,9 +13,13 @@ Arms:
   C2_poc_pn_2x         : POC etiological NG/CT/TV + POC syph + 2.0x baseline PN
   C3_poc_pn_3x         : POC etiological NG/CT/TV + POC syph + 3.0x baseline PN
   D_poc_pn_3x_fsw_out  : C3 stack + direct FSW NG/CT/TV outreach (~70% annual reach)
-  E1_d_careseek_1_5x   : D stack + symptomatic care-seeking ×1.5 (F+M)
-  E2_d_careseek_2x     : D stack + symptomatic care-seeking ×2.0 (F+M)
+  E1_d_careseek_1_5x   : D stack + symptomatic care-seeking ×1.5 (F+M, all four STIs incl. syph)
+  E2_d_careseek_2x     : D stack + symptomatic care-seeking ×2.0 (F+M, all four STIs incl. syph)
   E3_d_careseek_3x     : D stack + symptomatic care-seeking ×3.0 (F+M; near-ceiling)
+The care_seek multiplier scales NG/CT/TV p_symp_care AND the syph
+symp_test_prob CSV column simultaneously (the latter is the symptomatic
+syph care-seeking rate). ANC pathway is untouched — ANC testing is
+opportunistic at the visit, not care-seeking-driven.
 
 POC switch happens at intv_year (2027). In POC arms, syndromic_vds and
 syndromic_uds stop at intv_year; the POCPanel takes over for both
