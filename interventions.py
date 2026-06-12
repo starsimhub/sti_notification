@@ -7,7 +7,6 @@ import starsim as ss
 import numpy as np
 import pandas as pd
 import sciris as sc
-from collections import defaultdict
 
 
 class GonorrheaTreatmentFixed(sti.GonorrheaTreatment):
@@ -296,87 +295,60 @@ class SyndromicMgmt(sti.STITest):
 
 
 class PartnerNotificationNoCycle(sti.PartnerNotification):
+    """sti.PartnerNotification with A→B→A cycle prevention and two extra
+    result endpoints (wasted attendance + false-alarm index).
+
+    **Cycle prevention.** Each agent stores ``ti_last_index`` — the
+    timestep on which they last triggered PN as an index case. When
+    building the partner-candidate dict, any candidate whose
+    ``ti_last_index`` is within ``cycle_memory_steps`` of the current
+    step is dropped. ``_build_partner_edges`` delegates the edge walk
+    to the base class and applies the filter to the returned
+    ``{partner_uid: [edge_types]}`` dict.
+
+    This is a slight over-block vs. true per-pair cycle filtering:
+    a candidate ``P`` who was an index in step *t-Δ* is dropped from
+    ALL partner-of-index roles in step *t*, not just from the specific
+    ``(index, partner)`` edge where ``P`` was originally the notifier.
+    In our network model at the PN intensities we run, the overlap
+    is small. A perfect per-pair filter would need the base
+    PartnerNotification to expose per-edge (index, partner) pairs —
+    candidate for an upstream extension.
+
+    Prior-partner channel is not cycle-filtered — we don't use it
+    (p_notify_previous=0 in our arms).
+
+    **Endpoints.** See ``init_results``.
+
+    Args:
+        cycle_memory_steps (int): how many timesteps a recent index is
+            blocked from being a partner candidate. Default 12 (≈ 1 yr
+            on monthly dt). Pass ``None`` for unbounded memory.
     """
-    PartnerNotification base class with A→B→A cycle prevention.
-
-    Tracks ``last_notifier[uid]`` = the agent who most recently notified
-    this uid. When that agent becomes an index case, the (index, partner)
-    edge to their last_notifier is dropped — A→B→A back-notification is
-    blocked while chain propagation A→B→C still works.
-
-    Cycle prevention happens inside ``_build_partner_edges`` (edges
-    filtered per-pair before notification/attendance bernoullis fire).
-    After the step's notifications resolve, ``last_notifier`` is updated
-    for newly-notified agents using the (index, partner) pair table
-    stashed during the build.
-
-    Caveats:
-      - Single-slot last_notifier: only the *most recent* notifier is
-        remembered. If C notifies B after A did, last_notifier[B]=C and
-        A→B→A is no longer blocked. In practice notifications happen
-        across many timesteps so this is rarely the bottleneck.
-      - Prior-partner channel (PriorPartners) is not cycle-filtered —
-        we don't use it (p_notify_previous=0 in our arms).
-    """
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, cycle_memory_steps=12, **kwargs):
         super().__init__(*args, **kwargs)
+        self.cycle_memory_steps = cycle_memory_steps
         self.define_states(
-            ss.FloatArr('last_notifier', default=-1.0,
-                        label='UID of most recent notifier'),
+            ss.FloatArr('ti_last_index', default=np.nan,
+                        label='ti when this agent last triggered PN as an index'),
         )
-        self._pair_partners = None
-        self._pair_indices = None
-
-    def _build_partner_edges(self, nw, index_uids):
-        in_p1 = np.isin(nw.p1, index_uids)
-        in_p2 = np.isin(nw.p2, index_uids)
-        partner_uids = np.concatenate([nw.p2[in_p1], nw.p1[in_p2]])
-        edge_types = np.concatenate([nw.edges.edge_type[in_p1],
-                                     nw.edges.edge_type[in_p2]])
-        index_per_edge = np.concatenate([nw.p1[in_p1], nw.p2[in_p2]])
-
-        # Drop edges where the partner is itself an index case
-        keep = ~np.isin(partner_uids, index_uids)
-        partner_uids = partner_uids[keep]
-        edge_types = edge_types[keep]
-        index_per_edge = index_per_edge[keep]
-
-        # Cycle prevention: drop (index, partner) edges where the partner
-        # was the index's most recent notifier (A→B→A guard).
-        if len(partner_uids):
-            ln_of_idx = np.asarray(self.last_notifier[ss.uids(index_per_edge)])
-            keep_nocycle = ln_of_idx != partner_uids.astype(float)
-            partner_uids = partner_uids[keep_nocycle]
-            edge_types = edge_types[keep_nocycle]
-            index_per_edge = index_per_edge[keep_nocycle]
-
-        # Stash for last_notifier update at end of step
-        self._pair_partners = partner_uids
-        self._pair_indices = index_per_edge
-
-        partner_edges = defaultdict(list)
-        for uid, et in zip(partner_uids, edge_types):
-            partner_edges[int(uid)].append(int(et))
-        return partner_edges
 
     def init_results(self):
         super().init_results()
-        # Wasted-attendance endpoint: attendees with no current STI to find.
-        # BV is intentionally excluded — PN is meant to interrupt sexual
-        # transmission, and BV is not sexually transmitted in this model.
-        # So an attendee whose only "infection" is BV still counts as a
-        # wasted PN trip for STI-interruption purposes.
+        # Wasted-attendance endpoint: attendees with no current STI.
+        # BV is intentionally excluded — BV is not sexually transmitted
+        # in this model, so an attendee whose only "infection" is BV
+        # still counts as a wasted PN trip for STI-interruption purposes.
         #
         # False-alarm-index endpoint: indices who triggered PN but had no
-        # current STI at the moment of treatment (their treatment was
-        # over-treatment for at least one STI and they had no other STI
-        # being correctly treated). Computed from tx.outcomes — STITreatment
-        # builds outcomes[disease].{successful, unsuccessful, unnecessary}
-        # per step. An index UID is "false alarm" if it appears in
-        # outcomes[d].unnecessary for SOME STI d in {ng, ct, tv, syph} but
-        # does NOT appear in outcomes[d].(successful|unsuccessful) for ANY
-        # STI in the same set. Only NG/CT/TV/syph count — BV doesn't
-        # justify partner notification.
+        # current STI at the moment of treatment (their triggering
+        # treatment was over-treatment for at least one STI and they had
+        # no other STI being correctly treated). Computed from tx.outcomes
+        # — STITreatment builds outcomes[disease].{successful,
+        # unsuccessful, unnecessary} per step. An index UID is "false
+        # alarm" if it appears in outcomes[d].unnecessary for some
+        # d ∈ {ng, ct, tv, syph} AND does NOT appear in
+        # outcomes[d].(successful|unsuccessful) for any d in the same set.
         self.define_results(
             ss.Result('new_attended_no_sti', dtype=int,
                       label='PN attendees with no current STI',
@@ -386,30 +358,53 @@ class PartnerNotificationNoCycle(sti.PartnerNotification):
                       auto_plot=False),
         )
 
-    def step(self):
-        super().step()
-        # Update last_notifier for newly-notified agents (ti_notified set
-        # by parent.step on all attendees this step). For each attendee,
-        # pick any matching (index, partner=attendee) pair from this step.
-        partners = self._pair_partners
-        indices = self._pair_indices
-        attending = (self.ti_notified == self.ti).uids
+    def _build_partner_edges(self, nw, index_uids):
+        """Delegate edge walking to the base class, then drop candidates
+        whose ti_last_index is recent."""
+        partner_edges = super()._build_partner_edges(nw, index_uids)
+        if not partner_edges:
+            return partner_edges
+        candidates = np.fromiter(partner_edges.keys(), dtype=np.int64)
+        ti_idx = np.asarray(self.ti_last_index[ss.uids(candidates)])
+        if self.cycle_memory_steps is None:
+            blocked_mask = ~np.isnan(ti_idx)
+        else:
+            blocked_mask = (~np.isnan(ti_idx)) & \
+                           ((self.ti - ti_idx) <= self.cycle_memory_steps)
+        if not blocked_mask.any():
+            return partner_edges
+        keep = candidates[~blocked_mask]
+        return {int(p): partner_edges[int(p)] for p in keep}
 
-        # Wasted-attendance count: attendees with no current STI to find.
+    def step(self):
+        # Mark current indices BEFORE super().step() so the next step's
+        # cycle check sees them as recently-an-index. Base-class
+        # _build_partner_edges already drops index-from-index edges
+        # within this step, so marking now doesn't affect THIS step's
+        # notifications.
+        index_uids = self.eligibility(self.sim)
+        if len(index_uids):
+            self.ti_last_index[index_uids] = self.ti
+
+        super().step()
+
+        # --- Wasted-attendance: attendees with no current STI to find ---
+        attending = (self.ti_notified == self.ti).uids
         if len(attending):
             ppl = self.sim.people
             any_sti = (ppl.ng.infected | ppl.ct.infected |
                        ppl.tv.infected | ppl.syph.infected)
-            n_none = int((~any_sti[attending]).sum())
-            self.results['new_attended_no_sti'][self.ti] += n_none
+            self.results['new_attended_no_sti'][self.ti] += \
+                int((~any_sti[attending]).sum())
 
-        # False-alarm-index count: indices whose triggering treatment
-        # didn't correspond to a real STI infection. See init_results
-        # docstring for definition. Read from tx.outcomes — populated
-        # by STITreatment.step earlier this timestep.
+        # --- False-alarm-index: indices treated for nothing they had ---
+        # Read tx.outcomes (populated by STITreatment.step earlier this ti)
+        # for the four STI treatments. An index UID is "false alarm" iff
+        # it's in the unnecessary bucket for some STI AND not in
+        # successful/unsuccessful for any STI.
         target_diseases = {'ng', 'ct', 'tv', 'syph'}
-        had_sti = ss.uids()       # treated and had at least one STI
-        treated_any = ss.uids()   # treated for at least one STI (any outcome)
+        had_sti = ss.uids()
+        treated_any = ss.uids()
         for tx_name in ('ng_tx', 'ct_tx', 'metronidazole', 'syph_tx'):
             tx = self.sim.interventions.get(tx_name)
             if tx is None:
@@ -418,9 +413,7 @@ class PartnerNotificationNoCycle(sti.PartnerNotification):
             if outcomes is None:
                 continue
             for key, val in outcomes.items():
-                if key not in target_diseases:
-                    continue
-                if not hasattr(val, 'get'):
+                if key not in target_diseases or not hasattr(val, 'get'):
                     continue
                 succ = val.get('successful', ss.uids())
                 unsucc = val.get('unsuccessful', ss.uids())
@@ -430,22 +423,6 @@ class PartnerNotificationNoCycle(sti.PartnerNotification):
         false_alarm = treated_any.remove(had_sti)
         if len(false_alarm):
             self.results['new_index_no_sti'][self.ti] += len(false_alarm)
-
-        if partners is not None and len(partners) and len(attending):
-            sort_idx = np.argsort(partners, kind='stable')
-            p_sorted = partners[sort_idx]
-            i_sorted = indices[sort_idx]
-            first = np.searchsorted(p_sorted, attending, side='left')
-            in_range = first < len(p_sorted)
-            if in_range.any():
-                safe_first = np.clip(first, 0, len(p_sorted) - 1)
-                match = (p_sorted[safe_first] == attending) & in_range
-                if match.any():
-                    atts = attending[match]
-                    chosen = i_sorted[first[match]]
-                    self.last_notifier[atts] = chosen.astype(float)
-        self._pair_partners = None
-        self._pair_indices = None
         return
 
 

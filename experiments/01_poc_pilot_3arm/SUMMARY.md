@@ -22,24 +22,24 @@ Endpoints added this iteration:
   - **Wasted PN attendance**: PN attendees who had no current STI (NG/CT/TV/syph all negative at attendance). BV is excluded — not sexually transmitted, so PN triggered by BV-driven over-treatment is wasted by definition. Counts the clinic-time and partner-relationship cost of false-alarm PN.
 
 Effects (A baseline → C3 dx+PN → D adds FSW outreach → E2 adds 2× care-seeking):
-  - **NG point-prevalence at 2040:** 0.7% (A) → 0.9% (C3) → 0.8% (D) → 0.5% (E2). E2 vs A: -30% relative.
-  - **CT point-prevalence at 2040:** 9.8% (A) → 9.3% (C3) → 8.8% (D) → 7.4% (E2). E2 vs A: -24% relative.
-  - **TV point-prevalence at 2040:** 12.3% (A) → 10.1% (C3) → 9.5% (D) → 8.2% (E2). E2 vs A: -33% relative.
-  - **Syph sexually-transmissible prevalence at 2040** (primary + secondary + early latent — WHO early infectious syphilis): 3.7% (A) → 3.8% (B) → 3.5% (C3) → 3.6% (D) → 2.4% (E2) → 1.3% (E3). E3 vs A: -65% relative. The E-arms care-seeking multiplier scales syph symp_test_prob in addition to NG/CT/TV `p_symp_care` — so syph finally responds to demand-gen, in contrast to the earlier flat C3→D→E2 (where E only scaled NG/CT/TV). Total syph prev not reported — the calibration ensemble overshoots total syph prev (latent/tertiary), so the policy-relevant slice is the sexually-transmissible fraction.
+  - **NG point-prevalence at 2040:** 0.7% (A) → 1.0% (C3) → 0.9% (D) → 0.5% (E2). E2 vs A: -26% relative.
+  - **CT point-prevalence at 2040:** 9.8% (A) → 9.5% (C3) → 8.9% (D) → 7.6% (E2). E2 vs A: -22% relative.
+  - **TV point-prevalence at 2040:** 12.3% (A) → 10.2% (C3) → 9.6% (D) → 8.3% (E2). E2 vs A: -32% relative.
+  - **Syph sexually-transmissible prevalence at 2040** (primary + secondary + early latent — WHO early infectious syphilis): 3.7% (A) → 3.3% (B) → 3.7% (C3) → 3.7% (D) → 2.2% (E2) → 1.4% (E3). E3 vs A: -63% relative. The E-arms care-seeking multiplier scales syph symp_test_prob in addition to NG/CT/TV `p_symp_care` — so syph finally responds to demand-gen, in contrast to the earlier flat C3→D→E2 (where E only scaled NG/CT/TV). Total syph prev not reported — the calibration ensemble overshoots total syph prev (latent/tertiary), so the policy-relevant slice is the sexually-transmissible fraction.
   - **Unnecessary syph treatments A→B:** 5.27M → 0.41M (-92%) — POC dx specificity win still clean.
   - **BV prevalence at 2040 (all arms):** ~40.2%. BV is the dominant cause of VDS presentations — most women presenting with VDS-like symptoms in this model have BV, not NG/CT/TV. Under SOC syndromic management they get presumptively treated for NG/CT/TV and become PN indices.
-  - **PN false-alarm indices (A):** 7.10M agents triggered PN despite having NO actual STI at the moment of treatment.
+  - **PN false-alarm indices (A):** 7.08M agents triggered PN despite having NO actual STI at the moment of treatment.
   - **PN false-alarm indices (B):** 0.64M agents triggered PN despite having NO actual STI at the moment of treatment.
-  - **PN false-alarm indices (C3):** 0.83M agents triggered PN despite having NO actual STI at the moment of treatment.
-  - **PN false-alarm indices (D):** 1.01M agents triggered PN despite having NO actual STI at the moment of treatment.
-  - **PN false-alarm indices (E2):** 1.68M agents triggered PN despite having NO actual STI at the moment of treatment.
-  - **Wasted PN attendance:** 0.13M / 1.01M (12.6%) in A vs 1.21M / 5.82M (20.8%) in E3. Scaling PN volume reaches further into casual partnerships with lower STI co-prev → wasted-fraction creeps up.
+  - **PN false-alarm indices (C3):** 0.80M agents triggered PN despite having NO actual STI at the moment of treatment.
+  - **PN false-alarm indices (D):** 0.97M agents triggered PN despite having NO actual STI at the moment of treatment.
+  - **PN false-alarm indices (E2):** 1.62M agents triggered PN despite having NO actual STI at the moment of treatment.
+  - **Wasted PN attendance:** 0.11M / 0.91M (12.0%) in A vs 0.81M / 4.45M (18.1%) in E3. Scaling PN volume reaches further into casual partnerships with lower STI co-prev → wasted-fraction creeps up.
 
 Per-episode "treated within N months of acquisition" (`CareTimingAnalyzer`, A vs E3):
-  - **NG (A → E3):** 3-mo 22.1% → 28.7% ; 6-mo 23.1% → 31.4%.
-  - **CT (A → E3):** 3-mo 9.7% → 43.4% ; 6-mo 13.1% → 51.3%.
-  - **TV (A → E3):** 3-mo 4.2% → 22.4% ; 6-mo 4.4% → 23.8%.
-  - **SYPH (A → E3):** 3-mo 31.3% → 55.0% ; 6-mo 42.6% → 64.4%.
+  - **NG (A → E3):** 3-mo 22.2% → 27.6% ; 6-mo 23.1% → 30.0%.
+  - **CT (A → E3):** 3-mo 9.6% → 42.8% ; 6-mo 12.9% → 50.3%.
+  - **TV (A → E3):** 3-mo 4.1% → 22.0% ; 6-mo 4.3% → 23.2%.
+  - **SYPH (A → E3):** 3-mo 31.3% → 54.3% ; 6-mo 42.6% → 63.3%.
 
 **Syph APO:** stisim's `new_congenital` ~33-36K cases per arm; `new_nnds` and `new_stillborns` are placeholder fields never written without FetalHealth wiring.
 
@@ -51,70 +51,70 @@ Mean over draws+seeds. All counts in millions over 2027-2040.
 ### SYPH
 | Metric | A | B | C1 | C2 | C3 | D | E1 | E2 | E3 |
 |---|---|---|---|---|---|---|---|---|---|
-| New infections | 3.46M | 3.08M | 3.19M | 3.23M | 3.47M | 3.49M | 2.32M | 2.83M | 1.72M |
-|   new inf — F | 1.76M | 1.61M | 1.68M | 1.72M | 1.87M | 1.85M | 1.19M | 1.38M | 0.77M |
-|   new inf — M | 1.70M | 1.46M | 1.50M | 1.51M | 1.60M | 1.63M | 1.13M | 1.44M | 0.95M |
-| Treatments — total | 8.17M | 2.73M | 2.93M | 3.08M | 3.41M | 3.43M | 2.77M | 3.47M | 2.90M |
-|   successful | 2.65M | 2.25M | 2.42M | 2.53M | 2.80M | 2.82M | 1.96M | 2.46M | 1.55M |
-|   unnecessary | 5.27M | 0.41M | 0.44M | 0.48M | 0.52M | 0.53M | 0.75M | 0.93M | 1.29M |
-| n_infected (point, 2040) | 1865.3K | 1884.2K | 1826.4K | 1759.7K | 1735.6K | 1735.0K | 1114.8K | 1085.6K | 667.3K |
-| Sexually transmissible prev (point, 2040) | 3.7% | 3.8% | 3.6% | 3.3% | 3.5% | 3.6% | 2.3% | 2.4% | 1.3% |
-| 3-month treatment rate | 31.3% | 32.0% | 32.9% | 33.0% | 34.0% | 33.8% | 40.2% | 47.7% | 55.0% |
-| 6-month treatment rate | 42.6% | 42.8% | 43.6% | 44.3% | 45.2% | 45.2% | 51.4% | 59.3% | 64.4% |
+| New infections | 3.46M | 2.99M | 3.15M | 3.20M | 3.42M | 3.36M | 2.17M | 2.65M | 1.58M |
+|   new inf — F | 1.76M | 1.56M | 1.66M | 1.69M | 1.82M | 1.77M | 1.08M | 1.27M | 0.70M |
+|   new inf — M | 1.70M | 1.42M | 1.49M | 1.52M | 1.59M | 1.60M | 1.09M | 1.39M | 0.89M |
+| Treatments — total | 8.17M | 2.67M | 2.89M | 3.04M | 3.34M | 3.30M | 2.61M | 3.28M | 2.70M |
+|   successful | 2.65M | 2.20M | 2.39M | 2.51M | 2.76M | 2.72M | 1.85M | 2.32M | 1.42M |
+|   unnecessary | 5.27M | 0.41M | 0.43M | 0.46M | 0.50M | 0.50M | 0.70M | 0.88M | 1.23M |
+| n_infected (point, 2040) | 1865.3K | 1849.8K | 1821.4K | 1756.1K | 1728.1K | 1715.9K | 1078.2K | 1053.4K | 654.2K |
+| Sexually transmissible prev (point, 2040) | 3.7% | 3.3% | 3.5% | 3.4% | 3.7% | 3.7% | 2.1% | 2.2% | 1.4% |
+| 3-month treatment rate | 31.3% | 32.1% | 32.5% | 32.8% | 33.2% | 32.9% | 39.1% | 46.9% | 54.3% |
+| 6-month treatment rate | 42.6% | 42.8% | 43.4% | 43.8% | 44.3% | 44.1% | 50.5% | 58.3% | 63.3% |
 
 ### NG
 | Metric | A | B | C1 | C2 | C3 | D | E1 | E2 | E3 |
 |---|---|---|---|---|---|---|---|---|---|
-| New infections | 4.84M | 7.61M | 7.49M | 7.27M | 7.13M | 6.41M | 4.81M | 4.21M | 3.86M |
-|   new inf — F | 2.26M | 3.47M | 3.44M | 3.36M | 3.31M | 3.10M | 2.26M | 2.00M | 1.82M |
-|   new inf — M | 2.59M | 4.15M | 4.05M | 3.92M | 3.82M | 3.31M | 2.56M | 2.22M | 2.05M |
-| Treatments — total | 9.93M | 2.10M | 2.18M | 2.23M | 2.34M | 2.37M | 2.39M | 2.42M | 2.48M |
-|   successful | 1.13M | 1.43M | 1.47M | 1.48M | 1.53M | 1.47M | 1.32M | 1.23M | 1.19M |
-|   unnecessary | 8.76M | 0.61M | 0.66M | 0.69M | 0.75M | 0.84M | 1.01M | 1.13M | 1.25M |
-| n_infected (point, 2040) | 103.2K | 163.4K | 157.7K | 151.9K | 142.0K | 127.5K | 88.7K | 72.2K | 61.5K |
-| Prevalence (point, 2040) | 0.7% | 1.1% | 1.0% | 1.0% | 0.9% | 0.8% | 0.6% | 0.5% | 0.4% |
-| 3-month treatment rate | 22.1% | 17.6% | 18.0% | 18.6% | 19.2% | 20.5% | 24.6% | 26.1% | 28.7% |
-| 6-month treatment rate | 23.1% | 18.8% | 19.4% | 20.1% | 21.0% | 22.8% | 27.1% | 28.6% | 31.4% |
+| New infections | 4.85M | 7.62M | 7.54M | 7.42M | 7.28M | 6.56M | 5.04M | 4.48M | 4.22M |
+|   new inf — F | 2.26M | 3.46M | 3.45M | 3.40M | 3.35M | 3.15M | 2.36M | 2.10M | 1.98M |
+|   new inf — M | 2.59M | 4.16M | 4.10M | 4.02M | 3.93M | 3.41M | 2.69M | 2.37M | 2.24M |
+| Treatments — total | 9.90M | 2.09M | 2.16M | 2.21M | 2.29M | 2.31M | 2.36M | 2.40M | 2.48M |
+|   successful | 1.13M | 1.42M | 1.45M | 1.47M | 1.50M | 1.44M | 1.33M | 1.26M | 1.23M |
+|   unnecessary | 8.73M | 0.61M | 0.64M | 0.68M | 0.72M | 0.81M | 0.98M | 1.09M | 1.19M |
+| n_infected (point, 2040) | 105.4K | 163.4K | 159.6K | 154.7K | 147.6K | 134.5K | 96.3K | 78.2K | 76.9K |
+| Prevalence (point, 2040) | 0.7% | 1.1% | 1.0% | 1.0% | 1.0% | 0.9% | 0.6% | 0.5% | 0.5% |
+| 3-month treatment rate | 22.2% | 17.5% | 17.8% | 18.1% | 18.7% | 20.0% | 23.8% | 25.3% | 27.6% |
+| 6-month treatment rate | 23.1% | 18.7% | 19.1% | 19.6% | 20.4% | 22.1% | 26.2% | 27.4% | 30.0% |
 
 ### CT
 | Metric | A | B | C1 | C2 | C3 | D | E1 | E2 | E3 |
 |---|---|---|---|---|---|---|---|---|---|
-| New infections | 14.80M | 19.09M | 18.90M | 18.75M | 18.45M | 17.96M | 17.35M | 17.23M | 17.14M |
-|   new inf — F | 8.10M | 8.77M | 8.77M | 8.77M | 8.74M | 8.75M | 8.40M | 8.55M | 8.48M |
-|   new inf — M | 6.70M | 10.33M | 10.14M | 9.99M | 9.72M | 9.22M | 8.96M | 8.69M | 8.67M |
-| Treatments — total | 9.93M | 7.32M | 7.63M | 7.93M | 8.34M | 8.75M | 10.11M | 10.65M | 10.82M |
-|   successful | 5.91M | 6.32M | 6.56M | 6.80M | 7.13M | 7.43M | 8.55M | 8.94M | 9.00M |
-|   unnecessary | 3.38M | 0.30M | 0.34M | 0.37M | 0.43M | 0.50M | 0.61M | 0.71M | 0.82M |
-| n_infected (point, 2040) | 1537.0K | 1590.0K | 1556.0K | 1520.8K | 1471.8K | 1381.5K | 1219.5K | 1170.6K | 1154.0K |
-| Prevalence (point, 2040) | 9.8% | 10.1% | 9.9% | 9.7% | 9.3% | 8.8% | 7.7% | 7.4% | 7.3% |
-| 3-month treatment rate | 9.7% | 28.3% | 28.6% | 28.9% | 29.5% | 31.3% | 38.1% | 41.6% | 43.4% |
-| 6-month treatment rate | 13.1% | 31.8% | 32.4% | 33.1% | 34.2% | 37.4% | 45.7% | 49.5% | 51.3% |
+| New infections | 14.86M | 19.11M | 18.92M | 18.78M | 18.54M | 18.04M | 17.45M | 17.29M | 17.22M |
+|   new inf — F | 8.14M | 8.76M | 8.75M | 8.73M | 8.70M | 8.73M | 8.35M | 8.48M | 8.43M |
+|   new inf — M | 6.73M | 10.36M | 10.19M | 10.06M | 9.85M | 9.32M | 9.11M | 8.81M | 8.81M |
+| Treatments — total | 9.90M | 7.27M | 7.55M | 7.81M | 8.20M | 8.58M | 9.88M | 10.36M | 10.54M |
+|   successful | 5.90M | 6.28M | 6.49M | 6.70M | 7.00M | 7.29M | 8.35M | 8.70M | 8.77M |
+|   unnecessary | 3.35M | 0.30M | 0.34M | 0.37M | 0.43M | 0.49M | 0.60M | 0.69M | 0.80M |
+| n_infected (point, 2040) | 1544.6K | 1594.8K | 1564.6K | 1533.8K | 1499.8K | 1408.6K | 1252.1K | 1201.2K | 1184.3K |
+| Prevalence (point, 2040) | 9.8% | 10.1% | 9.9% | 9.7% | 9.5% | 8.9% | 7.9% | 7.6% | 7.5% |
+| 3-month treatment rate | 9.6% | 28.1% | 28.3% | 28.7% | 29.0% | 30.5% | 37.3% | 40.8% | 42.8% |
+| 6-month treatment rate | 12.9% | 31.5% | 32.0% | 32.6% | 33.3% | 36.2% | 44.5% | 48.3% | 50.3% |
 
 ### TV
 | Metric | A | B | C1 | C2 | C3 | D | E1 | E2 | E3 |
 |---|---|---|---|---|---|---|---|---|---|
-| New infections | 44.19M | 44.93M | 44.48M | 44.15M | 43.48M | 41.94M | 40.68M | 40.06M | 39.07M |
-|   new inf — F | 11.61M | 11.81M | 12.26M | 12.64M | 13.15M | 13.52M | 13.45M | 13.58M | 13.68M |
-|   new inf — M | 32.61M | 33.14M | 32.24M | 31.54M | 30.35M | 28.45M | 27.25M | 26.50M | 25.41M |
-| Treatments — total | 3.56M | 6.25M | 6.57M | 6.86M | 7.26M | 7.42M | 9.18M | 10.81M | 12.43M |
-|   successful | 2.06M | 4.96M | 5.23M | 5.45M | 5.77M | 5.84M | 7.29M | 8.66M | 10.13M |
-|   unnecessary | 1.28M | 0.73M | 0.77M | 0.80M | 0.86M | 0.93M | 1.09M | 1.19M | 1.19M |
-| n_infected (point, 2040) | 1930.2K | 1802.6K | 1734.6K | 1676.5K | 1587.4K | 1492.1K | 1373.6K | 1287.7K | 1159.4K |
-| Prevalence (point, 2040) | 12.3% | 11.5% | 11.1% | 10.7% | 10.1% | 9.5% | 8.8% | 8.2% | 7.4% |
-| 3-month treatment rate | 4.2% | 9.7% | 10.0% | 10.3% | 10.7% | 11.4% | 15.3% | 18.8% | 22.4% |
-| 6-month treatment rate | 4.4% | 10.3% | 10.7% | 11.0% | 11.5% | 12.4% | 16.6% | 20.2% | 23.8% |
+| New infections | 44.22M | 44.92M | 44.48M | 44.08M | 43.40M | 41.89M | 40.81M | 40.02M | 39.22M |
+|   new inf — F | 11.60M | 11.75M | 12.16M | 12.50M | 12.95M | 13.38M | 13.33M | 13.37M | 13.37M |
+|   new inf — M | 32.65M | 33.19M | 32.35M | 31.60M | 30.47M | 28.53M | 27.50M | 26.67M | 25.87M |
+| Treatments — total | 3.51M | 6.21M | 6.50M | 6.76M | 7.13M | 7.28M | 9.06M | 10.62M | 12.24M |
+|   successful | 2.04M | 4.93M | 5.17M | 5.38M | 5.67M | 5.74M | 7.21M | 8.52M | 9.99M |
+|   unnecessary | 1.24M | 0.73M | 0.76M | 0.79M | 0.84M | 0.90M | 1.05M | 1.16M | 1.15M |
+| n_infected (point, 2040) | 1933.2K | 1804.1K | 1744.8K | 1680.8K | 1596.7K | 1500.6K | 1389.3K | 1305.2K | 1197.4K |
+| Prevalence (point, 2040) | 12.3% | 11.5% | 11.1% | 10.7% | 10.2% | 9.6% | 8.9% | 8.3% | 7.6% |
+| 3-month treatment rate | 4.1% | 9.7% | 9.9% | 10.1% | 10.5% | 11.2% | 14.9% | 18.5% | 22.0% |
+| 6-month treatment rate | 4.3% | 10.3% | 10.6% | 10.8% | 11.3% | 12.1% | 16.2% | 19.8% | 23.2% |
 
 ### BV
 | Metric | A | B | C1 | C2 | C3 | D | E1 | E2 | E3 |
 |---|---|---|---|---|---|---|---|---|---|
-| New infections | 78.91M | 75.99M | 76.72M | 77.27M | 78.00M | 78.30M | 81.71M | 84.26M | 84.73M |
-|   new inf — F | 78.97M | 76.05M | 76.77M | 77.33M | 78.06M | 78.35M | 81.77M | 84.32M | 84.78M |
+| New infections | 78.84M | 75.96M | 76.67M | 77.22M | 77.94M | 78.24M | 81.68M | 84.21M | 84.66M |
+|   new inf — F | 78.90M | 76.02M | 76.73M | 77.28M | 78.00M | 78.30M | 81.74M | 84.27M | 84.72M |
 |   new inf — M | 0.00M | 0.00M | 0.00M | 0.00M | 0.00M | 0.00M | 0.00M | 0.00M | 0.00M |
 | Treatments — total | NA | NA | NA | NA | NA | NA | NA | NA | NA |
 |   successful | NA | NA | NA | NA | NA | NA | NA | NA | NA |
 |   unnecessary | NA | NA | NA | NA | NA | NA | NA | NA | NA |
-| n_infected (point, 2040) | 10730.3K | 10770.9K | 10759.8K | 10751.0K | 10741.7K | 10743.0K | 10716.3K | 10693.3K | 10720.7K |
-| Prevalence (point, 2040) | 40.2% | 40.4% | 40.3% | 40.2% | 40.2% | 40.2% | 40.0% | 39.8% | 39.9% |
+| n_infected (point, 2040) | 10731.7K | 10771.1K | 10760.8K | 10752.4K | 10743.8K | 10744.7K | 10715.1K | 10696.8K | 10719.9K |
+| Prevalence (point, 2040) | 40.2% | 40.4% | 40.3% | 40.2% | 40.2% | 40.2% | 40.0% | 39.9% | 39.9% |
 | 3-month treatment rate | NA | NA | NA | NA | NA | NA | NA | NA | NA |
 | 6-month treatment rate | NA | NA | NA | NA | NA | NA | NA | NA | NA |
 
@@ -124,7 +124,7 @@ Native syph module results, summed over 2027-2040.
 
 | Metric | A | B | C1 | C2 | C3 | D | E1 | E2 | E3 |
 |---|---|---|---|---|---|---|---|---|---|
-| Congenital syph cases | 35.6K | 37.5K | 38.9K | 37.0K | 37.2K | 40.0K | 22.6K | 24.2K | 14.4K |
+| Congenital syph cases | 35.6K | 38.5K | 36.8K | 37.2K | 36.9K | 38.0K | 23.2K | 23.3K | 12.8K |
 | Congenital deaths (=NND+stillborn) | 0.0K | 0.0K | 0.0K | 0.0K | 0.0K | 0.0K | 0.0K | 0.0K | 0.0K |
 | Neonatal deaths (NND)* | 0.0K | 0.0K | 0.0K | 0.0K | 0.0K | 0.0K | 0.0K | 0.0K | 0.0K |
 | Stillbirths* | 0.0K | 0.0K | 0.0K | 0.0K | 0.0K | 0.0K | 0.0K | 0.0K | 0.0K |
@@ -136,10 +136,10 @@ Native syph module results, summed over 2027-2040.
 | Metric | A | B | C1 | C2 | C3 | D | E1 | E2 | E3 |
 |---|---|---|---|---|---|---|---|---|---|
 | HIV new infections | 0.49M | 0.49M | 0.49M | 0.49M | 0.49M | 0.49M | 0.49M | 0.51M | 0.50M |
-| PN partners notified | 1.58M | 1.63M | 2.32M | 2.98M | 4.28M | 4.44M | 5.26M | 5.68M | 6.26M |
-| PN partners attending | 1.01M | 1.03M | 1.91M | 2.72M | 4.00M | 4.13M | 4.89M | 5.26M | 5.82M |
-|   of which attendee had no STI (wasted attendance) | 0.13M | 0.11M | 0.23M | 0.35M | 0.58M | 0.68M | 0.93M | 1.05M | 1.21M |
-|   PN indices over-treated (no STI at moment of tx) | 7.10M | 0.64M | 0.70M | 0.74M | 0.83M | 1.01M | 1.38M | 1.68M | 2.09M |
+| PN partners notified | 1.40M | 1.41M | 2.02M | 2.59M | 3.68M | 3.75M | 4.23M | 4.44M | 4.76M |
+| PN partners attending | 0.91M | 0.91M | 1.68M | 2.38M | 3.45M | 3.50M | 3.95M | 4.12M | 4.45M |
+|   of which attendee had no STI (wasted attendance) | 0.11M | 0.09M | 0.19M | 0.28M | 0.43M | 0.52M | 0.67M | 0.73M | 0.81M |
+|   PN indices over-treated (no STI at moment of tx) | 7.08M | 0.64M | 0.69M | 0.73M | 0.80M | 0.97M | 1.32M | 1.62M | 2.01M |
 
 ## Notes
 
