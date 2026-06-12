@@ -366,9 +366,23 @@ class PartnerNotificationNoCycle(sti.PartnerNotification):
         # transmission, and BV is not sexually transmitted in this model.
         # So an attendee whose only "infection" is BV still counts as a
         # wasted PN trip for STI-interruption purposes.
+        #
+        # False-alarm-index endpoint: indices who triggered PN but had no
+        # current STI at the moment of treatment (their treatment was
+        # over-treatment for at least one STI and they had no other STI
+        # being correctly treated). Computed from tx.outcomes — STITreatment
+        # builds outcomes[disease].{successful, unsuccessful, unnecessary}
+        # per step. An index UID is "false alarm" if it appears in
+        # outcomes[d].unnecessary for SOME STI d in {ng, ct, tv, syph} but
+        # does NOT appear in outcomes[d].(successful|unsuccessful) for ANY
+        # STI in the same set. Only NG/CT/TV/syph count — BV doesn't
+        # justify partner notification.
         self.define_results(
             ss.Result('new_attended_no_sti', dtype=int,
                       label='PN attendees with no current STI',
+                      auto_plot=False),
+            ss.Result('new_index_no_sti', dtype=int,
+                      label='PN indices over-treated (no STI at treatment)',
                       auto_plot=False),
         )
 
@@ -388,6 +402,34 @@ class PartnerNotificationNoCycle(sti.PartnerNotification):
                        ppl.tv.infected | ppl.syph.infected)
             n_none = int((~any_sti[attending]).sum())
             self.results['new_attended_no_sti'][self.ti] += n_none
+
+        # False-alarm-index count: indices whose triggering treatment
+        # didn't correspond to a real STI infection. See init_results
+        # docstring for definition. Read from tx.outcomes — populated
+        # by STITreatment.step earlier this timestep.
+        target_diseases = {'ng', 'ct', 'tv', 'syph'}
+        had_sti = ss.uids()       # treated and had at least one STI
+        treated_any = ss.uids()   # treated for at least one STI (any outcome)
+        for tx_name in ('ng_tx', 'ct_tx', 'metronidazole', 'syph_tx'):
+            tx = self.sim.interventions.get(tx_name)
+            if tx is None:
+                continue
+            outcomes = getattr(tx, 'outcomes', None)
+            if outcomes is None:
+                continue
+            for key, val in outcomes.items():
+                if key not in target_diseases:
+                    continue
+                if not hasattr(val, 'get'):
+                    continue
+                succ = val.get('successful', ss.uids())
+                unsucc = val.get('unsuccessful', ss.uids())
+                unnec = val.get('unnecessary', ss.uids())
+                had_sti = had_sti | succ | unsucc
+                treated_any = treated_any | succ | unsucc | unnec
+        false_alarm = treated_any.remove(had_sti)
+        if len(false_alarm):
+            self.results['new_index_no_sti'][self.ti] += len(false_alarm)
 
         if partners is not None and len(partners) and len(attending):
             sort_idx = np.argsort(partners, kind='stable')

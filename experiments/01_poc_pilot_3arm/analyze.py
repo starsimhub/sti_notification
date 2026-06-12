@@ -163,22 +163,19 @@ def write_summary(df, arms):
                       f'{parts}. E2 vs A: '
                       f'{fmt_pct_change(rel_e2_vs_a)} relative.')
 
-    a_pt = arm_mean(df, 'A_soc', 'syph_prop_treated')
-    b_pt = arm_mean(df, 'B_poc_baseline', 'syph_prop_treated')
-    c3_pt = arm_mean(df, 'C3_poc_pn_3x', 'syph_prop_treated')
-    if all(np.isfinite([a_pt, b_pt, c3_pt])):
-        md.append(f'  - **Syph `prop_treated` scales with PN intensity:** '
-                  f'{fmt_pct(b_pt)} (B) → {fmt_pct(c3_pt)} (C3). C3 '
-                  f'exceeds the syndromic baseline A ({fmt_pct(a_pt)}).')
-
-    a_pev = arm_mean(df, 'A_soc', 'syph_prevalence_end')
-    b_pev = arm_mean(df, 'B_poc_baseline', 'syph_prevalence_end')
-    c3_pev = arm_mean(df, 'C3_poc_pn_3x', 'syph_prevalence_end')
-    d_pev = arm_mean(df, 'D_poc_pn_3x_fsw_out', 'syph_prevalence_end')
+    a_pev = arm_mean(df, 'A_soc', 'syph_sti_prev_end')
+    b_pev = arm_mean(df, 'B_poc_baseline', 'syph_sti_prev_end')
+    c3_pev = arm_mean(df, 'C3_poc_pn_3x', 'syph_sti_prev_end')
+    d_pev = arm_mean(df, 'D_poc_pn_3x_fsw_out', 'syph_sti_prev_end')
     if all(np.isfinite([a_pev, b_pev, c3_pev, d_pev])):
-        md.append(f'  - **Syph point-prevalence at 2040:** '
-                  f'{fmt_pct(a_pev)} (A) → {fmt_pct(b_pev)} (B) → '
-                  f'{fmt_pct(c3_pev)} (C3) → {fmt_pct(d_pev)} (D).')
+        md.append(f'  - **Syph sexually-transmissible prevalence at 2040** '
+                  f'(primary + secondary + early latent — WHO early '
+                  f'infectious syphilis): {fmt_pct(a_pev)} (A) → '
+                  f'{fmt_pct(b_pev)} (B) → {fmt_pct(c3_pev)} (C3) → '
+                  f'{fmt_pct(d_pev)} (D). Total syph prev not reported — '
+                  f'the calibration ensemble overshoots total syph prev '
+                  f'(latent/tertiary), so the policy-relevant slice is '
+                  f'the sexually-transmissible fraction.')
 
     a_su = arm_mean(df, 'A_soc', 'syph_tx_unnec_2027_2040')
     b_su = arm_mean(df, 'B_poc_baseline', 'syph_tx_unnec_2027_2040')
@@ -199,15 +196,47 @@ def write_summary(df, arms):
                   f'SOC syndromic management they get presumptively treated '
                   f'for NG/CT/TV and become PN indices.')
 
-    # Wasted-PN fraction: of attendees, how many had no current STI?
+    # False-alarm-index PN: A is 10x worse than B because syndromic
+    # over-treats most VDS presenters as NG/CT/TV when they actually
+    # have BV-only. POC dx eliminates almost all of that.
     for arm, short in (('A_soc', 'A'), ('B_poc_baseline', 'B'),
-                       ('C3_poc_pn_3x', 'C3'), ('D_poc_pn_3x_fsw_out', 'D')):
-        att = arm_mean(df, arm, 'pn_attending_2027_2040')
-        wasted = arm_mean(df, arm, 'pn_attended_no_sti_2027_2040')
-        if all(np.isfinite([att, wasted])) and att > 0:
-            md.append(f'  - **Wasted PN attendance ({short}):** '
-                      f'{wasted/1e6:.2f}M / {att/1e6:.2f}M '
-                      f'({fmt_pct(wasted/att)}) had no STI at attendance.')
+                       ('C3_poc_pn_3x', 'C3'), ('D_poc_pn_3x_fsw_out', 'D'),
+                       ('E2_d_careseek_2x', 'E2')):
+        idx = arm_mean(df, arm, 'pn_index_no_sti_2027_2040')
+        if np.isfinite(idx):
+            md.append(f'  - **PN false-alarm indices ({short}):** '
+                      f'{idx/1e6:.2f}M agents triggered PN despite having '
+                      f'NO actual STI at the moment of treatment.')
+    # Wasted PN attendance: per-attendee metric (paired with notifs/attends)
+    a_att = arm_mean(df, 'A_soc', 'pn_attending_2027_2040')
+    a_wasted = arm_mean(df, 'A_soc', 'pn_attended_no_sti_2027_2040')
+    e3_att = arm_mean(df, 'E3_d_careseek_3x', 'pn_attending_2027_2040')
+    e3_wasted = arm_mean(df, 'E3_d_careseek_3x', 'pn_attended_no_sti_2027_2040')
+    if all(np.isfinite([a_att, a_wasted, e3_att, e3_wasted])) and a_att > 0:
+        md.append(f'  - **Wasted PN attendance:** {a_wasted/1e6:.2f}M / '
+                  f'{a_att/1e6:.2f}M ({fmt_pct(a_wasted/a_att)}) in A vs '
+                  f'{e3_wasted/1e6:.2f}M / {e3_att/1e6:.2f}M '
+                  f'({fmt_pct(e3_wasted/e3_att)}) in E3. Scaling PN volume '
+                  f'reaches further into casual partnerships with lower '
+                  f'STI co-prev → wasted-fraction creeps up.')
+
+    # Strict 3-month cure rate vs lax event-ratio — the lax metric
+    # overstated coverage because it counted re-infections and treatments
+    # of pre-window infections. Highlight the gap.
+    md.append('')
+    md.append('Per-episode "treated within 3 months of acquisition" metric '
+              '(`CareTimingAnalyzer`): much stricter than the lax '
+              '`tx_success/new_inf` event-ratio (which double-counts '
+              're-infections + pre-window cures). Compare A vs E3:')
+    for d in ('ng', 'ct', 'tv', 'syph'):
+        lax_a = arm_mean(df, 'A_soc', f'{d}_prop_treated')
+        strict_a = arm_mean(df, 'A_soc', f'{d}_prop_cured_3mo')
+        lax_e3 = arm_mean(df, 'E3_d_careseek_3x', f'{d}_prop_treated')
+        strict_e3 = arm_mean(df, 'E3_d_careseek_3x', f'{d}_prop_cured_3mo')
+        if all(np.isfinite([lax_a, strict_a, lax_e3, strict_e3])):
+            md.append(f'  - **{d.upper()}:** A lax {fmt_pct(lax_a)} → '
+                      f'strict {fmt_pct(strict_a)} ; E3 lax '
+                      f'{fmt_pct(lax_e3)} → strict {fmt_pct(strict_e3)}.')
 
     md.append('')
     md.append('**Syph APO:** stisim\'s `new_congenital` ~33-36K cases per '
@@ -229,6 +258,17 @@ def write_summary(df, arms):
         sep    = '|' + '|'.join(['---'] * (len(arms) + 1)) + '|'
         md.append(header)
         md.append(sep)
+        # For syph, report sexually_transmissible_prevalence
+        # (primary + secondary + early latent, matches WHO 'early
+        # infectious syphilis') instead of total prev (the latter
+        # includes late latent + tertiary and is not on calibration
+        # target).
+        if disease == 'syph':
+            prev_col   = 'syph_sti_prev_end'
+            prev_label = 'Sexually transmissible prev (point, 2040)'
+        else:
+            prev_col   = f'{disease}_prevalence_end'
+            prev_label = 'Prevalence (point, 2040)'
         for col, label, scale in [
             (f'{disease}_new_inf_2027_2040',  'New infections',          'M'),
             (f'{disease}_new_inf_f_2027_2040','  new inf — F',           'M'),
@@ -237,10 +277,11 @@ def write_summary(df, arms):
             (f'{disease}_tx_success_2027_2040', '  successful',          'M'),
             (f'{disease}_tx_unnec_2027_2040', '  unnecessary',           'M'),
             (f'{disease}_n_infected_end',     'n_infected (point, 2040)','K'),
-            (f'{disease}_prevalence_end',     'Prevalence (point, 2040)','prev'),
-            (f'{disease}_prop_treated',       'Prop new inf treated',    'prev'),
+            (prev_col,                        prev_label,                'prev'),
+            (f'{disease}_prop_treated',       'Prop new inf treated (event-ratio, lax)','prev'),
             (f'{disease}_prop_treated_f',     '  — F',                   'prev'),
             (f'{disease}_prop_treated_m',     '  — M',                   'prev'),
+            (f'{disease}_prop_cured_3mo',     'Prop new inf cured w/in 3mo (per-episode, strict)','prev'),
         ]:
             cells = [label]
             for a in arms:
@@ -289,7 +330,8 @@ def write_summary(df, arms):
         ('hiv_new_inf_2027_2040',          'HIV new infections',  'M'),
         ('pn_notified_2027_2040',          'PN partners notified','M'),
         ('pn_attending_2027_2040',         'PN partners attending','M'),
-        ('pn_attended_no_sti_2027_2040',   '  of which no STI found (wasted)','M'),
+        ('pn_attended_no_sti_2027_2040',   '  of which attendee had no STI (wasted attendance)','M'),
+        ('pn_index_no_sti_2027_2040',      '  PN indices over-treated (no STI at moment of tx)','M'),
     ]:
         cells = [label]
         for a in arms:
@@ -313,19 +355,29 @@ def write_summary(df, arms):
               'no-treatment, so NG prevalence in those calibrated draws is '
               'an over-estimate; the bug-fixed dynamics drive NG down across '
               'all arms.')
-    md.append('- **`prop_treated`** can exceed 100% in the (rare) regime '
-              'where the same agent gets infected and successfully '
-              'treated more than once over 2027-2040. It is best read as '
-              'a treatment-volume-per-infection ratio, not a literal '
-              'patient coverage rate.')
+    md.append('- **`prop_treated` (event-ratio, lax)** can exceed 100% in '
+              'the regime where the same agent gets infected and '
+              'successfully treated more than once over 2027-2040. It is '
+              'best read as a treatment-volume-per-infection ratio, not a '
+              'literal patient coverage rate. Reported alongside '
+              '`prop_cured_3mo` (per-episode, strict) which counts per-'
+              'episode "newly infected at T0 and successfully treated '
+              'within 3 months of T0" — implemented via the '
+              '`CareTimingAnalyzer` in analyzers.py.')
+    md.append('- **PN false-alarm index** is computed inside '
+              '`PartnerNotificationNoCycle.step` by reading `tx.outcomes` '
+              'across NG/CT/TV/syph treatments: an index UID is "false '
+              'alarm" if it appears in `outcomes[d].unnecessary` for at '
+              'least one STI AND does NOT appear in '
+              '`outcomes[d].(successful|unsuccessful)` for any STI. BV is '
+              'excluded — BV-only over-treatment that gets correctly '
+              'caught by metronidazole still triggers PN, and that PN is '
+              'false-alarm.')
     md.append('- **PN cascade**: still tracks anyone-treated-this-step as '
               'index pool, not stratified by which STI triggered treatment. '
               'Splitting PN by disease (which STI drove the index case) and '
               'by sex (M vs F index / attendee) requires bookkeeping inside '
               '`POCPN.notify_attendees` — TODO.')
-    md.append('- **Treated-within-3-months metric** also a TODO — requires '
-              'per-agent (ti_infected - ti_treated) tracking which is not '
-              'currently exposed in results.')
     md.append('- **FetalHealth wiring** still off. Native syph module gives '
               '`new_congenital`; NND + stillborn require FetalHealth + '
               '`sti_fetal` connector. Numbers above let us decide whether '

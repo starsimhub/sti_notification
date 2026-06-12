@@ -14,7 +14,7 @@ import stisim as sti
 from interventions import make_testing, make_syph_testing, make_pn
 from hiv_model import make_hiv, make_hiv_intvs
 from connectors import sti_fetal
-from analyzers import SyphTransmissionEvents
+from analyzers import SyphTransmissionEvents, CareTimingAnalyzer
 
 LOCATION = 'zimbabwe'
 DATA_DIR = 'data'
@@ -67,8 +67,14 @@ def make_ulcerative_stis():
     return syph, gud
 
 
-def make_diseases(which='all', care_seek_mult=1.0):
-    """Build the disease set + matching analyzers. Returns (dict, analyzers)."""
+def make_diseases(which='all', care_seek_mult=1.0,
+                  care_timing_window_months=3):
+    """Build the disease set + matching analyzers. Returns (dict, analyzers).
+
+    care_timing_window_months controls the CareTimingAnalyzer window
+    (per-episode "treated within N months of acquisition" metric);
+    default 3 months matches the "treated promptly" policy threshold.
+    """
     d = sc.objdict(hiv=make_hiv())
     analyzers = []
     if which in ('discharging', 'all'):
@@ -87,6 +93,35 @@ def make_diseases(which='all', care_seek_mult=1.0):
             age_limits=[15, 64], name='syph_hiv_nontrep'))
         # Transmission event recorder (Lorenz + transmission matrix)
         analyzers.append(SyphTransmissionEvents())
+
+    # Per-episode "treated within N months of acquisition" — stricter
+    # than tx_success / new_inf (which counts treatment events not
+    # episodes). Only meaningful when treatments exist; gate on which.
+    if which == 'all':
+        analyzers.append(CareTimingAnalyzer(
+            disease_names=['ng', 'ct', 'tv', 'syph'],
+            treatment_disease_map={
+                'ng_tx': 'ng',
+                'ct_tx': 'ct',
+                'metronidazole': 'tv',
+                'syph_tx': 'syph',
+            },
+            window_months=care_timing_window_months,
+        ))
+    elif which == 'discharging':
+        analyzers.append(CareTimingAnalyzer(
+            disease_names=['ng', 'ct', 'tv'],
+            treatment_disease_map={
+                'ng_tx': 'ng', 'ct_tx': 'ct', 'metronidazole': 'tv',
+            },
+            window_months=care_timing_window_months,
+        ))
+    elif which == 'ulcerative':
+        analyzers.append(CareTimingAnalyzer(
+            disease_names=['syph'],
+            treatment_disease_map={'syph_tx': 'syph'},
+            window_months=care_timing_window_months,
+        ))
     return d, analyzers
 
 

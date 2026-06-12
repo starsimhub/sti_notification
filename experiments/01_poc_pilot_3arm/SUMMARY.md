@@ -25,14 +25,21 @@ Effects (A baseline → C3 dx+PN → D adds FSW outreach → E2 adds 2× care-se
   - **NG point-prevalence at 2040:** 0.7% (A) → 0.9% (C3) → 0.8% (D) → 0.5% (E2). E2 vs A: -31% relative.
   - **CT point-prevalence at 2040:** 9.8% (A) → 9.3% (C3) → 8.8% (D) → 7.4% (E2). E2 vs A: -24% relative.
   - **TV point-prevalence at 2040:** 12.3% (A) → 10.1% (C3) → 9.5% (D) → 8.3% (E2). E2 vs A: -33% relative.
-  - **Syph `prop_treated` scales with PN intensity:** 73.0% (B) → 80.8% (C3). C3 exceeds the syndromic baseline A (84.5%).
-  - **Syph point-prevalence at 2040:** 13.2% (A) → 13.5% (B) → 12.3% (C3) → 12.3% (D).
+  - **Syph sexually-transmissible prevalence at 2040** (primary + secondary + early latent — WHO early infectious syphilis): 3.7% (A) → 3.8% (B) → 3.5% (C3) → 3.6% (D). Total syph prev not reported — the calibration ensemble overshoots total syph prev (latent/tertiary), so the policy-relevant slice is the sexually-transmissible fraction.
   - **Unnecessary syph treatments A→B:** 5.27M → 0.41M (-92%) — POC dx specificity win still clean.
   - **BV prevalence at 2040 (all arms):** ~40.2%. BV is the dominant cause of VDS presentations — most women presenting with VDS-like symptoms in this model have BV, not NG/CT/TV. Under SOC syndromic management they get presumptively treated for NG/CT/TV and become PN indices.
-  - **Wasted PN attendance (A):** 0.13M / 1.01M (12.6%) had no STI at attendance.
-  - **Wasted PN attendance (B):** 0.11M / 1.03M (10.9%) had no STI at attendance.
-  - **Wasted PN attendance (C3):** 0.58M / 4.00M (14.4%) had no STI at attendance.
-  - **Wasted PN attendance (D):** 0.68M / 4.13M (16.5%) had no STI at attendance.
+  - **PN false-alarm indices (A):** 7.10M agents triggered PN despite having NO actual STI at the moment of treatment.
+  - **PN false-alarm indices (B):** 0.64M agents triggered PN despite having NO actual STI at the moment of treatment.
+  - **PN false-alarm indices (C3):** 0.83M agents triggered PN despite having NO actual STI at the moment of treatment.
+  - **PN false-alarm indices (D):** 1.01M agents triggered PN despite having NO actual STI at the moment of treatment.
+  - **PN false-alarm indices (E2):** 1.29M agents triggered PN despite having NO actual STI at the moment of treatment.
+  - **Wasted PN attendance:** 0.13M / 1.01M (12.6%) in A vs 1.08M / 5.81M (18.6%) in E3. Scaling PN volume reaches further into casual partnerships with lower STI co-prev → wasted-fraction creeps up.
+
+Per-episode "treated within 3 months of acquisition" metric (`CareTimingAnalyzer`): much stricter than the lax `tx_success/new_inf` event-ratio (which double-counts re-infections + pre-window cures). Compare A vs E3:
+  - **NG:** A lax 23.5% → strict 22.1% ; E3 lax 33.1% → strict 28.8%.
+  - **CT:** A lax 43.7% → strict 9.7% ; E3 lax 65.7% → strict 43.3%.
+  - **TV:** A lax 5.6% → strict 4.2% ; E3 lax 30.3% → strict 22.4%.
+  - **SYPH:** A lax 84.5% → strict 31.3% ; E3 lax 82.3% → strict 34.6%.
 
 **Syph APO:** stisim's `new_congenital` ~33-36K cases per arm; `new_nnds` and `new_stillborns` are placeholder fields never written without FetalHealth wiring.
 
@@ -51,10 +58,11 @@ Mean over draws+seeds. All counts in millions over 2027-2040.
 |   successful | 2.65M | 2.25M | 2.42M | 2.53M | 2.80M | 2.82M | 2.99M | 3.07M | 3.16M |
 |   unnecessary | 5.27M | 0.41M | 0.44M | 0.48M | 0.52M | 0.53M | 0.56M | 0.57M | 0.59M |
 | n_infected (point, 2040) | 1865.3K | 1884.2K | 1826.4K | 1759.7K | 1735.6K | 1735.0K | 1740.8K | 1730.1K | 1742.2K |
-| Prevalence (point, 2040) | 13.2% | 13.5% | 13.0% | 12.4% | 12.3% | 12.3% | 12.4% | 12.4% | 12.5% |
-| Prop new inf treated | 84.5% | 73.0% | 75.7% | 78.4% | 80.8% | 80.8% | 81.5% | 82.3% | 82.3% |
+| Sexually transmissible prev (point, 2040) | 3.7% | 3.8% | 3.6% | 3.3% | 3.5% | 3.6% | 3.7% | 3.7% | 4.1% |
+| Prop new inf treated (event-ratio, lax) | 84.5% | 73.0% | 75.7% | 78.4% | 80.8% | 80.8% | 81.5% | 82.3% | 82.3% |
 |   — F | 89.6% | 82.6% | 86.2% | 89.4% | 91.2% | 88.9% | 89.4% | 89.6% | 90.4% |
 |   — M | 77.4% | 61.8% | 63.4% | 65.4% | 68.2% | 71.1% | 72.0% | 73.7% | 72.8% |
+| Prop new inf cured w/in 3mo (per-episode, strict) | 31.3% | 32.0% | 32.9% | 33.0% | 34.0% | 33.8% | 34.3% | 34.6% | 34.6% |
 
 ### NG
 | Metric | A | B | C1 | C2 | C3 | D | E1 | E2 | E3 |
@@ -67,9 +75,10 @@ Mean over draws+seeds. All counts in millions over 2027-2040.
 |   unnecessary | 8.76M | 0.61M | 0.66M | 0.69M | 0.75M | 0.84M | 1.01M | 1.13M | 1.25M |
 | n_infected (point, 2040) | 103.2K | 163.4K | 157.7K | 151.9K | 142.0K | 127.5K | 87.8K | 70.7K | 66.0K |
 | Prevalence (point, 2040) | 0.7% | 1.1% | 1.0% | 1.0% | 0.9% | 0.8% | 0.6% | 0.5% | 0.4% |
-| Prop new inf treated | 23.5% | 19.1% | 19.8% | 20.6% | 21.7% | 23.5% | 27.7% | 30.3% | 33.1% |
+| Prop new inf treated (event-ratio, lax) | 23.5% | 19.1% | 19.8% | 20.6% | 21.7% | 23.5% | 27.7% | 30.3% | 33.1% |
 |   — F | 6.2% | 8.9% | 10.6% | 12.2% | 14.4% | 19.1% | 22.6% | 26.5% | 27.0% |
 |   — M | 38.1% | 27.3% | 27.2% | 27.4% | 27.5% | 27.5% | 32.1% | 33.7% | 38.0% |
+| Prop new inf cured w/in 3mo (per-episode, strict) | 22.1% | 17.6% | 18.0% | 18.6% | 19.2% | 20.5% | 24.7% | 26.9% | 28.8% |
 
 ### CT
 | Metric | A | B | C1 | C2 | C3 | D | E1 | E2 | E3 |
@@ -82,9 +91,10 @@ Mean over draws+seeds. All counts in millions over 2027-2040.
 |   unnecessary | 3.38M | 0.30M | 0.34M | 0.37M | 0.43M | 0.50M | 0.61M | 0.70M | 0.82M |
 | n_infected (point, 2040) | 1537.0K | 1590.0K | 1556.0K | 1520.8K | 1471.8K | 1381.5K | 1217.0K | 1167.7K | 1152.7K |
 | Prevalence (point, 2040) | 9.8% | 10.1% | 9.9% | 9.7% | 9.3% | 8.8% | 7.7% | 7.4% | 7.3% |
-| Prop new inf treated | 43.7% | 36.4% | 38.1% | 39.7% | 42.2% | 47.8% | 57.7% | 62.6% | 65.7% |
+| Prop new inf treated (event-ratio, lax) | 43.7% | 36.4% | 38.1% | 39.7% | 42.2% | 47.8% | 57.7% | 62.6% | 65.7% |
 |   — F | 17.5% | 23.7% | 27.5% | 30.8% | 35.4% | 46.0% | 56.9% | 63.6% | 66.9% |
 |   — M | 75.8% | 47.3% | 47.4% | 47.8% | 48.5% | 49.4% | 58.2% | 61.3% | 64.4% |
+| Prop new inf cured w/in 3mo (per-episode, strict) | 9.7% | 28.3% | 28.6% | 28.9% | 29.5% | 31.3% | 38.7% | 42.0% | 43.3% |
 
 ### TV
 | Metric | A | B | C1 | C2 | C3 | D | E1 | E2 | E3 |
@@ -97,9 +107,10 @@ Mean over draws+seeds. All counts in millions over 2027-2040.
 |   unnecessary | 1.28M | 0.73M | 0.77M | 0.80M | 0.86M | 0.93M | 1.08M | 1.19M | 1.18M |
 | n_infected (point, 2040) | 1930.2K | 1802.6K | 1734.6K | 1676.5K | 1587.4K | 1492.1K | 1371.7K | 1290.1K | 1163.6K |
 | Prevalence (point, 2040) | 12.3% | 11.5% | 11.1% | 10.7% | 10.1% | 9.5% | 8.8% | 8.3% | 7.4% |
-| Prop new inf treated | 5.6% | 12.1% | 13.1% | 13.8% | 15.0% | 16.8% | 21.8% | 26.1% | 30.3% |
+| Prop new inf treated (event-ratio, lax) | 5.6% | 12.1% | 13.1% | 13.8% | 15.0% | 16.8% | 21.8% | 26.1% | 30.3% |
 |   — F | 16.0% | 18.6% | 21.2% | 23.2% | 26.2% | 31.2% | 38.5% | 48.4% | 50.5% |
 |   — M | 1.2% | 9.4% | 9.5% | 9.6% | 9.8% | 9.8% | 13.3% | 15.8% | 20.9% |
+| Prop new inf cured w/in 3mo (per-episode, strict) | 4.2% | 9.7% | 10.0% | 10.3% | 10.7% | 11.4% | 15.6% | 18.6% | 22.4% |
 
 ### BV
 | Metric | A | B | C1 | C2 | C3 | D | E1 | E2 | E3 |
@@ -112,9 +123,10 @@ Mean over draws+seeds. All counts in millions over 2027-2040.
 |   unnecessary | NA | NA | NA | NA | NA | NA | NA | NA | NA |
 | n_infected (point, 2040) | 10730.3K | 10770.9K | 10759.8K | 10751.0K | 10741.7K | 10743.0K | 10702.4K | 10671.5K | 10669.1K |
 | Prevalence (point, 2040) | 40.2% | 40.4% | 40.3% | 40.2% | 40.2% | 40.2% | 40.0% | 39.9% | 39.9% |
-| Prop new inf treated | NA | NA | NA | NA | NA | NA | NA | NA | NA |
+| Prop new inf treated (event-ratio, lax) | NA | NA | NA | NA | NA | NA | NA | NA | NA |
 |   — F | NA | NA | NA | NA | NA | NA | NA | NA | NA |
 |   — M | NA | NA | NA | NA | NA | NA | NA | NA | NA |
+| Prop new inf cured w/in 3mo (per-episode, strict) | NA | NA | NA | NA | NA | NA | NA | NA | NA |
 
 ## Syph APO/ABO
 
@@ -136,12 +148,13 @@ Native syph module results, summed over 2027-2040.
 | HIV new infections | 0.49M | 0.49M | 0.49M | 0.49M | 0.49M | 0.49M | 0.49M | 0.49M | 0.49M |
 | PN partners notified | 1.58M | 1.63M | 2.32M | 2.98M | 4.28M | 4.44M | 5.25M | 5.66M | 6.25M |
 | PN partners attending | 1.01M | 1.03M | 1.91M | 2.72M | 4.00M | 4.13M | 4.87M | 5.24M | 5.81M |
-|   of which no STI found (wasted) | 0.13M | 0.11M | 0.23M | 0.35M | 0.58M | 0.68M | 0.87M | 0.97M | 1.08M |
+|   of which attendee had no STI (wasted attendance) | 0.13M | 0.11M | 0.23M | 0.35M | 0.58M | 0.68M | 0.87M | 0.97M | 1.08M |
+|   PN indices over-treated (no STI at moment of tx) | 7.10M | 0.64M | 0.70M | 0.74M | 0.83M | 1.01M | 1.17M | 1.29M | 1.35M |
 
 ## Notes
 
 - **NG fix:** stisim ships `GonorrheaTreatment` with an AMR tracking state `rel_treat` declared `FloatArr(default=1)`, but starsim does not apply the default to `.raw`. Every agent's rel_treat sits at NaN, so `new_treat_eff = NaN * base_treat_eff = NaN` and the `treat_eff` bernoulli always rejects — 0% NG cures. Worked around locally by treating NaN as the documented default (1.0) in `GonorrheaTreatmentFixed.set_treat_eff`. Calibration baseline (with the bug) treated NG as effectively no-treatment, so NG prevalence in those calibrated draws is an over-estimate; the bug-fixed dynamics drive NG down across all arms.
-- **`prop_treated`** can exceed 100% in the (rare) regime where the same agent gets infected and successfully treated more than once over 2027-2040. It is best read as a treatment-volume-per-infection ratio, not a literal patient coverage rate.
+- **`prop_treated` (event-ratio, lax)** can exceed 100% in the regime where the same agent gets infected and successfully treated more than once over 2027-2040. It is best read as a treatment-volume-per-infection ratio, not a literal patient coverage rate. Reported alongside `prop_cured_3mo` (per-episode, strict) which counts per-episode "newly infected at T0 and successfully treated within 3 months of T0" — implemented via the `CareTimingAnalyzer` in analyzers.py.
+- **PN false-alarm index** is computed inside `PartnerNotificationNoCycle.step` by reading `tx.outcomes` across NG/CT/TV/syph treatments: an index UID is "false alarm" if it appears in `outcomes[d].unnecessary` for at least one STI AND does NOT appear in `outcomes[d].(successful|unsuccessful)` for any STI. BV is excluded — BV-only over-treatment that gets correctly caught by metronidazole still triggers PN, and that PN is false-alarm.
 - **PN cascade**: still tracks anyone-treated-this-step as index pool, not stratified by which STI triggered treatment. Splitting PN by disease (which STI drove the index case) and by sex (M vs F index / attendee) requires bookkeeping inside `POCPN.notify_attendees` — TODO.
-- **Treated-within-3-months metric** also a TODO — requires per-agent (ti_infected - ti_treated) tracking which is not currently exposed in results.
 - **FetalHealth wiring** still off. Native syph module gives `new_congenital`; NND + stillborn require FetalHealth + `sti_fetal` connector. Numbers above let us decide whether to enable.

@@ -191,6 +191,15 @@ def extract_endpoints(sim, arm_label, draw_idx, seed):
             _, vals = grab_safe(dres['prevalence'])
             if vals is not None and len(vals):
                 rows[f'{disease}_prevalence_end'] = float(vals[-1])
+        # Syph-specific: sexually_transmissible_prevalence (primary +
+        # secondary + early latent). Matches WHO "early infectious
+        # syphilis" — the policy-relevant active-transmission slice,
+        # rather than the total prev that includes late latent +
+        # tertiary (currently not on calibration target).
+        if disease == 'syph' and 'sexually_transmissible_prevalence' in dres:
+            _, vals = grab_safe(dres['sexually_transmissible_prevalence'])
+            if vals is not None and len(vals):
+                rows[f'{disease}_sti_prev_end'] = float(vals[-1])
 
     # Per-disease treatments (total + successful + unnecessary, overall + by sex)
     # Read from sim.results[disease] (per-disease attribution) rather than the
@@ -235,16 +244,36 @@ def extract_endpoints(sim, arm_label, draw_idx, seed):
             rows[label] = sum_over_window(syph_res[key], INTV_YEAR, END_YEAR)
 
     # PN: notified + attending, current vs prior channel + wasted attendance
+    # + false-alarm index (index had no STI at moment of treatment).
     pn = getattr(sim.interventions, 'pn', None)
     if pn is not None:
         for key, label in (('new_notified',          'pn_notified_2027_2040'),
                            ('new_attending',         'pn_attending_2027_2040'),
                            ('new_notified_current',  'pn_notified_current_2027_2040'),
                            ('new_notified_previous', 'pn_notified_previous_2027_2040'),
-                           ('new_attended_no_sti',   'pn_attended_no_sti_2027_2040')):
+                           ('new_attended_no_sti',   'pn_attended_no_sti_2027_2040'),
+                           ('new_index_no_sti',      'pn_index_no_sti_2027_2040')):
             if key in pn.results:
                 rows[label] = sum_over_window(pn.results[key],
                                               INTV_YEAR, END_YEAR)
+
+    # Care-timing analyzer: # of new infections cured within window of
+    # acquisition. The denominator is sim.results[d].new_infections in
+    # the same window (extracted above as `{disease}_new_inf_2027_2040`).
+    # sim.analyzers is a starsim ndict — access by key.
+    care_timing = (sim.analyzers.get('care_timing')
+                   if hasattr(sim.analyzers, 'get') else None)
+    if care_timing is not None:
+        for d in ('ng', 'ct', 'tv', 'syph'):
+            key = f'{d}_inf_treated_within_window'
+            if key in care_timing.results:
+                rows[f'{d}_cured_within_3mo_2027_2040'] = sum_over_window(
+                    care_timing.results[key], INTV_YEAR, END_YEAR)
+                # Episode coverage = cured_in_window / new_inf
+                num = rows.get(f'{d}_cured_within_3mo_2027_2040')
+                den = rows.get(f'{d}_new_inf_2027_2040')
+                if num is not None and den is not None and den > 0:
+                    rows[f'{d}_prop_cured_3mo'] = float(num) / float(den)
 
     return rows
 
