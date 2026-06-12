@@ -54,11 +54,13 @@ def make_ulcerative_stis():
         eff_condom=0.5,
         rel_trans_primary=5,
         rel_trans_secondary=1,
-        rel_trans_latent=0.1,
         rel_trans_latent_half_life=ss.months(6),
         p_symp_primary=[0.3, 0.8],
         anc_detection=1.,
         rel_init_prev=0.2,
+        # 15-64 matches the ZIMPHIA household-survey denominator for the
+        # trep / nontrep targets in the calibration pipeline.
+        age_range=[15, 64],
         init_prev_data=pd.read_csv(init_prev_path) if os.path.exists(init_prev_path) else None,
         init_prev_latent_data=pd.read_csv(init_prev_latent_path) if os.path.exists(init_prev_latent_path) else None,
     )

@@ -74,7 +74,7 @@ Each cell × 20 stochastic seeds = ~250 sims for the prelim. Fits on a laptop.
 | Endpoint | Source | Notes |
 |----|----|----|
 | HIV new infections | `hiv.results.new_infections` | Stratify by sex |
-| Syph active prevalence | `syph.results.active_prevalence` | |
+| Syph symptomatic prevalence | `syph.results.symptomatic_prevalence` | Primary + secondary stages |
 | Syph onward transmission averted | Counterfactual diff | Need to record at module level |
 | Adverse pregnancy outcomes | `FetalHealth` (port from anc_sti_screening) | Syph + HIV |
 | Adverse birth outcomes | Same | Stillbirth, preterm, LBW |

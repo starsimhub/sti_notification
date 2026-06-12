@@ -196,8 +196,8 @@ def extract_calibration_summary(sim, draw_idx: int, seed: int) -> dict:
     yrs_inf, new_inf  = grab(r, 'new_infections')
     _, fsw_prev       = grab(r, 'prevalence_sw')
     _, client_prev    = grab(r, 'prevalence_client')
-    _, nontrep_f      = grab(r, 'nontrep_prevalence_15_64_f')
-    _, trep_f         = grab(r, 'trep_prevalence_15_64_f')
+    _, nontrep_f      = grab(r, 'nontrep_prevalence_f')
+    _, trep_f         = grab(r, 'trep_prevalence_f')
 
     r_trep    = sim.results['syph_hiv_trep']
     r_nontrep = sim.results['syph_hiv_nontrep']
@@ -290,11 +290,13 @@ TIME_SERIES_RESULTS = {
         'new_infections',
         'prevalence', 'prevalence_f', 'prevalence_m',
         'prevalence_sw', 'prevalence_client',
-        'trep_prevalence_15_64',
-        'trep_prevalence_15_64_f', 'trep_prevalence_15_64_m',
-        'nontrep_prevalence_15_64',
-        'nontrep_prevalence_15_64_f', 'nontrep_prevalence_15_64_m',
-        'active_prevalence', 'active_prevalence_f', 'active_prevalence_m',
+        # trep / nontrep denominators are sexually-active adults within the
+        # syph module's `age_range` (set to 15-64 in model.py to match the
+        # ZIMPHIA household-survey reference).
+        'trep_prevalence',
+        'trep_prevalence_f', 'trep_prevalence_m',
+        'nontrep_prevalence',
+        'nontrep_prevalence_f', 'nontrep_prevalence_m',
         'sexually_transmissible_prevalence',
         'sexually_transmissible_prevalence_f',
         'sexually_transmissible_prevalence_m',
@@ -311,7 +313,7 @@ SNAPSHOT_BASES = {
     'ct':   ['prevalence'],
     'tv':   ['prevalence'],
     'syph': ['trep_prevalence', 'nontrep_prevalence',
-             'active_prevalence', 'sexually_transmissible_prevalence',
+             'sexually_transmissible_prevalence',
              'symptomatic_prevalence', 'primary_prevalence'],
 }
 

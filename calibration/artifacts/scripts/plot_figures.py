@@ -99,7 +99,7 @@ def fig_syph_timeseries(ts, fig_dir: Path):
     fig, axes = plt.subplots(2, 2, figsize=(11, 7.5))
 
     ax = axes[0, 0]
-    plot_one_ts(ax, get_series(ts, 'syph', 'trep_prevalence_15_64'),
+    plot_one_ts(ax, get_series(ts, 'syph', 'trep_prevalence'),
                 color=COL_MODEL, multiplier=100)
     ax.axhline(ZIMPHIA_NATIONAL_TREP_15_64 * 100, color=COL_DATA,
                linestyle='--', alpha=0.7, label='ZIMPHIA 2015-16 (2.7%)')
@@ -111,7 +111,7 @@ def fig_syph_timeseries(ts, fig_dir: Path):
     ax.set_ylim(bottom=0)
 
     ax = axes[0, 1]
-    plot_one_ts(ax, get_series(ts, 'syph', 'nontrep_prevalence_15_64'),
+    plot_one_ts(ax, get_series(ts, 'syph', 'nontrep_prevalence'),
                 color=COL_MODEL, multiplier=100)
     ax.axhline(ZIMPHIA_NATIONAL_ACTIVE_15_64 * 100, color=COL_DATA,
                linestyle='--', alpha=0.7, label='ZIMPHIA 2015-16 (0.8%)')
