@@ -170,8 +170,7 @@ def make_interventions(diseases, which='all', poc=None, poc_syph=None,
         poc_syph = poc
     intvs = make_hiv_intvs()
     if which in ('discharging', 'all'):
-        intvs += make_testing(diseases.ng, diseases.ct, diseases.tv, diseases.bv,
-                              poc=poc, stop=stop,
+        intvs += make_testing(poc=poc, stop=stop,
                               fsw_outreach=fsw_outreach,
                               fsw_coverage_per_step=fsw_coverage_per_step)
     # Insert PN AFTER make_testing but BEFORE make_syph_testing. This
