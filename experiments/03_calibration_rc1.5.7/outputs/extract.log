@@ -1,0 +1,13 @@
+Loaded 53 draws from experiments/03_calibration_rc1.5.7/outputs/draws_used.csv
+Total sims: 159 (53 × 3 seeds)
+Running on 60 workers...
+  [ 30/159] 445s eta=1914s ok=30 err=0
+  [ 60/159] 500s eta=825s ok=60 err=0
+  [ 90/159] 920s eta=705s ok=90 err=0
+  [120/159] 972s eta=316s ok=120 err=0
+  [150/159] 1342s eta=81s ok=150 err=0
+  [159/159] 1364s eta=0s ok=159 err=0
+
+Done in 1364.0s. OK: 159, errors: 0
+  ts quantiles -> ensemble_ts_quantiles.parquet: 2240 rows
+  snap quantiles -> ensemble_snapshots_quantiles.parquet: 288 rows
