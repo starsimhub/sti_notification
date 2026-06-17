@@ -31,12 +31,56 @@
 
 **Calibration is complete on stisim rc1.5.7.** See `experiments/03_calibration_rc1.5.7/SUMMARY.md`. 53-draw robust ensemble at `experiments/03_calibration_rc1.5.7/outputs/draws_used.csv`; time-series + age × sex snapshot quantile parquets alongside. 17 priors.
 
-**Scenarios scaffolding.** `run_sweeps.py` already defines the three orthogonal sweeps (PN coverage, care-seeking intensity, dx × PN interaction). `interventions.py` has `SyndromicPN`, `POCPN`, `FSWOutreach`, `make_testing`, `make_pn` ready. `model.py` builds the 7-disease sim with `FetalHealth` wired via `custom=` for APO/ABO accounting.
+**Scenarios scaffolding.** `interventions.py` has `SyndromicPN`, `POCPN`, `FSWOutreach`, `make_testing`, `make_pn` ready. `model.py` builds the 7-disease sim with `FetalHealth` wired via `custom=` for APO/ABO accounting. Each scenario run lives in its own `experiments/NN_<slug>/run.py` — see *Wiring scenarios off the calibrated ensemble* below for the contract.
 
 ## Scenario design
 
-### Levers (defined in `run_sweeps.py` and `interventions.py`)
-- **PN coverage**: 4 levels (`PN_LEVELS = {none, low, med, high}`); each level is a dict of `p_notify_current`, `p_attends_current`, `p_notify_previous`, `p_attends_previous` Bernoullis. Edge-type stratification available via `pn.pn_rates({'stable': p, 'casual': p, ...})` when needed.
+### Wiring scenarios off the calibrated ensemble
+
+Every scenario run lives in its own `experiments/NN_<slug>/run.py`,
+following the pattern from `experiments/01_poc_pilot_3arm/run.py`.
+The `run_sweeps.py` / `plot_sweeps.py` files at the repo root were
+pre-experiment-folder scaffolding and have been removed; do not
+resurrect that shape. Each scenario `run.py` must:
+
+1. **Load draws from the current calibration baseline**:
+   `experiments/03_calibration_rc1.5.7/outputs/draws_used.csv`. **Not**
+   `calibration/artifacts/draws_used.csv` — that's the older 2026-06-10
+   baseline, kept for historical comparison only.
+2. **Apply each draw via `_pipeline.set_pars_local`** (in
+   `calibration/artifacts/scripts/_pipeline.py`). `sti.Sim` stores
+   modules in lists not dicts, so dict-style parameter overrides
+   silently miss; `set_pars_local` iterates and matches by `mod.name`.
+   Do not reimplement this.
+3. **Use edge-stratified PN via `pn_rates`**:
+   `pn.pn_rates({'stable': p_stable, 'casual': p_casual, ...})`.
+   Flat-scalar Bernoullis ignore the edge-type structure of the
+   network and don't match the calibrated PN dynamics. Edge-rate
+   dicts are baseline-multiplied per `BASELINE_NOTIFY` /
+   `BASELINE_ATTEND` constants (see exp 01's `run.py` for the pattern).
+4. **Vary scenario kwargs around the loaded draw**, not in place of
+   it. The draw sets calibrated transmission / network / care-seeking
+   parameters; the scenario kwargs (PN coverage, care-seeking
+   multiplier, `poc=`) layer on top.
+
+### Wiring check before each scenario sweep
+
+Before running any new scenario at full ensemble size, run a
+**1-draw × 3-seed wiring check** end-to-end:
+
+- Pick one draw (e.g. the median-n_pass row of `draws_used.csv`).
+- Compare a no-PN cell vs a high-PN cell.
+- Verify that notification counts move in the right direction and
+  order of magnitude.
+
+This is a wiring check, not a science check. It does not need to
+reproduce headline results from prior experiments (which were
+calibrated against a different baseline). Its purpose is catching
+silent failures: draws not actually loaded, PN rates not actually
+applied, scenarios not differing as expected.
+
+### Levers (constructed from `interventions.py` per scenario)
+- **PN coverage**: 4 levels (none / low / med / high). Each level is a dict of edge-stratified rates passed via `pn_rates` — `{'stable': p_stable, 'casual': p_casual}` for notify and `{'stable': {'f': p, 'm': p}, ...}` for attend (see exp 01's `BASELINE_NOTIFY` / `BASELINE_ATTEND` and the multiplier pattern).
 - **PN recall window**: `dur_recall` ∈ {3 mo, 6 mo, 12 mo} on `PriorPartners`.
 - **Care-seeking intensity**: multiplier on `p_symp_care` ∈ {1.0×, 1.25×, 1.5×, 2.0×}. Same multiplier for NG/CT/TV; separate setting for syphilis primary/secondary.
 - **Diagnostic accuracy**: SOC syndromic vs POC etiological (`poc=` flag).
@@ -72,7 +116,7 @@ Each cell propagated through the 53-draw ensemble (× the seed strategy in `run_
 
 ## Next concrete steps (ordered)
 
-1. **Wire scenarios off the 53-draw ensemble.** Update `run_sweeps.py` to load `experiments/03_calibration_rc1.5.7/outputs/draws_used.csv` and propagate each draw through the three sweeps.
+1. **Wire scenarios off the 53-draw ensemble.** Following *Wiring scenarios off the calibrated ensemble* above, build a single new `experiments/NN_<slug>/run.py` (modeled on `experiments/01_poc_pilot_3arm/run.py`) that loads `experiments/03_calibration_rc1.5.7/outputs/draws_used.csv`, applies each draw via `_pipeline.set_pars_local`, and uses edge-stratified `pn_rates`. Run the 1-draw wiring check first.
 2. **Add the unnecessary-notification metric.** Tag attendees whose true-negative status across all four PN diseases (ng/ct/tv/syph) means the notification was unwarranted.
 3. **DALY post-processing.** Apply standard weights to incident cases, deaths, and APO/ABO outputs.
 4. **Run the three sweeps.** Open a new experiment folder per sweep (e.g. `experiments/04_pn_sweep/`, `experiments/05_outreach_sweep/`, `experiments/06_dx_pn_interaction/`) — or one combined folder if the storage cost stays reasonable. Let the `calib:project-workflow` skill decide.
