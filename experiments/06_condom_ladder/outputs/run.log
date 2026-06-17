@@ -1,0 +1,20 @@
+[exp06] condom ladder, draw=773 seed=0 n_agents=10000 window=(2030, 2034) eff=0.5
+[exp06] === coverage 0.0 ===
+[exp06]   ct_prev=0.198 reinf=0.55 protected=0
+[exp06] === coverage 0.25 ===
+[exp06]   ct_prev=0.192 reinf=0.55 protected=140,614
+[exp06] === coverage 0.5 ===
+[exp06]   ct_prev=0.187 reinf=0.53 protected=262,468
+[exp06] === coverage 0.75 ===
+[exp06]   ct_prev=0.183 reinf=0.58 protected=367,521
+[exp06] === coverage 1.0 ===
+[exp06]   ct_prev=0.181 reinf=0.51 protected=472,664
+
+[exp06] === CONDOM LADDER (CT, draw 773, POC+baseline PN) ===
+ coverage  ct_prev_window_mean  ct_new_inf_window  cohort_reinf_rate  mean_protected
+    0.000                0.198     11,330,880.000              0.550           0.000
+    0.250                0.192     10,964,610.000              0.550     140,613.750
+    0.500                0.187     10,655,760.000              0.530     262,468.125
+    0.750                0.183     10,374,750.000              0.580     367,520.625
+    1.000                0.181     10,246,860.000              0.510     472,663.750
+[exp06] done.
