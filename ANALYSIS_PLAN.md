@@ -23,23 +23,15 @@
 | Geographies | Zimbabwe only for July deliverable; KE + ZA deferred |
 | Diseases | All 7 from day 1 (HIV + syph + GUDP + NG/CT/TV + BV) |
 | Health endpoints | APO + ABO + DALYs (primary); HIV infections, onward syph transmission, GUD-mediated HIV (secondary) |
-| PN mechanism | Edge-stratified `PartnerNotification` (local `pn.py`) on `PriorPartners` recall network; notify-vs-attend split for current and previous partners; recall window as a parameter |
+| PN mechanism | Edge-stratified `PartnerNotification` from `pn.py` on the `PriorPartners` recall network; notify-vs-attend split for current and previous partners; recall window as a parameter |
 | Care-seeking lever | Vary `p_symp_care` (NG/CT/TV same value; syph is per-stage `p_symp_primary`/`p_symp_secondary`) |
 | Diagnostic accuracy | SOC syndromic (`SyndromicManagement` via VDS/UDS) vs POC etiological panel; selected by `poc=` flag in `make_testing` |
 
 ## Current state (2026-06-15)
 
-**Calibration is complete on stisim rc1.5.7.** See `experiments/03_calibration_rc1.5.7/SUMMARY.md`. 53-draw robust ensemble at `experiments/03_calibration_rc1.5.7/outputs/draws_used.csv`; time-series + age × sex snapshot quantile parquets alongside. 17 priors. The marital-act-decay knobs were dropped because stisim PR 506 didn't land in 1.5.7; the syph structural ceiling held without them.
-
-**Local stisim shim.** `pn.py` carries the edge-stratified `PartnerNotification` + `pn_rates` helper from stisim PR 505 (also not in 1.5.7). `SyndromicPN` and `POCPN` re-parent on this local class. Drop when 505 lands upstream.
+**Calibration is complete on stisim rc1.5.7.** See `experiments/03_calibration_rc1.5.7/SUMMARY.md`. 53-draw robust ensemble at `experiments/03_calibration_rc1.5.7/outputs/draws_used.csv`; time-series + age × sex snapshot quantile parquets alongside. 17 priors.
 
 **Scenarios scaffolding.** `run_sweeps.py` already defines the three orthogonal sweeps (PN coverage, care-seeking intensity, dx × PN interaction). `interventions.py` has `SyndromicPN`, `POCPN`, `FSWOutreach`, `make_testing`, `make_pn` ready. `model.py` builds the 7-disease sim with `FetalHealth` wired via `custom=` for APO/ABO accounting.
-
-## Where things live
-
-- **Layer 1 (`starsim`)** — no changes expected; pinned via conda env.
-- **Layer 2 (`stisim`)** — pinned to **rc1.5.7**. Stisim PRs 505 (edge-stratified PN) and 506 (marital-act-decay) are open but not in this release; `pn.py` is the only local carve-out.
-- **Layer 3 (`sti_notification`)** — sim assembly, scenario logic, country-specific data, outcome accounting, run scripts, plots.
 
 ## Scenario design
 
@@ -69,7 +61,7 @@ Each cell propagated through the 53-draw ensemble (× the seed strategy in `run_
 | DALYs | Post-hoc on incident cases + deaths + APOs | Standard weights |
 | Treatments delivered | per-treatment `new_treated` | Already tracked |
 | Unnecessary treatments | per-treatment `new_treated_unnecessary` | Already tracked; key metric for dx arm |
-| Notifications sent / partners attending | `pn.results.new_notified`, `new_attending` | Already tracked on the local `PartnerNotification` |
+| Notifications sent / partners attending | `pn.results.new_notified`, `new_attending` | Already tracked on `PartnerNotification` |
 | Unnecessary notifications | Notifications to true-negative partners | New metric needed for the dx arm |
 
 ## Manuscript framing (locked in from the calibration)
@@ -83,16 +75,14 @@ Each cell propagated through the 53-draw ensemble (× the seed strategy in `run_
 1. **Wire scenarios off the 53-draw ensemble.** Update `run_sweeps.py` to load `experiments/03_calibration_rc1.5.7/outputs/draws_used.csv` and propagate each draw through the three sweeps.
 2. **Add the unnecessary-notification metric.** Tag attendees whose true-negative status across all four PN diseases (ng/ct/tv/syph) means the notification was unwarranted.
 3. **DALY post-processing.** Apply standard weights to incident cases, deaths, and APO/ABO outputs.
-4. **Run the three sweeps.** Open `experiments/04_pn_sweep/`, `experiments/05_outreach_sweep/`, and `experiments/06_dx_pn_interaction/` (or a single `experiments/04_zimbabwe_scenarios/` if combined; let the `calib:project-workflow` skill decide).
-5. **Decision analysis.** CEAC + EVPI per `calib:decision-analysis` skill. Cost per averted APO is the headline cost-effectiveness output.
-6. **Threshold curves + interaction plots** for the manuscript figures.
+4. **Run the three sweeps.** Open a new experiment folder per sweep (e.g. `experiments/04_pn_sweep/`, `experiments/05_outreach_sweep/`, `experiments/06_dx_pn_interaction/`) — or one combined folder if the storage cost stays reasonable. Let the `calib:project-workflow` skill decide.
+5. **Endpoint reporting.** For each sweep, report the endpoints above with ensemble quantile envelopes. Threshold curves (PN coverage vs APO/ABO averted; care-seeking intensity vs HIV infections averted) and the dx × PN interaction plot are the headline figures.
 
 ## Recalibration triggers
 
 Recalibrate if any of:
-- Stisim PR 505 (baseline-pn) or PR 506 (marital-act-decay) lands — at minimum, drop `pn.py` and re-parent on the upstream class; for PR 506, reintroduce the dropped priors.
-- Stisim minor version bump (1.6.x) — parameter scales are not transferable across minor versions per `calibration/recalibration_guide.md`.
 - Any change to `model.py` that affects calibrated endpoints (new disease, new connector, changed natural-history defaults).
+- A stisim minor version bump (1.6.x) — parameter scales are not transferable across minor versions per `calibration/recalibration_guide.md`.
 - Refreshed ZIMPHIA / UNAIDS data that shifts target bands beyond the 80% CI.
 
 See `calibration/recalibration_guide.md` for the full when-to-recalibrate criteria.
