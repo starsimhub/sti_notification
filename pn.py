@@ -68,6 +68,12 @@ class PartnerNotification(ss.Intervention):
         self._prev_nw = None
         self._use_previous = False
         self.current_partner_edges = defaultdict(list)
+        # Opt-in dyad-level event log for chain tracing. Default None (off).
+        # Set to a list ([]) on the live module to enable: step() then
+        # appends (ti, index_uid, partner_uid, notified, attended) tuples
+        # for every current-channel (index, partner) dyad. Recomputed from
+        # network topology only — consumes no RNG, changes no behaviour.
+        self.trace_events = None
         return
 
     def init_pre(self, sim):
@@ -167,11 +173,38 @@ class PartnerNotification(ss.Intervention):
             self.ti_notified[all_attending] = self.ti
             self.notify_attendees(all_attending)
 
+        if self.trace_events is not None:
+            self._log_trace(index_uids, cur_notified, cur_attending)
+
         ti = self.ti
         self.results['new_notified_current'][ti] = len(cur_notified)
         self.results['new_notified_previous'][ti] = len(prev_notified)
         self.results['new_notified'][ti] = len(cur_notified) + len(prev_notified)
         self.results['new_attending'][ti] = len(all_attending)
+        return
+
+    def _log_trace(self, index_uids, cur_notified, cur_attending):
+        """Append current-channel (index, partner) dyads to ``trace_events``.
+
+        For chain tracing. Re-derives the index→partner edge mapping from
+        network topology (no RNG draws), then tags each dyad with the
+        actual notified / attended outcomes computed in ``step``. One
+        record per (index, partner) edge:
+        ``(ti, index_uid, partner_uid, notified, attended)``.
+        """
+        nw = self._cur_nw
+        p1_is_index = np.isin(nw.p1, index_uids)
+        p2_is_index = np.isin(nw.p2, index_uids)
+        has_one_index = p1_is_index ^ p2_is_index
+        partner = np.where(p1_is_index, nw.p2, nw.p1)[has_one_index]
+        index = np.where(p1_is_index, nw.p1, nw.p2)[has_one_index]
+        notified = set(int(u) for u in cur_notified)
+        attending = set(int(u) for u in cur_attending)
+        ti = self.ti
+        for ip, pp in zip(index, partner):
+            pp = int(pp)
+            self.trace_events.append(
+                (ti, int(ip), pp, int(pp in notified), int(pp in attending)))
         return
 
 
