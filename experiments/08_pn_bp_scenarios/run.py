@@ -150,6 +150,9 @@ def main():
     if not DRAWS_CSV.exists():
         raise SystemExit(f'draws not found: {DRAWS_CSV} (set DRAWS env var)')
     draws = pd.read_csv(DRAWS_CSV)
+    n_draws_env = os.environ.get('N_DRAWS')
+    if n_draws_env:
+        draws = draws.head(int(n_draws_env))  # quick indicative subset
     cells = build_cells()
     tasks = []
     for _, r in draws.iterrows():
