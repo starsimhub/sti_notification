@@ -15,13 +15,14 @@ work (PN/condom ladders, wiring + story runs) is under `archive/`.
 
 ## State of play
 
-**Active calibration baseline.** `experiments/02_2026-06-22_calibration_per_disease_sustain/` — **26-draw robust ensemble** on **stisim rc1.5.7** with 17 priors, using a **per-disease sustainability filter** (HIV/syph/NG/CT/TV all required to sustain through 2030–2040; the earlier syph-only filter let through ~43% of draws with NG or TV at near-extinction beta values, including the draw 773 that extinguished both in scenarios). Draws live at `experiments/02_2026-06-22_calibration_per_disease_sustain/outputs/draws_used.csv`. Full report in that folder's `SUMMARY.md`. **Predates the BV-in-VDS edit (`SimpleBV` + `bv_care`); re-fire before the headline factorial.**
+**Active calibration baseline.** `experiments/03_2026-06-22_calibration_bv_in_vds/` — **26-draw robust ensemble** on **stisim rc1.5.7** with 17 priors, using the **per-disease sustainability filter** (HIV/syph/NG/CT/TV all required to sustain through 2030–2040), calibrated against the current model with **BV-in-VDS** (`SimpleBV` + `bv_care` in `seeking_care_vds`). Draws live at `experiments/03_2026-06-22_calibration_bv_in_vds/outputs/draws_used.csv`. Full report in that folder's `SUMMARY.md`. From a 500-draw LHS (half of exp 02's budget) with identical phase-1 acceptance rate (31.2%); promoted because exp 02's draws predated the BV-in-VDS edit.
 
 **Historical baselines.**
+- `experiments/02_2026-06-22_calibration_per_disease_sustain/` — exp 02's 26-draw ensemble against the pre-BV-in-VDS model. Same priors + filter as exp 03; superseded but kept for reference. Note: zero overlap in retained `draw_idx` with exp 03 (the BV-in-VDS edit moves the passing region of the LHS hyper-cube).
 - `experiments/01_2026-06-15_calibration_rc1.5.7/` — 53-draw ensemble on the same model but with a syph-only sustainability filter. Superseded because 23/53 draws had NG or TV `beta_m2f` < 0.05, near the extinction threshold.
 - 169-draw ensemble on `main` under `calibration/artifacts/` against an older stisim base. The 41-experiment development history is on the `archive/calibration-2026-06` tag.
 
-**Active work.** POC scenario factorial on the `scenarios/zimbabwe` branch, driven by root `run_scenarios.py`: `SOC` + `POC × CARE_SEEKING × PN_INTENSITY × BUNDLED_PREVENTION` (5×5×5 = 125, + SOC = 126 cells), propagated through the 26-draw ensemble, reporting the endpoints in `ANALYSIS_PLAN.md`. `SMOKE=1` runs a 6-cell wiring check.
+**Active work.** POC scenario factorial on the `scenarios/zimbabwe` branch, driven by root `run_scenarios.py`: `SOC` + `POC × CARE_SEEKING × PN_INTENSITY × BUNDLED_PREVENTION` (5×5×5 = 125, + SOC = 126 cells), propagated through the exp 03 26-draw ensemble, reporting the endpoints in `ANALYSIS_PLAN.md`. `SMOKE=1` runs a 6-cell wiring check.
 
 ## Intake
 

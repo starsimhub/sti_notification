@@ -98,10 +98,13 @@ exp 02's 4.2). All five STIs sustain 3/3 seeds in 33/50 phase-2 cells (66%).
 ## Next
 
 1. **Promote `outputs/draws_used.csv` as the active calibration baseline.**
-   Update `CLAUDE.md` and any scenario drivers that hard-code the exp 02
-   path (`experiments/02_2026-06-22_calibration_per_disease_sustain/outputs/draws_used.csv`).
-2. **Re-run exp 08** (PN × bundled-prevention sweep) against this ensemble.
-   Diff ladder shape vs the first-pass exp 08 results (calibrated on the
-   pre-BV-in-VDS model). Expect: qualitative ladder shape preserved
-   (PN dominant on prev/APO; BP dominant on NG); absolute magnitudes
-   may shift by a few percentage points.
+   - Update `CLAUDE.md` "active calibration baseline" pointer + drop the
+     "predates the BV-in-VDS edit" warning.
+   - Update the `DRAWS_CSV` default in [`run_scenarios.py`](../../run_scenarios.py)
+     (the root scenario driver; was `experiments/02_2026-06-22_calibration_per_disease_sustain/outputs/draws_used.csv`).
+2. **Re-fire the headline scenario factorial** (`run_scenarios.py`,
+   126-cell SOC + POC×CARE_SEEKING×PN_INTENSITY×BUNDLED_PREVENTION) against
+   this ensemble. Diff vs the archived first pass on pre-BV-in-VDS draws.
+   Expect: qualitative ladder shape preserved (PN dominant on prev/APO;
+   BP dominant on NG); absolute magnitudes may shift by a few percentage
+   points.

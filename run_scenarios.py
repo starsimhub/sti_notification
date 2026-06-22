@@ -61,7 +61,7 @@ N_AGENTS = 10_000
 
 DRAWS_CSV = Path(os.environ.get(
     'DRAWS',
-    REPO / 'experiments' / '02_2026-06-22_calibration_per_disease_sustain' / 'outputs' / 'draws_used.csv'))
+    REPO / 'experiments' / '03_2026-06-22_calibration_bv_in_vds' / 'outputs' / 'draws_used.csv'))
 
 
 def build_cells():
