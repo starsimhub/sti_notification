@@ -602,7 +602,11 @@ def make_testing(poc=None, stop=2040, fsw_outreach=False,
         ng_care = dis.ng.symptomatic & (dis.ng.ti_seeks_care == dis.ng.ti) & female
         tv_care = dis.tv.symptomatic & (dis.tv.ti_seeks_care == dis.tv.ti) & female
         ct_care = dis.ct.symptomatic & (dis.ct.ti_seeks_care == dis.ct.ti) & female
-        return (ng_care | ct_care | tv_care).uids
+        # Symptomatic BV also presents as vaginal discharge. This relies on
+        # SimpleBV (which has its own symptomatic + ti_seeks_care states);
+        # BV is female-only, so it enters VDS but not the UDS path.
+        bv_care = dis.bv.symptomatic & (dis.bv.ti_seeks_care == dis.bv.ti) & female
+        return (ng_care | ct_care | tv_care | bv_care).uids
 
     def _raw_seeking_care_uds(sim):
         dis = sim.diseases

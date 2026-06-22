@@ -41,7 +41,7 @@ def make_discharging_stis(care_seek_mult=1.0):
                       p_symp_care=scaled([0.49, 0.83]))
     tv = sti.Trichomoniasis(eff_condom=0.8, beta_m2f=0.14, p_symp=[0.6, 0.5],
                           p_symp_care=scaled([0.49, 0.27]))
-    bv = sti.BV()
+    bv = sti.SimpleBV()
     return ng, ct, tv, bv
 
 
