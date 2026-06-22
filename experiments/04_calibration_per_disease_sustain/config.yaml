@@ -1,0 +1,15 @@
+# Sizing for the exp 04 LHS calibration with per-disease sustainability.
+# Consumed by run.py; mirrors the underlying run_ensemble.py CLI args.
+n_draws:      1000   # Phase 1 LHS sample size (same as exp 03)
+seed:         45     # LHS seed (same as exp 03 for direct comparability)
+target_size:  50     # Phase 2 candidate pool target; smaller than exp 03's 100 since stricter filter cuts pass rate
+n_seeds:      3      # seeds per draw in Phase 2 robustness rerun
+n_workers:    60     # IDM Azure VM
+
+# Pipeline change vs exp 03:
+#   _pipeline.extract_calibration_summary now computes per-disease sustainability
+#   for HIV/syph/NG/CT/TV. The overall passes['sustained'] flag is True iff
+#   all five sustain (new_inf > 0 AND prev_f >= 0.001 in late projection window).
+#   BV is in equilibrium and isn't checked. Diagnostic per-disease values are
+#   written to the JSONL for audit.
+# Priors unchanged from exp 03 (17 parameters in priors.py).

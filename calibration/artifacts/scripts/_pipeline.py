@@ -228,7 +228,30 @@ def extract_calibration_summary(sim, draw_idx: int, seed: int) -> dict:
     ll_v     = plateau_shares.get('late_latent',  0.0)
     ni_late  = avg(new_inf, yrs_inf, 2030, 2040)
     pf_late  = avg(prev_f,  yrs, 2035, 2040)
-    sustained = bool(ni_late > 0 and pf_late >= 0.001)
+
+    # Per-disease sustainability — each STI must have nonzero new
+    # infections in 2030-2040 AND >= 0.1% female prevalence in 2035-2040.
+    # Catches NG/CT/TV draws that ride the extinction edge; the previous
+    # syph-only check let those through silently (exp 03 had 23/53 draws
+    # with NG or TV beta_m2f < 0.05, near the sustainability threshold).
+    # BV is in equilibrium and isn't checked.
+    def _disease_sustained(name):
+        rd = sim.results.get(name)
+        if rd is None:
+            return True, float('nan'), float('nan')
+        ys_pf, pf_arr = grab(rd, 'prevalence_f')
+        ys_ni, ni_arr = grab(rd, 'new_infections')
+        pf_l = avg(pf_arr, ys_pf, 2035, 2040)
+        ni_l = avg(ni_arr, ys_ni, 2030, 2040)
+        ok = bool(ni_l > 0 and pf_l >= 0.001)
+        return ok, pf_l, ni_l
+
+    sus_hiv,  pf_hiv,  ni_hiv  = _disease_sustained('hiv')
+    sus_ng,   pf_ng,   ni_ng   = _disease_sustained('ng')
+    sus_ct,   pf_ct,   ni_ct   = _disease_sustained('ct')
+    sus_tv,   pf_tv,   ni_tv   = _disease_sustained('tv')
+    sus_syph = bool(ni_late > 0 and pf_late >= 0.001)
+    sustained = sus_hiv and sus_syph and sus_ng and sus_ct and sus_tv
 
     hiv_pos_trep    = at(trep_has_hiv,    yrs_ana, 2016)
     hiv_neg_trep    = at(trep_no_hiv,     yrs_ana, 2016)
@@ -263,6 +286,24 @@ def extract_calibration_summary(sim, draw_idx: int, seed: int) -> dict:
         'client_prev_2016':             at(client_prev, yrs, 2016),
         'overall_prev_f_2035_2040_mean': pf_late,
         'new_inf_2030_2040_mean':       ni_late,
+        # Per-disease sustainability diagnostics — written for every sim
+        # so we can audit why a draw was rejected (e.g. low NG beta
+        # extinguishing NG even when syph sustains).
+        'sustained_hiv':   sus_hiv,
+        'sustained_syph':  sus_syph,
+        'sustained_ng':    sus_ng,
+        'sustained_ct':    sus_ct,
+        'sustained_tv':    sus_tv,
+        'pf_2035_2040_hiv':  pf_hiv,
+        'pf_2035_2040_syph': pf_late,
+        'pf_2035_2040_ng':   pf_ng,
+        'pf_2035_2040_ct':   pf_ct,
+        'pf_2035_2040_tv':   pf_tv,
+        'ni_2030_2040_hiv':  ni_hiv,
+        'ni_2030_2040_syph': ni_late,
+        'ni_2030_2040_ng':   ni_ng,
+        'ni_2030_2040_ct':   ni_ct,
+        'ni_2030_2040_tv':   ni_tv,
         'hiv_pos_trep_2016':            hiv_pos_trep,
         'hiv_neg_trep_2016':            hiv_neg_trep,
         'hiv_pos_nontrep_2016':         hiv_pos_nontrep,

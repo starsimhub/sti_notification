@@ -6,11 +6,13 @@ See `README.md` for project structure, `ANALYSIS_PLAN.md` for scope, and the per
 
 ## State of play
 
-**Active calibration baseline.** Exp 03 (`experiments/03_calibration_rc1.5.7/`) — 53-draw robust ensemble on **stisim rc1.5.7** with 17 priors. Draws used live at `experiments/03_calibration_rc1.5.7/outputs/draws_used.csv`; time-series + age × sex snapshot quantile parquets alongside. Full report in `experiments/03_calibration_rc1.5.7/SUMMARY.md`.
+**Active calibration baseline.** Exp 04 (`experiments/04_calibration_per_disease_sustain/`) — **26-draw robust ensemble** on **stisim rc1.5.7** with 17 priors, using a **per-disease sustainability filter** (HIV/syph/NG/CT/TV all required to sustain through 2030–2040; exp 03's syph-only filter let through ~43% of draws with NG or TV at near-extinction beta values, including the draw 773 that extinguished both in scenarios). Draws live at `experiments/04_calibration_per_disease_sustain/outputs/draws_used.csv`. Full report in `experiments/04_calibration_per_disease_sustain/SUMMARY.md`.
 
-**Historical baseline.** A 169-draw ensemble on `main` against an older stisim base lives under `calibration/artifacts/`. Kept as historical comparison; not used for current scenarios. The 41-experiment development history is on the `archive/calibration-2026-06` tag.
+**Historical baselines.**
+- Exp 03 (`experiments/03_calibration_rc1.5.7/`) — 53-draw ensemble on the same model but with a syph-only sustainability filter. Superseded by exp 04 because 23/53 draws had NG or TV `beta_m2f` < 0.05, near the extinction threshold.
+- 169-draw ensemble on `main` under `calibration/artifacts/` against an older stisim base. The 41-experiment development history is on the `archive/calibration-2026-06` tag.
 
-**Active work.** PN-intervention scenarios on the `scenarios/zimbabwe` branch. Scenarios run via `run_sweeps.py`. These propagate the 53-draw exp 03 ensemble through counterfactual PN coverage / care-seeking / diagnostic-accuracy settings and report the endpoints listed in `ANALYSIS_PLAN.md`.
+**Active work.** PN-intervention scenarios on the `scenarios/zimbabwe` branch. Per-experiment `run.py` shaped like `experiments/01_poc_pilot_3arm/run.py`. These propagate the 26-draw exp 04 ensemble through counterfactual PN coverage / care-seeking / diagnostic-accuracy settings and report the endpoints listed in `ANALYSIS_PLAN.md`.
 
 ## Intake
 
