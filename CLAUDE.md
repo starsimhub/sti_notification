@@ -4,15 +4,24 @@ Health-impact analysis of demand-generation strategies — partner notification 
 
 See `README.md` for project structure, `ANALYSIS_PLAN.md` for scope, and the per-experiment `SUMMARY.md` files under `experiments/` for results.
 
+## Repo layout (restructured 2026-06-22)
+
+Only **calibration** runs live under `experiments/`, each in its own dated,
+sequential folder (`01_2026-06-15_…`, `02_2026-06-22_…`), with that
+calibration's figures in the folder. **Scenarios** run through the single root
+`run_scenarios.py` (factors in `scenarios.py`); scenario figures go in root
+`figures/`, outputs in root `results/` (gitignored). Superseded exploratory
+work (PN/condom ladders, wiring + story runs) is under `archive/`.
+
 ## State of play
 
-**Active calibration baseline.** Exp 04 (`experiments/04_calibration_per_disease_sustain/`) — **26-draw robust ensemble** on **stisim rc1.5.7** with 17 priors, using a **per-disease sustainability filter** (HIV/syph/NG/CT/TV all required to sustain through 2030–2040; exp 03's syph-only filter let through ~43% of draws with NG or TV at near-extinction beta values, including the draw 773 that extinguished both in scenarios). Draws live at `experiments/04_calibration_per_disease_sustain/outputs/draws_used.csv`. Full report in `experiments/04_calibration_per_disease_sustain/SUMMARY.md`.
+**Active calibration baseline.** `experiments/02_2026-06-22_calibration_per_disease_sustain/` — **26-draw robust ensemble** on **stisim rc1.5.7** with 17 priors, using a **per-disease sustainability filter** (HIV/syph/NG/CT/TV all required to sustain through 2030–2040; the earlier syph-only filter let through ~43% of draws with NG or TV at near-extinction beta values, including the draw 773 that extinguished both in scenarios). Draws live at `experiments/02_2026-06-22_calibration_per_disease_sustain/outputs/draws_used.csv`. Full report in that folder's `SUMMARY.md`. **Predates the BV-in-VDS edit (`SimpleBV` + `bv_care`); re-fire before the headline factorial.**
 
 **Historical baselines.**
-- Exp 03 (`experiments/03_calibration_rc1.5.7/`) — 53-draw ensemble on the same model but with a syph-only sustainability filter. Superseded by exp 04 because 23/53 draws had NG or TV `beta_m2f` < 0.05, near the extinction threshold.
+- `experiments/01_2026-06-15_calibration_rc1.5.7/` — 53-draw ensemble on the same model but with a syph-only sustainability filter. Superseded because 23/53 draws had NG or TV `beta_m2f` < 0.05, near the extinction threshold.
 - 169-draw ensemble on `main` under `calibration/artifacts/` against an older stisim base. The 41-experiment development history is on the `archive/calibration-2026-06` tag.
 
-**Active work.** PN-intervention scenarios on the `scenarios/zimbabwe` branch. Per-experiment `run.py` shaped like `experiments/01_poc_pilot_3arm/run.py`. These propagate the 26-draw exp 04 ensemble through counterfactual PN coverage / care-seeking / diagnostic-accuracy settings and report the endpoints listed in `ANALYSIS_PLAN.md`.
+**Active work.** POC scenario factorial on the `scenarios/zimbabwe` branch, driven by root `run_scenarios.py`: `SOC` + `POC × CARE_SEEKING × PN_INTENSITY × BUNDLED_PREVENTION` (5×5×5 = 125, + SOC = 126 cells), propagated through the 26-draw ensemble, reporting the endpoints in `ANALYSIS_PLAN.md`. `SMOKE=1` runs a 6-cell wiring check.
 
 ## Intake
 
@@ -28,9 +37,9 @@ See `README.md` for project structure, `ANALYSIS_PLAN.md` for scope, and the per
 
 ### Calibration approach (record)
 
-17 parameters opened up (see `priors.py` and `experiments/03_calibration_rc1.5.7/SUMMARY.md`): five disease betas (HIV, syph, NG, CT, TV), HIV `rel_init_prev`, HIV–syph coupling, network structure, syphilis natural history. Condom effectiveness, `p_symp`, `p_symp_care=0.75`, and care-seeking rates fixed throughout.
+17 parameters opened up (see `priors.py` and `experiments/01_2026-06-15_calibration_rc1.5.7/SUMMARY.md`): five disease betas (HIV, syph, NG, CT, TV), HIV `rel_init_prev`, HIV–syph coupling, network structure, syphilis natural history. Condom effectiveness, `p_symp`, `p_symp_care=0.75`, and care-seeking rates fixed throughout.
 
-Method: LHS over the prior, single-seed filter on sustained + n_pass ≥ 5, 3-seed robustness re-run, ensemble selection on sustained 3/3 + mean n_pass ≥ 4. Institutional pipeline at `calibration/artifacts/scripts/run_ensemble.py`; experiment driver at `experiments/03_calibration_rc1.5.7/run.py`. History matching was used early but the syphilis bimodality defeated Bayes-linear emulation — see `calibration/methodology.md` §"Method evolution".
+Method: LHS over the prior, single-seed filter on sustained + n_pass ≥ 5, 3-seed robustness re-run, ensemble selection on sustained 3/3 + mean n_pass ≥ 4. Institutional pipeline at `calibration/artifacts/scripts/run_ensemble.py`; experiment driver at `experiments/01_2026-06-15_calibration_rc1.5.7/run.py`. History matching was used early but the syphilis bimodality defeated Bayes-linear emulation — see `calibration/methodology.md` §"Method evolution".
 
 **Calibration findings to carry into scenarios.** HIV calibrates cleanly (ensemble median 11.4% whole-pop, in the UNAIDS band). The syph absolute prev structural ceiling means trep/nontrep medians sit at ~26%/13% vs ZIMPHIA 2.7%/0.8% — documented as a model property, not an artifact. Manuscript framing: HIV is the headline; syph results are *relative-effect contrasts*, not absolute calibration.
 

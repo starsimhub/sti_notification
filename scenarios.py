@@ -10,12 +10,19 @@ Two single-axis intensity ladders, layered on top of each calibrated draw
                       directly by interventions.make_pn (notify_rates by edge
                       type; attendance_rates by edge type x partner sex).
 
-  BUNDLED_PREVENTION  "bundled prevention" is just the slide label for the
-                      rel_sus reduction we already use (exp 06 CondomCounseling).
-                      One axis = coverage of treated agents enrolled; per-person
-                      effect (rel_sus reduction) and duration fixed. These dicts
-                      are the args for that existing intervention. No new class.
+  CARE_SEEKING        symptomatic care-seeking intensity. One axis = a scalar
+                      multiplier on NG/CT/TV symptomatic care-seeking
+                      (p_symp_care), passed to make_sim(care_seek_mult=...).
+                      Scales the VDS (discharging-STI) pathway only.
 
+  BUNDLED_PREVENTION  "bundled prevention" is just the slide label for the
+                      rel_sus reduction we already use (CondomCounseling, now in
+                      interventions.py). One axis = coverage of treated agents
+                      enrolled; per-person effect (rel_sus reduction) and
+                      duration fixed. These dicts are the args for that
+                      intervention. No new class.
+
+These three ladders are the factors of the POC factorial (run_scenarios.py).
 Levels are intentionally round for slide use. All are provisional pending the
 sustained recalibrated ensemble.
 """
@@ -44,6 +51,19 @@ PN_INTENSITY = {
                           'casual': {'f': 0.90, 'm': 0.85}}),
 }
 
+# --- Symptomatic care-seeking (single axis: care_seek_mult) ---
+# Scalar multiplier on NG/CT/TV symptomatic care-seeking (p_symp_care), applied
+# via make_sim(care_seek_mult=...). baseline=1.0 is the calibrated SOC level;
+# female care-seeking saturates (clips to 1.0) near mult~2. Scales the VDS
+# (discharging-STI) pathway only; syph symptomatic testing stays at baseline.
+CARE_SEEKING = {
+    'baseline': 1.0,
+    'low':      1.25,
+    'moderate': 1.5,
+    'high':     1.8,
+    'maximum':  2.2,
+}
+
 # --- Bundled prevention for the diagnosed (single axis: coverage) ---
 # eff = per-person reduction in re-acquisition (rel_sus) of ng/ct/tv while
 # enrolled; dur_months = protection window. Fixed across levels so coverage is
@@ -58,3 +78,4 @@ BUNDLED_PREVENTION = {
 
 PN_LEVELS = list(PN_INTENSITY)
 BP_LEVELS = list(BUNDLED_PREVENTION)
+CARE_LEVELS = list(CARE_SEEKING)

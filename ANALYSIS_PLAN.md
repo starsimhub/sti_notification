@@ -23,76 +23,63 @@
 | Geographies | Zimbabwe only for July deliverable; KE + ZA deferred |
 | Diseases | All 7 from day 1 (HIV + syph + GUDP + NG/CT/TV + BV) |
 | Health endpoints | APO + ABO + DALYs (primary); HIV infections, onward syph transmission, GUD-mediated HIV (secondary) |
-| PN mechanism | Edge-stratified `PartnerNotification` from `pn.py` on the `PriorPartners` recall network; notify-vs-attend split for current and previous partners; recall window as a parameter |
-| Care-seeking lever | Vary `p_symp_care` (NG/CT/TV same value; syph is per-stage `p_symp_primary`/`p_symp_secondary`) |
+| PN mechanism | Edge-stratified `PartnerNotification` from `pn.py`; notify-vs-attend split by edge type and partner sex |
+| Care-seeking lever | Scalar `care_seek_mult` on NG/CT/TV `p_symp_care` (`make_sim(care_seek_mult=…)`); syph held at baseline |
+| Bundled prevention | `CondomCounseling` (interventions.py): coverage of the diagnosed enrolled in a `rel_sus`-reduction window for ng/ct/tv |
 | Diagnostic accuracy | SOC syndromic (`SyndromicManagement` via VDS/UDS) vs POC etiological panel; selected by `poc=` flag in `make_testing` |
 
-## Current state (2026-06-15)
+## Current state (2026-06-22)
 
-**Calibration baseline on stisim rc1.5.7.** See `experiments/04_calibration_per_disease_sustain/SUMMARY.md` (the active baseline, 26 draws under a per-disease sustainability filter); exp 03's 53-draw syph-only-filter ensemble is superseded but its time-series + age × sex snapshot parquets remain as a historical reference under `experiments/03_calibration_rc1.5.7/outputs/`. Draws used: `experiments/04_calibration_per_disease_sustain/outputs/draws_used.csv`. 17 priors.
+**Calibration baseline on stisim rc1.5.7.** See `experiments/02_2026-06-22_calibration_per_disease_sustain/SUMMARY.md` (the active baseline, 26 draws under a per-disease sustainability filter); the earlier 53-draw syph-only-filter ensemble is superseded but its time-series + age × sex snapshot parquets remain as a historical reference under `experiments/01_2026-06-15_calibration_rc1.5.7/outputs/`. Draws used: `experiments/02_2026-06-22_calibration_per_disease_sustain/outputs/draws_used.csv`. 17 priors. **This baseline predates the BV-in-VDS edit (`SimpleBV` + `bv_care`); re-fire before the headline factorial.**
 
-**Scenarios scaffolding.** `interventions.py` has `SyndromicPN`, `POCPN`, `FSWOutreach`, `make_testing`, `make_pn` ready. `model.py` builds the 7-disease sim with `FetalHealth` wired via `custom=` for APO/ABO accounting. Each scenario run lives in its own `experiments/NN_<slug>/run.py` — see *Wiring scenarios off the calibrated ensemble* below for the contract.
+**Scenarios scaffolding.** `interventions.py` has `SyndromicPN`, `POCPN`, `make_testing`, `make_pn`, and `CondomCounseling` ready; `model.py` builds the 7-disease sim with `FetalHealth` wired via `custom=`. The three scenario ladders live in `scenarios.py`. The factorial is driven by the single root `run_scenarios.py` (smoke-tested) — see *Wiring scenarios off the calibrated ensemble* below.
 
 ## Scenario design
 
 ### Wiring scenarios off the calibrated ensemble
 
-Every scenario run lives in its own `experiments/NN_<slug>/run.py`,
-following the pattern from `experiments/01_poc_pilot_3arm/run.py`.
-The `run_sweeps.py` / `plot_sweeps.py` files at the repo root were
-pre-experiment-folder scaffolding and have been removed; do not
-resurrect that shape. Each scenario `run.py` must:
+Scenarios run through the single root `run_scenarios.py` (not per-experiment
+folders — only calibrations live under `experiments/`). The driver:
 
-1. **Load draws from the current calibration baseline**:
-   `experiments/04_calibration_per_disease_sustain/outputs/draws_used.csv`. **Not**
-   `calibration/artifacts/draws_used.csv` — that's the older 2026-06-10
-   baseline, kept for historical comparison only.
-2. **Apply each draw via `_pipeline.set_pars_local`** (in
+1. **Loads draws from the current calibration baseline**:
+   `experiments/02_2026-06-22_calibration_per_disease_sustain/outputs/draws_used.csv`
+   (override with the `DRAWS` env var after recalibration). **Not**
+   `calibration/artifacts/draws_used.csv` — that's the older baseline,
+   historical only.
+2. **Applies each draw via `_pipeline.set_pars_local`** (in
    `calibration/artifacts/scripts/_pipeline.py`). `sti.Sim` stores
-   modules in lists not dicts, so dict-style parameter overrides
-   silently miss; `set_pars_local` iterates and matches by `mod.name`.
-   Do not reimplement this.
-3. **Use edge-stratified PN via `pn_rates`**:
-   `pn.pn_rates({'stable': p_stable, 'casual': p_casual, ...})`.
-   Flat-scalar Bernoullis ignore the edge-type structure of the
-   network and don't match the calibrated PN dynamics. Edge-rate
-   dicts are baseline-multiplied per `BASELINE_NOTIFY` /
-   `BASELINE_ATTEND` constants (see exp 01's `run.py` for the pattern).
-4. **Vary scenario kwargs around the loaded draw**, not in place of
-   it. The draw sets calibrated transmission / network / care-seeking
-   parameters; the scenario kwargs (PN coverage, care-seeking
-   multiplier, `poc=`) layer on top.
+   modules in lists not dicts, so dict-style overrides silently miss;
+   `set_pars_local` matches by `mod.name`. Do not reimplement this.
+3. **Layers the three levers on the loaded draw** (not in place of it):
+   `care_seek_mult=CARE_SEEKING[c]` and `pn_pars=PN_INTENSITY[p]` into
+   `make_sim`, and a `CondomCounseling(**BUNDLED_PREVENTION[b])` when
+   bundled prevention is on. The draw sets calibrated transmission /
+   network parameters; the levers sit on top.
+4. **Ladders are defined once in `scenarios.py`** (`CARE_SEEKING`,
+   `PN_INTENSITY`, `BUNDLED_PREVENTION`), so cells stay declarative and
+   the same levels feed any figure.
 
-### Wiring check before each scenario sweep
+### Wiring check before the full run
 
-Before running any new scenario at full ensemble size, run a
-**1-draw × 3-seed wiring check** end-to-end:
+Before running at full ensemble size, run the **smoke check** end-to-end
+(`SMOKE=1 python run_scenarios.py`): 6 spanning cells (SOC, POC-plain, and each
+lever at its maximum, plus all-max), 1 draw, 2k agents. Its purpose is catching
+silent failures — draws not loaded, a lever not applied, cells not differing —
+not reproducing headline results. Verify each lever moves prevalence /
+incidence / treatment-precision in the right direction.
 
-- Pick one draw (e.g. the median-n_pass row of `draws_used.csv`).
-- Compare a no-PN cell vs a high-PN cell.
-- Verify that notification counts move in the right direction and
-  order of magnitude.
+### Levers (the three ladders in `scenarios.py`)
+- **Symptomatic care-seeking** — `CARE_SEEKING`: scalar `care_seek_mult` on NG/CT/TV `p_symp_care`, baseline 1.0 → 2.2 (female care-seeking saturates near 2×). Scales the VDS pathway only.
+- **Partner notification** — `PN_INTENSITY`: single axis co-varying notify + attend rates (edge type × partner sex) from SOC baseline to a plausible maximum.
+- **Bundled prevention** — `BUNDLED_PREVENTION`: coverage of the diagnosed enrolled in a `CondomCounseling` `rel_sus`-reduction window (eff + duration fixed; coverage is the axis).
 
-This is a wiring check, not a science check. It does not need to
-reproduce headline results from prior experiments (which were
-calibrated against a different baseline). Its purpose is catching
-silent failures: draws not actually loaded, PN rates not actually
-applied, scenarios not differing as expected.
+Each ladder has 5 rungs (baseline/none → maximum). Diagnostic accuracy (SOC vs POC) is the framing arm, set by the `poc=` flag.
 
-### Levers (constructed from `interventions.py` per scenario)
-- **PN coverage**: 4 levels (none / low / med / high). Each level is a dict of edge-stratified rates passed via `pn_rates` — `{'stable': p_stable, 'casual': p_casual}` for notify and `{'stable': {'f': p, 'm': p}, ...}` for attend (see exp 01's `BASELINE_NOTIFY` / `BASELINE_ATTEND` and the multiplier pattern).
-- **PN recall window**: `dur_recall` ∈ {3 mo, 6 mo, 12 mo} on `PriorPartners`.
-- **Care-seeking intensity**: multiplier on `p_symp_care` ∈ {1.0×, 1.25×, 1.5×, 2.0×}. Same multiplier for NG/CT/TV; separate setting for syphilis primary/secondary.
-- **Diagnostic accuracy**: SOC syndromic vs POC etiological (`poc=` flag).
+### Scenario design — full factorial (ZW)
+- `SOC` — syndromic standard of care, all levers baseline (the reference).
+- `POC × CARE_SEEKING × PN_INTENSITY × BUNDLED_PREVENTION` = 5 × 5 × 5 = 125 cells; the (baseline, baseline, none) corner is "POC plain". 126 distinct cells total.
 
-### Scenario grid (ZW)
-Three orthogonal sweeps over the calibrated ensemble:
-
-1. **PN sweep** — fix dx=SOC, care-seeking=baseline, recall=6mo; vary PN coverage 4 ways.
-2. **Outreach sweep** — fix dx=SOC, PN=med, recall=6mo; vary care-seeking 4 ways.
-3. **Dx × PN interaction** — 2 dx × 4 PN coverage = 8 cells, fixed care-seeking baseline. This is where the "better dx → less unnecessary PN" story lands.
-
-Each cell propagated through the 26-draw ensemble in `experiments/04_calibration_per_disease_sustain/outputs/draws_used.csv`. Apply seeds via the standard 3-seed pattern from `experiments/01_poc_pilot_3arm/run.py`.
+Each cell propagated through the 26-draw ensemble. The factorial surfaces both main effects (each lever's dose-response) and interactions (e.g. does PN add to bundled prevention, or substitute?). Single-lever response and the "better dx → less unnecessary PN" contrast both fall out as slices. Full run ≈ 126 × 26 ≈ 3300 sims (~95 min on 60 cores at 1 seed).
 
 ### Endpoints
 | Endpoint | Source | Notes |
@@ -116,16 +103,17 @@ Each cell propagated through the 26-draw ensemble in `experiments/04_calibration
 
 ## Next concrete steps (ordered)
 
-1. **Wire scenarios off the 26-draw ensemble.** Following *Wiring scenarios off the calibrated ensemble* above, build a single new `experiments/NN_<slug>/run.py` (modeled on `experiments/01_poc_pilot_3arm/run.py`) that loads `experiments/04_calibration_per_disease_sustain/outputs/draws_used.csv`, applies each draw via `_pipeline.set_pars_local`, and uses edge-stratified `pn_rates`. Run the 1-draw wiring check first.
-2. **Add the unnecessary-notification metric.** Tag attendees whose true-negative status across all four PN diseases (ng/ct/tv/syph) means the notification was unwarranted.
-3. **DALY post-processing.** Apply standard weights to incident cases, deaths, and APO/ABO outputs.
-4. **Run the three sweeps.** Open a new experiment folder per sweep (e.g. `experiments/04_pn_sweep/`, `experiments/05_outreach_sweep/`, `experiments/06_dx_pn_interaction/`) — or one combined folder if the storage cost stays reasonable. Let the `calib:project-workflow` skill decide.
-5. **Endpoint reporting.** For each sweep, report the endpoints above with ensemble quantile envelopes. Threshold curves (PN coverage vs APO/ABO averted; care-seeking intensity vs HIV infections averted) and the dx × PN interaction plot are the headline figures.
+1. **Review the `CARE_SEEKING` levels** in `scenarios.py` (new ladder; values provisional).
+2. **Recalibrate (BV-aware).** The active baseline predates the `SimpleBV` + `bv_care` VDS edit. Re-fire calibration, then point `run_scenarios.py` at the new ensemble via the `DRAWS` env var (or update the default path).
+3. **Run the factorial.** `conda run -n starsim env N_SEEDS=1 N_WORKERS=60 python run_scenarios.py` (smoke check first). Output → `results/scenarios.jsonl`.
+4. **Add the unnecessary-notification metric.** Tag attendees whose true-negative status across all four PN diseases (ng/ct/tv/syph) means the notification was unwarranted.
+5. **DALY post-processing.** Apply standard weights to incident cases, deaths, and APO/ABO outputs.
+6. **Endpoint reporting.** Figures in `figures/`: main-effect dose-response per lever, interaction slices, and the dx contrast (POC vs SOC: treatment precision, unnecessary PN). Report with ensemble quantile envelopes.
 
 ## Recalibration triggers
 
 Recalibrate if any of:
-- Any change to `model.py` that affects calibrated endpoints (new disease, new connector, changed natural-history defaults).
+- Any change to `model.py` that affects calibrated endpoints (new disease, new connector, changed natural-history defaults). **Currently triggered: the BV-in-VDS edit (`SimpleBV` + `bv_care`) changed the VDS care-seeking pathway after the active ensemble was fit.**
 - A stisim minor version bump (1.6.x) — parameter scales are not transferable across minor versions per `calibration/recalibration_guide.md`.
 - Refreshed ZIMPHIA / UNAIDS data that shifts target bands beyond the 80% CI.
 

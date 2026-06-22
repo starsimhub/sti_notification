@@ -16,7 +16,7 @@ from _pipeline import row_to_sim_pars, set_pars_local, SYMP_TEST_CSV
 from model import make_sim
 from interventions import ANC_PROBS_REALISTIC
 
-draws = pd.read_csv('experiments/03_calibration_rc1.5.7/outputs/draws_used.csv')
+draws = pd.read_csv('experiments/01_2026-06-15_calibration_rc1.5.7/outputs/draws_used.csv')
 sp = row_to_sim_pars(draws[draws.draw_idx == 773].iloc[0].to_dict())
 sim = make_sim(seed=0, start=1985, stop=2020, n_agents=10_000, poc=None,
                pn_pars=None, fetal_health=False, verbose=0,

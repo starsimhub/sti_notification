@@ -77,7 +77,7 @@ class UnnecessaryPNCapture(ss.Analyzer):
 
 
 def main():
-    draws = pd.read_csv('experiments/03_calibration_rc1.5.7/outputs/draws_used.csv')
+    draws = pd.read_csv('experiments/01_2026-06-15_calibration_rc1.5.7/outputs/draws_used.csv')
     sp = row_to_sim_pars(draws[draws.draw_idx == 773].iloc[0].to_dict())
     ap = AnnualPartners(window=(2019, 2020))
     up = UnnecessaryPNCapture(window=(2010, 2020))
