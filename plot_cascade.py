@@ -45,8 +45,14 @@ def reinfection_rate():
     return float(ch.A_reinfected.mean())
 
 
-def plot_cascade(ax, steps, labels, loss_labels, title, xmax=115):
-    """Horizontal waterfall cascade, matching plot_gud_cascade."""
+def plot_cascade(ax, steps, labels, loss_labels, title, xmax=115,
+                 xlabel='per 100 incident infections', show_loss=True,
+                 count_fs=16, loss_fs=12, title_fs=None):
+    """Horizontal waterfall cascade, matching plot_gud_cascade.
+
+    show_loss=False keeps the grey loss tracks but drops the per-step text
+    (for small multi-panel layouts). count_fs/loss_fs scale the labels.
+    """
     y = np.arange(len(steps))[::-1]
     ax.barh(y, steps, color=BAR_COLOR, alpha=0.85, edgecolor='white',
             linewidth=0.5, height=0.7)
@@ -56,20 +62,23 @@ def plot_cascade(ax, steps, labels, loss_labels, title, xmax=115):
     for i, step in enumerate(steps):
         txt = f'{step:.0f}' if step >= 1 else f'{step:.1f}'
         ax.text(step + 1.5, y[i], txt, ha='left', va='center',
-                fontsize=16, fontweight='bold')
-    for i in range(1, len(steps)):
-        lost = steps[i-1] - steps[i]
-        if lost > 0.5:
-            # left-align just past the retained bar so labels clear the y-axis
-            # labels even when the cascade is steep and bars are short
-            ax.text(steps[i] + 1.5, y[i] + 0.34, f'−{lost:.0f}: {loss_labels[i]}',
-                    ha='left', va='bottom', fontsize=12, color='#888888',
-                    style='italic')
+                fontsize=count_fs, fontweight='bold')
+    if show_loss:
+        for i in range(1, len(steps)):
+            lost = steps[i-1] - steps[i]
+            if lost > 0.5:
+                # left-align just past the retained bar so labels clear the
+                # y-axis labels even when the cascade is steep and bars short
+                ax.text(steps[i] + 1.5, y[i] + 0.34, f'−{lost:.0f}: {loss_labels[i]}',
+                        ha='left', va='bottom', fontsize=loss_fs, color='#888888',
+                        style='italic')
     ax.set_yticks(y)
     ax.set_yticklabels(labels)
     ax.set_xlim(0, xmax)
-    ax.set_xlabel('per 100 incident infections')
-    ax.set_title(title)
+    if xlabel:
+        ax.set_xlabel(xlabel)
+    if title:
+        ax.set_title(title, fontsize=title_fs)
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
 
@@ -88,12 +97,80 @@ def ct_cascade_steps(p_reinf):
     return steps, labels, loss_labels
 
 
+def vds_cascade_steps():
+    """VDS presentation cascade, per 100 women with vaginal discharge symptoms.
+
+    Seek-care is the model care-seeking rate; presumptive NG/CT treatment is
+    the syndromic routing. The correct-vs-overtreatment split of those treated
+    depends on the true etiology mix of VDS presenters (most discharge is BV,
+    not an STI) and is left for the sustained ensemble to measure.
+    """
+    s1 = 100.0
+    s2 = s1 * P_SEEK_CARE_F
+    s3 = s2 * P_ROUTE_NGCT
+    steps = [s1, s2, s3]
+    labels = ['Present with\nVDS', 'Seek\ncare', 'Presumptively\ntreated for\nNG/CT']
+    loss_labels = ['', 'No care sought', 'Dismissed or metronidazole only']
+    return steps, labels, loss_labels
+
+
+# Per-pathogen cascade parameters (women), Zimbabwe model.
+#   p_symp: symptomatic (for syphilis: visible primary chancre)
+#   route:  P(syndromic management routes to the correct treatment | seek care)
+#   cure:   treatment efficacy | treated
+#   sustained: whether the pathogen persists in draw 773 (else illustrative)
+#   reinf_measured: whether the 12-month reinfection step is measured (else provisional)
+DISEASES = {
+    'ng':   dict(name='Gonorrhoea',     p_symp=0.13, route=0.70, cure=0.96, sustained=False),
+    'ct':   dict(name='Chlamydia',      p_symp=0.30, route=0.70, cure=0.90, sustained=True),
+    'tv':   dict(name='Trichomoniasis', p_symp=0.60, route=0.65, cure=0.90, sustained=False),
+    'syph': dict(name='Syphilis',       p_symp=0.30, route=0.80, cure=0.98, sustained=True),
+}
+SHORT_LABELS = ['Acquired', 'Symptomatic', 'Sought care', 'Treated', 'Cured (12mo)']
+SHORT_LOSS = ['', 'Asymptomatic', 'No care', 'Not treated', 'Reinfected']
+
+
+def disease_cascade_steps(disease, p_reinf):
+    """5-step care cascade per 100 incident infections, for a pathogen."""
+    d = DISEASES[disease]
+    s1 = 100.0
+    s2 = s1 * d['p_symp']
+    s3 = s2 * P_SEEK_CARE_F
+    s4 = s3 * d['route'] * d['cure']
+    s5 = s4 * (1 - p_reinf)
+    return [s1, s2, s3, s4, s5]
+
+
 if __name__ == '__main__':
     sc.makepath(FIGURES_DIR)
     set_font(size=20)
+
+    # --- 4-panel cascade by pathogen (NG/CT/TV/syphilis) ---
+    p_reinf = reinfection_rate()  # CT-measured; provisional for the others
+    fig, axes = pl.subplots(2, 2, figsize=(9.7, 5))
+    order = ['ng', 'ct', 'tv', 'syph']
+    for ax, dis in zip(axes.flat, order):
+        steps = disease_cascade_steps(dis, p_reinf)
+        d = DISEASES[dis]
+        plot_cascade(ax, steps, SHORT_LABELS, SHORT_LOSS,
+                     title=d['name'], xlabel=None, show_loss=False,
+                     count_fs=11, title_fs=13)
+        ax.tick_params(axis='y', labelsize=10)
+        ax.tick_params(axis='x', labelsize=9)
+    fig.text(0.5, 0.03,
+             'Steps from model parameters (symptomatic, care-seeking 0.49, syndromic routing, cure). '
+             'Reinfection: CT measured (exp 04, 52%); provisional elsewhere. Grey = lost at each step. '
+             'Preliminary: draw 773, single seed.',
+             fontsize=8, color='#888888', ha='center')
+    fig.subplots_adjust(left=0.12, right=0.99, top=0.93, bottom=0.12,
+                        wspace=0.34, hspace=0.55)
+    out0 = f'{FIGURES_DIR}/fig_cascades_4panel_soc.png'
+    fig.savefig(out0, dpi=200)  # no bbox='tight' so the canvas stays exactly 9.7x5
+    print(f'Saved {out0}')
+
+    # --- CT care cascade (per 100 incident infections) ---
     p_reinf = reinfection_rate()
     steps, labels, loss_labels = ct_cascade_steps(p_reinf)
-
     fig, ax = pl.subplots(1, 1, figsize=(12, 6))
     plot_cascade(ax, steps, labels, loss_labels,
                  title='Chlamydia care cascade, women\nunder syndromic management, Zimbabwe model')
@@ -105,5 +182,28 @@ if __name__ == '__main__':
     pl.tight_layout()
     out = f'{FIGURES_DIR}/fig_cascade_ct_soc.png'
     pl.savefig(out, dpi=200, bbox_inches='tight')
-    print(f'cured-at-12mo per 100 incident: {steps[-1]:.1f}')
+    print(f'CT cured-at-12mo per 100 incident: {steps[-1]:.1f}')
     print(f'Saved {out}')
+
+    # --- VDS presentation cascade (per 100 symptomatic women) ---
+    vsteps, vlabels, vloss = vds_cascade_steps()
+    fig, ax = pl.subplots(1, 1, figsize=(12, 5))
+    plot_cascade(ax, vsteps, vlabels, vloss,
+                 title='Vaginal discharge syndrome under syndromic management\nper 100 symptomatic women',
+                 xlabel='per 100 symptomatic women')
+    # overtreatment annotation on the treated bar (1b hook), flagged illustrative
+    ax.text(vsteps[2] + 1.5, 0.0 + 0.0, '', fontsize=1)  # keep layout stable
+    ax.annotate('most discharge is bacterial vaginosis, not an STI:\n'
+                'much of this treatment is not for an STI (overtreatment)',
+                xy=(vsteps[2], 0), xytext=(vsteps[2] + 22, 0.15),
+                fontsize=12, color='#c0392b', style='italic',
+                ha='left', va='center')
+    fig.text(0.04, -0.03,
+             'Per 100 women presenting with VDS. Seek care 0.49 and syndromic NG/CT '
+             'routing 0.70 from model parameters. The correct-treatment vs overtreatment '
+             'split requires the etiology mix of VDS presenters (ensemble). Preliminary: draw 773.',
+             fontsize=11, color='#888888', ha='left')
+    pl.tight_layout()
+    out2 = f'{FIGURES_DIR}/fig_cascade_vds_soc.png'
+    pl.savefig(out2, dpi=200, bbox_inches='tight')
+    print(f'Saved {out2}')

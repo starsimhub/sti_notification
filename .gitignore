@@ -50,3 +50,6 @@ experiments/*/outputs/series.pkl
 experiments/04_soc_vs_poc_pn_wiring/outputs/pn_dyads*.csv
 experiments/04_soc_vs_poc_pn_wiring/outputs/trans_events*.csv
 experiments/04_soc_vs_poc_pn_wiring/outputs/tx_events*.csv
+
+# brainstorming visual companion
+.superpowers/
