@@ -218,3 +218,73 @@ class CareTimingAnalyzer(ss.Analyzer):
                 if n_in:
                     self.results[f'{d}_inf_treated_within_{w}mo'][ti] += n_in
         return
+
+
+class VDSEtiology(ss.Analyzer):
+    """VDS etiology diagnostic (heavy-ish; for diagnostic runs, not full sweeps).
+
+    Each step, among adult women in ``age_range`` who are symptomatic for any
+    of NG/CT/TV/BV (i.e. presenting with vaginal discharge), records:
+      - the denominator (n women) and the VDS count (n with discharge);
+      - per-pathogen carriage among VDS women (``.infected``) -> the etiology
+        marginals, which sum to >1 under coinfection;
+      - the 15 mutually-exclusive infection combinations among VDS women,
+        which sum to the VDS count.
+
+    Counts are unscaled (proportions are ratios, so population scale cancels).
+    Pool over a window post-hoc for stable proportions (see diagnostics driver).
+    """
+
+    MARGINALS = ('ng', 'ct', 'tv', 'bv')
+    COMBOS = ('ng_only', 'ct_only', 'tv_only', 'bv_only',
+              'ng_ct', 'ng_tv', 'ng_bv', 'ct_tv', 'ct_bv', 'tv_bv',
+              'ng_ct_tv', 'ng_ct_bv', 'ng_tv_bv', 'ct_tv_bv',
+              'ng_ct_tv_bv')
+
+    def __init__(self, age_range=(15, 49), name='vds_etiology', *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.name = name
+        self.age_range = age_range
+        return
+
+    def init_results(self):
+        super().init_results()
+        defs = [ss.Result('n_women', dtype=int, scale=False, label='Adult women'),
+                ss.Result('n_vds', dtype=int, scale=False, label='Women with vaginal discharge')]
+        defs += [ss.Result(f'marg_{p}', dtype=int, scale=False, label=f'VDS with {p.upper()}')
+                 for p in self.MARGINALS]
+        defs += [ss.Result(c, dtype=int, scale=False, label=c) for c in self.COMBOS]
+        self.define_results(*defs)
+        return
+
+    def step(self):
+        sim = self.sim
+        ti = self.ti
+        ppl = sim.people
+        dis = sim.diseases
+        lo, hi = self.age_range
+        womenf = (ppl.age >= lo) & (ppl.age <= hi) & ppl.female
+
+        inf = {p: getattr(dis, p).infected for p in self.MARGINALS}
+        symp = {p: getattr(dis, p).symptomatic for p in self.MARGINALS}
+        vds = womenf & (symp['ng'] | symp['ct'] | symp['tv'] | symp['bv'])
+
+        self.results['n_women'][ti] = len(womenf.uids)
+        self.results['n_vds'][ti] = len(vds.uids)
+        for p in self.MARGINALS:
+            self.results[f'marg_{p}'][ti] = len((vds & inf[p]).uids)
+
+        ng, ct, tv, bv = (inf['ng'], inf['ct'], inf['tv'], inf['bv'])
+        combo = {
+            'ng_only': ng & ~ct & ~tv & ~bv, 'ct_only': ~ng & ct & ~tv & ~bv,
+            'tv_only': ~ng & ~ct & tv & ~bv, 'bv_only': ~ng & ~ct & ~tv & bv,
+            'ng_ct': ng & ct & ~tv & ~bv, 'ng_tv': ng & ~ct & tv & ~bv,
+            'ng_bv': ng & ~ct & ~tv & bv, 'ct_tv': ~ng & ct & tv & ~bv,
+            'ct_bv': ~ng & ct & ~tv & bv, 'tv_bv': ~ng & ~ct & tv & bv,
+            'ng_ct_tv': ng & ct & tv & ~bv, 'ng_ct_bv': ng & ct & ~tv & bv,
+            'ng_tv_bv': ng & ~ct & tv & bv, 'ct_tv_bv': ~ng & ct & tv & bv,
+            'ng_ct_tv_bv': ng & ct & tv & bv,
+        }
+        for c, mask in combo.items():
+            self.results[c][ti] = len((vds & mask).uids)
+        return
