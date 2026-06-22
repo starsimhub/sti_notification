@@ -29,7 +29,7 @@
 
 ## Current state (2026-06-15)
 
-**Calibration is complete on stisim rc1.5.7.** See `experiments/03_calibration_rc1.5.7/SUMMARY.md`. 53-draw robust ensemble at `experiments/03_calibration_rc1.5.7/outputs/draws_used.csv`; time-series + age × sex snapshot quantile parquets alongside. 17 priors.
+**Calibration baseline on stisim rc1.5.7.** See `experiments/04_calibration_per_disease_sustain/SUMMARY.md` (the active baseline, 26 draws under a per-disease sustainability filter); exp 03's 53-draw syph-only-filter ensemble is superseded but its time-series + age × sex snapshot parquets remain as a historical reference under `experiments/03_calibration_rc1.5.7/outputs/`. Draws used: `experiments/04_calibration_per_disease_sustain/outputs/draws_used.csv`. 17 priors.
 
 **Scenarios scaffolding.** `interventions.py` has `SyndromicPN`, `POCPN`, `FSWOutreach`, `make_testing`, `make_pn` ready. `model.py` builds the 7-disease sim with `FetalHealth` wired via `custom=` for APO/ABO accounting. Each scenario run lives in its own `experiments/NN_<slug>/run.py` — see *Wiring scenarios off the calibrated ensemble* below for the contract.
 
@@ -44,7 +44,7 @@ pre-experiment-folder scaffolding and have been removed; do not
 resurrect that shape. Each scenario `run.py` must:
 
 1. **Load draws from the current calibration baseline**:
-   `experiments/03_calibration_rc1.5.7/outputs/draws_used.csv`. **Not**
+   `experiments/04_calibration_per_disease_sustain/outputs/draws_used.csv`. **Not**
    `calibration/artifacts/draws_used.csv` — that's the older 2026-06-10
    baseline, kept for historical comparison only.
 2. **Apply each draw via `_pipeline.set_pars_local`** (in
@@ -92,7 +92,7 @@ Three orthogonal sweeps over the calibrated ensemble:
 2. **Outreach sweep** — fix dx=SOC, PN=med, recall=6mo; vary care-seeking 4 ways.
 3. **Dx × PN interaction** — 2 dx × 4 PN coverage = 8 cells, fixed care-seeking baseline. This is where the "better dx → less unnecessary PN" story lands.
 
-Each cell propagated through the 53-draw ensemble (× the seed strategy in `run_sweeps.py`).
+Each cell propagated through the 26-draw ensemble in `experiments/04_calibration_per_disease_sustain/outputs/draws_used.csv`. Apply seeds via the standard 3-seed pattern from `experiments/01_poc_pilot_3arm/run.py`.
 
 ### Endpoints
 | Endpoint | Source | Notes |
@@ -116,7 +116,7 @@ Each cell propagated through the 53-draw ensemble (× the seed strategy in `run_
 
 ## Next concrete steps (ordered)
 
-1. **Wire scenarios off the 53-draw ensemble.** Following *Wiring scenarios off the calibrated ensemble* above, build a single new `experiments/NN_<slug>/run.py` (modeled on `experiments/01_poc_pilot_3arm/run.py`) that loads `experiments/03_calibration_rc1.5.7/outputs/draws_used.csv`, applies each draw via `_pipeline.set_pars_local`, and uses edge-stratified `pn_rates`. Run the 1-draw wiring check first.
+1. **Wire scenarios off the 26-draw ensemble.** Following *Wiring scenarios off the calibrated ensemble* above, build a single new `experiments/NN_<slug>/run.py` (modeled on `experiments/01_poc_pilot_3arm/run.py`) that loads `experiments/04_calibration_per_disease_sustain/outputs/draws_used.csv`, applies each draw via `_pipeline.set_pars_local`, and uses edge-stratified `pn_rates`. Run the 1-draw wiring check first.
 2. **Add the unnecessary-notification metric.** Tag attendees whose true-negative status across all four PN diseases (ng/ct/tv/syph) means the notification was unwarranted.
 3. **DALY post-processing.** Apply standard weights to incident cases, deaths, and APO/ABO outputs.
 4. **Run the three sweeps.** Open a new experiment folder per sweep (e.g. `experiments/04_pn_sweep/`, `experiments/05_outreach_sweep/`, `experiments/06_dx_pn_interaction/`) — or one combined folder if the storage cost stays reasonable. Let the `calib:project-workflow` skill decide.
