@@ -1,0 +1,47 @@
+
+=== PHASE 1: 500-draw LHS, seed=45 ===
+  wrote 500 prior rows to /home/robyn/sti_notification/experiments/03_2026-06-22_calibration_bv_in_vds/outputs/phase1_priors.csv
+
+Phase 1: running 500 sims on 60 workers...
+  [  50/500] 489s  eta=4398s
+  [ 100/500] 939s  eta=3756s
+  [ 150/500] 1385s  eta=3232s
+  [ 200/500] 1822s  eta=2733s
+  [ 250/500] 2239s  eta=2239s
+  [ 300/500] 2439s  eta=1626s
+  [ 350/500] 2830s  eta=1213s
+  [ 400/500] 3278s  eta=820s
+  [ 450/500] 3691s  eta=410s
+  [ 500/500] 4069s  eta=0s
+  done in 4069.3s
+
+=== CANDIDATE SELECTION ===
+  Phase 1 ok:              500
+  sustained:               156
+  sustained AND 5+/9:      22
+  sustained AND ==4/9:     60
+  backfilled with 4/9:     28
+  wrote 50 candidates to /home/robyn/sti_notification/experiments/03_2026-06-22_calibration_bv_in_vds/outputs/phase2_candidates.csv
+
+=== PHASE 2: 50 candidates × 3 seeds ===
+
+Phase 2: running 150 sims on 60 workers...
+  [  50/150] 489s  eta=978s
+  [ 100/150] 939s  eta=470s
+  [ 150/150] 1356s  eta=0s
+  done in 1356.1s
+
+Wrote per-draw summary to /home/robyn/sti_notification/experiments/03_2026-06-22_calibration_bv_in_vds/outputs/ensemble_summary.csv
+Robust ensemble (sustained 3/3 AND mean n_pass ≥ 4): 26 draws → /home/robyn/sti_notification/experiments/03_2026-06-22_calibration_bv_in_vds/outputs/draws_used.csv
+
+=== ENSEMBLE STATS ===
+  candidates evaluated:    50
+  robust draws:            26
+  median nontrep_f:        0.155
+  median trep_f:           0.289
+  median fsw_prev_2019:    0.620
+  median HIV ratio:        3.529
+  median n_pass:           4.00
+exp 03 (2026-06-22) — calibration re-fire with BV-in-VDS model
+cmd: /home/robyn/miniconda/envs/starsim/bin/python /home/robyn/sti_notification/calibration/artifacts/scripts/run_ensemble.py --out-dir /home/robyn/sti_notification/experiments/03_2026-06-22_calibration_bv_in_vds/outputs --n-draws 500 --target-size 50 --n-seeds 3 --n-workers 60 --seed 45
+
