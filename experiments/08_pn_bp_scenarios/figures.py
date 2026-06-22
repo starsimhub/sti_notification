@@ -63,13 +63,13 @@ def summarise(df):
 
 
 def main():
-    set_font(size=13)
+    set_font(size=11)
     df = load()
     ncells_present = [c for c in CELL_ORDER if c in set(df.cell)]
     summ = summarise(df)
     ndraws = df.draw.nunique()
 
-    fig, axes = pl.subplots(2, 2, figsize=(11, 7))
+    fig, axes = pl.subplots(2, 2, figsize=(9.7, 5))
     for ax, (col, title, scale) in zip(axes.flat, PANELS):
         if col not in summ:
             ax.set_visible(False)
@@ -86,21 +86,23 @@ def main():
         ax.scatter(x, med, c=colors, s=45, zorder=2)
         ax.set_xticks(x)
         ax.set_xticklabels([CELL_LABELS[CELL_ORDER.index(c)] for c in ncells_present],
-                           fontsize=9)
-        ax.set_title(title, fontsize=12)
+                           fontsize=7)
+        ax.tick_params(axis='y', labelsize=8)
+        ax.set_title(title, fontsize=10)
         ax.margins(y=0.15)
         ax.spines['top'].set_visible(False)
         ax.spines['right'].set_visible(False)
 
-    fig.text(0.5, 0.005,
-             f'Median and IQR across {ndraws} draws. INDICATIVE: ensemble predates '
+    fig.text(0.5, 0.015,
+             f'Median and IQR across {ndraws} draws. Indicative: ensemble predates '
              'the BV-in-VDS edit (not yet recalibrated). Grey SOC, blue PN ladder, green bundled prevention.',
-             ha='center', fontsize=9, color='#888888')
-    fig.tight_layout(rect=[0, 0.03, 1, 1])
+             ha='center', fontsize=7, color='#888888')
+    fig.subplots_adjust(left=0.075, right=0.99, top=0.92, bottom=0.17,
+                        wspace=0.22, hspace=0.62)
     out = HERE / 'figures'
     out.mkdir(exist_ok=True)
     p = out / 'fig_scenarios_indicative.png'
-    fig.savefig(p, dpi=200, bbox_inches='tight')
+    fig.savefig(p, dpi=200)  # no bbox trim: keep exactly 9.7x5
     print(f'cells: {ncells_present}')
     print(f'draws: {ndraws}')
     print(f'Saved {p}')
