@@ -34,7 +34,7 @@ OUT = HERE / 'archive' / '04_soc_vs_poc_pn_wiring' / 'outputs'
 FIG = HERE / 'figures'
 FONT = '/Users/robynstuart/gf/syph_dx_zim/assets/LibertinusSans-Regular.otf'
 
-ARM_TITLE = {'A': 'arm A — SOC + baseline PN', 'B': 'arm B — POC + PN×3'}
+ARM_TITLE = {'A': 'arm A: SOC + baseline PN', 'B': 'arm B: POC + PN x3'}
 
 CASC_COLORS = ['#cfe8ff', '#a9d3f5', '#7fb8e8', '#5a9bd4']
 CX = [0.02, 0.21, 0.40, 0.59]            # cascade box left edges (axes coords)
@@ -181,7 +181,7 @@ def main():
                frameon=False, fontsize=6.8, handlelength=1.1, handleheight=1.3,
                labelspacing=0.9, title='index outcome at 12 mo', title_fontsize=7.5)
 
-    fig.text(0.40, 0.012, 'draw 773, 1 seed, 12-month follow-up; −n = partners lost '
+    fig.text(0.40, 0.012, 'draw 66, 1 seed, 12-month follow-up; -n = partners lost '
              'at each cascade step', ha='center', fontsize=7, color='#888')
 
     FIG.mkdir(parents=True, exist_ok=True)

@@ -1,20 +1,20 @@
 {
   "cohort": 100,
   "not_notified": {
-    "total": 84,
-    "no_partner": 12,
-    "had_partner_silent": 72,
-    "reinfected": 43,
-    "stayed_clear": 41
+    "total": 76,
+    "no_partner": 16,
+    "had_partner_silent": 60,
+    "reinfected": 34,
+    "stayed_clear": 42
   },
   "notified": {
-    "total": 16,
-    "partner_attended": 11,
-    "partner_not_attended": 5,
-    "attended_partner_cured": 7,
-    "attended_partner_not_cured": 4,
-    "notattend_reinf_index": 4,
-    "notattend_reinf_by_that_partner": 4,
-    "notattend_clear": 1
+    "total": 24,
+    "partner_attended": 15,
+    "partner_not_attended": 9,
+    "attended_partner_cured": 8,
+    "attended_partner_not_cured": 7,
+    "notattend_reinf_index": 5,
+    "notattend_reinf_by_that_partner": 5,
+    "notattend_clear": 4
   }
 }

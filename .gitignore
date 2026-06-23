@@ -65,3 +65,6 @@ docs/*.pptx
 
 # Sciris pickle dumps anywhere (large binaries)
 **/*.obj
+
+# Local figure archive (kept off the tree)
+figures/_archive/

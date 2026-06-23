@@ -22,7 +22,7 @@ import pandas as pd
 import matplotlib.pyplot as pl
 
 FONT = '/Users/robynstuart/gf/syph_dx_zim/assets/LibertinusSans-Regular.otf'
-REINF_CSV = 'experiments/04_soc_vs_poc_pn_wiring/outputs/chains_A.csv'
+REINF_CSV = 'archive/04_soc_vs_poc_pn_wiring/outputs/chains_A.csv'
 FIGURES_DIR = 'figures'
 
 BAR_COLOR = '#4a90d9'
@@ -159,8 +159,8 @@ if __name__ == '__main__':
         ax.tick_params(axis='x', labelsize=9)
     fig.text(0.5, 0.03,
              'Steps from model parameters (symptomatic, care-seeking 0.49, syndromic routing, cure). '
-             'Reinfection: CT measured (exp 04, 52%); provisional elsewhere. Grey = lost at each step. '
-             'Preliminary: draw 773, single seed.',
+             f'Reinfection: CT measured ({p_reinf:.0%}); provisional elsewhere. Grey = lost at each step. '
+             'Preliminary: draw 66, single seed.',
              fontsize=8, color='#888888', ha='center')
     fig.subplots_adjust(left=0.12, right=0.99, top=0.93, bottom=0.12,
                         wspace=0.34, hspace=0.55)

@@ -34,7 +34,7 @@ from model import make_sim                                            # noqa
 from interventions import ANC_PROBS_REALISTIC                         # noqa
 from analyzers import VDSEtiology                                     # noqa
 
-CALIB = REPO / 'experiments' / '02_2026-06-22_calibration_per_disease_sustain' / 'outputs'
+CALIB = REPO / 'experiments' / '03_2026-06-22_calibration_bv_in_vds' / 'outputs'
 DRAWS = CALIB / 'draws_used.csv'
 ENS = CALIB / 'ensemble_summary.csv'
 FONT = '/Users/robynstuart/gf/syph_dx_zim/assets/LibertinusSans-Regular.otf'

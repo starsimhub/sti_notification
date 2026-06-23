@@ -49,7 +49,7 @@ from model import make_sim                                            # noqa
 from interventions import ANC_PROBS_REALISTIC                         # noqa
 from tracer import STIChainTracer                                     # noqa
 
-DRAWS_CSV = REPO / 'experiments' / '03_calibration_rc1.5.7' / 'outputs' / 'draws_used.csv'
+DRAWS_CSV = REPO / 'experiments' / '03_2026-06-22_calibration_bv_in_vds' / 'outputs' / 'draws_used.csv'
 OUT = HERE / 'outputs'
 
 # Baseline PN rates (mirror interventions.make_pn defaults).
