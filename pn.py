@@ -185,25 +185,18 @@ class PartnerNotification(ss.Intervention):
             prev_attending = ss.uids()
 
         all_attending = cur_attending | prev_attending
-        if len(all_attending):
-            self.ti_notified[all_attending] = self.ti
-            self.notify_attendees(all_attending)
-
-        if self.trace_events is not None:
-            self._log_trace(index_uids, cur_notified, cur_attending)
-
+        all_notified = cur_notified | prev_notified
         ti = self.ti
-        self.results['new_notified_current'][ti] = len(cur_notified)
-        self.results['new_notified_previous'][ti] = len(prev_notified)
-        self.results['new_notified'][ti] = len(cur_notified) + len(prev_notified)
-        self.results['new_attending'][ti] = len(all_attending)
 
         # PN funnel precision: of notified / attending partners, count those
         # with no current NG/CT/TV/syph infection. BV doesn't justify PN, so
-        # BV-only counts as "no STI". This is the dyad-level false-alarm
-        # rate at each PN stage. Uses BoolArr | BoolArr semantics so that
-        # `any_sti[uids]` returns a uid-indexed bool array.
-        all_notified = cur_notified | prev_notified
+        # BV-only counts as "no STI". Measured BEFORE notify_attendees() — both
+        # SyndromicPN and POCPN override notify_attendees to fire
+        # vds.step / panel.step, which append uids to tx.eligibility queues.
+        # In stisim's current SyndromicManagement flow, the actual tx.step
+        # fires on the NEXT timestep (deferred), so this ordering doesn't
+        # affect the count today — but measure before to be robust to any
+        # future change that fires treatment inline.
         if len(all_notified) or len(all_attending):
             any_sti = None
             for d in ('ng', 'ct', 'tv', 'syph'):
@@ -216,6 +209,18 @@ class PartnerNotification(ss.Intervention):
                     self.results['new_notified_no_sti'][ti] += int((~any_sti[all_notified]).sum())
                 if len(all_attending):
                     self.results['new_attended_no_sti'][ti] += int((~any_sti[all_attending]).sum())
+
+        if len(all_attending):
+            self.ti_notified[all_attending] = self.ti
+            self.notify_attendees(all_attending)
+
+        if self.trace_events is not None:
+            self._log_trace(index_uids, cur_notified, cur_attending)
+
+        self.results['new_notified_current'][ti] = len(cur_notified)
+        self.results['new_notified_previous'][ti] = len(prev_notified)
+        self.results['new_notified'][ti] = len(cur_notified) + len(prev_notified)
+        self.results['new_attending'][ti] = len(all_attending)
         return
 
     def _log_trace(self, index_uids, cur_notified, cur_attending):
