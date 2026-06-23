@@ -100,16 +100,22 @@ class PartnerNotification(ss.Intervention):
             ss.Result('new_attending', dtype=int, label='Partners attending'),
             ss.Result('new_notified_current', dtype=int, label='Current partners notified', auto_plot=False),
             ss.Result('new_notified_previous', dtype=int, label='Prior partners notified', auto_plot=False),
-            # PN funnel precision: count notified / attending partners who
-            # have NO current STI (NG/CT/TV/syph) at the moment of routing.
-            # Under SOC syndromic dx, attended-no-STI === treated unnecessarily
-            # via PN (syndromic presumes-treats all attendees). Under POC,
-            # attended-no-STI is wasted-follow-up but NOT wasted treatment
-            # (the test catches them). BV is excluded — it doesn't justify
-            # partner notification.
-            # Total unnecessary treatments (PN-routed or otherwise) are
-            # captured per-disease by STITreatment.results.new_treated_unnecessary
-            # — not duplicated here.
+            # ---- PN justification: did the index actually need to alert anyone? ----
+            # Total PN triggers this step (size of eligibility pool).
+            ss.Result('new_index_total', dtype=int,
+                      label='PN triggers (index cases)', auto_plot=False),
+            # Index false-alarm: PN triggered but the index has no current STI.
+            # The headline "was PN warranted?" metric. Under SOC syndromic,
+            # BV-only women presenting at VDS become indices despite no STI →
+            # high false-alarm rate. Under POC test-based dx, only test-positive
+            # agents trigger PN → false-alarm rate ~0 (modulo test specificity).
+            ss.Result('new_index_no_sti', dtype=int,
+                      label='PN triggers with no current STI (false alarm)',
+                      auto_plot=False),
+            # ---- Partner outcome (downstream signal, NOT a PN-warranted metric) ----
+            # Of partners notified/attending, what fraction currently have no STI.
+            # Reflects transmission-link enrichment + Bernoulli filters. A negative
+            # partner test from a CORRECTLY-triggered PN is still a worthwhile test.
             ss.Result('new_notified_no_sti', dtype=int,
                       label='PN notified, no current STI',
                       auto_plot=False),
@@ -197,18 +203,49 @@ class PartnerNotification(ss.Intervention):
         # fires on the NEXT timestep (deferred), so this ordering doesn't
         # affect the count today — but measure before to be robust to any
         # future change that fires treatment inline.
-        if len(all_notified) or len(all_attending):
-            any_sti = None
-            for d in ('ng', 'ct', 'tv', 'syph'):
-                dis = self.sim.diseases.get(d)
-                if dis is None or not hasattr(dis, 'infected'):
+        # Index-side: was PN warranted? An index has "no STI" iff their own
+        # treatment was in tx.outcomes[d].unnecessary for SOME d (so they got
+        # treated) AND was NOT in outcomes[d].(successful | unsuccessful) for
+        # ANY d (so no real infection was being treated).
+        #
+        # We CAN'T just check `dis.infected[index_uids]` here, because
+        # STITreatment.change_states -> clear_infection has already run this
+        # step. A successfully-treated confirmed-positive index would look
+        # no-STI by the time pn.step is reached. tx.outcomes is the right
+        # source: it freezes "had STI at treatment time" before clearance.
+        target_diseases = ('ng', 'ct', 'tv', 'syph')
+        had_sti_set = ss.uids()
+        for tx_name in ('ng_tx', 'ct_tx', 'metronidazole', 'syph_tx'):
+            tx = self.sim.interventions.get(tx_name)
+            if tx is None:
+                continue
+            out = getattr(tx, 'outcomes', None)
+            if out is None:
+                continue
+            for key, val in out.items():
+                if key not in target_diseases or not hasattr(val, 'get'):
                     continue
-                any_sti = dis.infected if any_sti is None else (any_sti | dis.infected)
-            if any_sti is not None:
-                if len(all_notified):
-                    self.results['new_notified_no_sti'][ti] += int((~any_sti[all_notified]).sum())
-                if len(all_attending):
-                    self.results['new_attended_no_sti'][ti] += int((~any_sti[all_attending]).sum())
+                had_sti_set = had_sti_set | val.get('successful', ss.uids()) | val.get('unsuccessful', ss.uids())
+        false_alarm = index_uids.remove(had_sti_set)
+        self.results['new_index_total'][ti] += len(index_uids)
+        self.results['new_index_no_sti'][ti] += len(false_alarm)
+
+        # Partner-side: of partners notified / attending, what fraction have no
+        # current STI. A negative partner test from a correctly-triggered PN is
+        # still a worthwhile test, so this is a transmission-link signal, NOT
+        # a "was PN warranted?" signal. Partners are NOT in tx.outcomes this
+        # step (they get queued for next-step tx), so dis.infected is safe.
+        any_sti = None
+        for d in target_diseases:
+            dis = self.sim.diseases.get(d)
+            if dis is None or not hasattr(dis, 'infected'):
+                continue
+            any_sti = dis.infected if any_sti is None else (any_sti | dis.infected)
+        if any_sti is not None:
+            if len(all_notified):
+                self.results['new_notified_no_sti'][ti] += int((~any_sti[all_notified]).sum())
+            if len(all_attending):
+                self.results['new_attended_no_sti'][ti] += int((~any_sti[all_attending]).sum())
 
         if len(all_attending):
             self.ti_notified[all_attending] = self.ti

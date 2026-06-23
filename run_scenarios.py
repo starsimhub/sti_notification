@@ -172,6 +172,7 @@ def extract(sim, cell, draw, seed):
     if pn is not None:
         for k in ('new_notified', 'new_attending',
                   'new_notified_current', 'new_notified_previous',
+                  'new_index_total', 'new_index_no_sti',
                   'new_notified_no_sti', 'new_attended_no_sti'):
             if k in pn.results:
                 row[f'pn_{k}'] = _wsum(pn.results[k], yv)
