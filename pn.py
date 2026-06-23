@@ -100,6 +100,22 @@ class PartnerNotification(ss.Intervention):
             ss.Result('new_attending', dtype=int, label='Partners attending'),
             ss.Result('new_notified_current', dtype=int, label='Current partners notified', auto_plot=False),
             ss.Result('new_notified_previous', dtype=int, label='Prior partners notified', auto_plot=False),
+            # PN funnel precision: count notified / attending partners who
+            # have NO current STI (NG/CT/TV/syph) at the moment of routing.
+            # Under SOC syndromic dx, attended-no-STI === treated unnecessarily
+            # via PN (syndromic presumes-treats all attendees). Under POC,
+            # attended-no-STI is wasted-follow-up but NOT wasted treatment
+            # (the test catches them). BV is excluded — it doesn't justify
+            # partner notification.
+            # Total unnecessary treatments (PN-routed or otherwise) are
+            # captured per-disease by STITreatment.results.new_treated_unnecessary
+            # — not duplicated here.
+            ss.Result('new_notified_no_sti', dtype=int,
+                      label='PN notified, no current STI',
+                      auto_plot=False),
+            ss.Result('new_attended_no_sti', dtype=int,
+                      label='PN attendees with no current STI',
+                      auto_plot=False),
         )
         return
 
@@ -181,6 +197,25 @@ class PartnerNotification(ss.Intervention):
         self.results['new_notified_previous'][ti] = len(prev_notified)
         self.results['new_notified'][ti] = len(cur_notified) + len(prev_notified)
         self.results['new_attending'][ti] = len(all_attending)
+
+        # PN funnel precision: of notified / attending partners, count those
+        # with no current NG/CT/TV/syph infection. BV doesn't justify PN, so
+        # BV-only counts as "no STI". This is the dyad-level false-alarm
+        # rate at each PN stage. Uses BoolArr | BoolArr semantics so that
+        # `any_sti[uids]` returns a uid-indexed bool array.
+        all_notified = cur_notified | prev_notified
+        if len(all_notified) or len(all_attending):
+            any_sti = None
+            for d in ('ng', 'ct', 'tv', 'syph'):
+                dis = self.sim.diseases.get(d)
+                if dis is None or not hasattr(dis, 'infected'):
+                    continue
+                any_sti = dis.infected if any_sti is None else (any_sti | dis.infected)
+            if any_sti is not None:
+                if len(all_notified):
+                    self.results['new_notified_no_sti'][ti] += int((~any_sti[all_notified]).sum())
+                if len(all_attending):
+                    self.results['new_attended_no_sti'][ti] += int((~any_sti[all_attending]).sum())
         return
 
     def _log_trace(self, index_uids, cur_notified, cur_attending):

@@ -59,6 +59,32 @@ INTV_YEAR = 2027
 END_YEAR = 2040
 N_AGENTS = 10_000
 
+# Annualised time series we want per (cell, draw, seed).
+TS_RESULTS = {
+    'hiv':  ['prevalence', 'prevalence_f', 'prevalence_m', 'new_infections'],
+    'ng':   ['prevalence', 'prevalence_f', 'prevalence_m', 'new_infections'],
+    'ct':   ['prevalence', 'prevalence_f', 'prevalence_m', 'new_infections'],
+    'tv':   ['prevalence', 'prevalence_f', 'prevalence_m', 'new_infections'],
+    'syph': ['prevalence', 'prevalence_f', 'prevalence_m', 'new_infections',
+             'sexually_transmissible_prevalence',
+             'sexually_transmissible_prevalence_f',
+             'sexually_transmissible_prevalence_m',
+             'symptomatic_prevalence', 'primary_prevalence',
+             'trep_prevalence_15_64', 'nontrep_prevalence_15_64',
+             'new_congenital', 'new_stillborns'],
+}
+# Age x sex prevalence bases for snapshot years. Auto-discovers
+# {base}_{f|m}_{age1}_{age2} variants from the disease's result keys.
+SNAPSHOT_BASES = {
+    'hiv':  ['prevalence'],
+    'ng':   ['prevalence'],
+    'ct':   ['prevalence'],
+    'tv':   ['prevalence'],
+    'syph': ['trep_prevalence', 'nontrep_prevalence',
+             'sexually_transmissible_prevalence', 'primary_prevalence'],
+}
+SNAPSHOT_YEARS = (2027, 2030, 2035, 2040)
+
 DRAWS_CSV = Path(os.environ.get(
     'DRAWS',
     REPO / 'experiments' / '03_2026-06-22_calibration_bv_in_vds' / 'outputs' / 'draws_used.csv'))
@@ -105,37 +131,155 @@ def extract(sim, cell, draw, seed):
         dr = sim.results.get(d)
         if dr is None:
             continue
+        # Incidence: overall + sex split
         if 'new_infections' in dr:
             row[f'{d}_new_inf'] = _wsum(dr['new_infections'], yv)
+        for sk in ('f', 'm'):
+            k = f'new_infections_{sk}'
+            if k in dr:
+                row[f'{d}_new_inf_{sk}'] = _wsum(dr[k], yv)
+        # End-of-window point prevalence
         if 'prevalence' in dr:
             row[f'{d}_prev_end'] = float(dr.prevalence.values[-1])
+        # Treatments: overall + sex split for total/successful/unnecessary
         for k in ('new_treated', 'new_treated_success', 'new_treated_unnecessary'):
             if k in dr:
                 row[f'{d}_{k}'] = _wsum(dr[k], yv)
+            for sk in ('f', 'm'):
+                k2 = f'{k}_{sk}'
+                if k2 in dr:
+                    row[f'{d}_{k}_{sk}'] = _wsum(dr[k2], yv)
+        # Coverage proxy: % new infections successfully treated
+        succ = row.get(f'{d}_new_treated_success')
+        inf = row.get(f'{d}_new_inf')
+        if succ is not None and inf is not None and inf > 0:
+            row[f'{d}_prop_treated'] = float(succ) / float(inf)
+
+    # Syph-specific: sexually-transmissible prevalence (primary + secondary +
+    # early latent), the WHO "early infectious syphilis" slice.
+    sr = sim.results.get('syph')
+    if sr is not None:
+        if 'sexually_transmissible_prevalence' in sr:
+            row['syph_sti_prev_end'] = float(
+                sr['sexually_transmissible_prevalence'].values[-1])
+        for k in ('new_nnds', 'new_stillborns', 'new_congenital',
+                  'new_congenital_deaths'):
+            if k in sr:
+                row[f'syph_{k}'] = _wsum(sr[k], yv)
+
+    # PN: total + channel split + false-alarm precision endpoints.
     pn = sim.interventions.get('pn')
     if pn is not None:
-        for k in ('new_notified', 'new_attending'):
+        for k in ('new_notified', 'new_attending',
+                  'new_notified_current', 'new_notified_previous',
+                  'new_notified_no_sti', 'new_attended_no_sti'):
             if k in pn.results:
                 row[f'pn_{k}'] = _wsum(pn.results[k], yv)
+
+    # FetalHealth: APO/ABO counts.
     fh = sim.results.get('fetal_health')
     if fh is not None:
         for k in ('n_lbw', 'n_sga', 'n_svn', 'n_births'):
             if k in fh:
                 row[f'fh_{k}'] = _wsum(fh[k], yv)
-    sr = sim.results.get('syph')
-    if sr is not None and 'new_congenital' in sr:
-        row['syph_new_congenital'] = _wsum(sr['new_congenital'], yv)
+
+    # Care-timing analyzer: # of new infections cured within window of
+    # acquisition. Per-disease for NG/CT/TV/syph at the default (3, 6) months.
+    care = sim.analyzers.get('care_timing') if hasattr(sim.analyzers, 'get') else None
+    if care is not None:
+        for d in ('ng', 'ct', 'tv', 'syph'):
+            for w in getattr(care, 'windows_months', (3, 6)):
+                key = f'{d}_inf_treated_within_{w}mo'
+                if key in care.results:
+                    row[f'{d}_treated_within_{w}mo'] = _wsum(care.results[key], yv)
     return row
+
+
+def _annualize(result):
+    """Return (years, values) for an annualised sim result, or (None, None)."""
+    try:
+        ann = result.annualize()
+        return (np.asarray(ann.timevec.years).astype(int),
+                np.asarray(ann.values, dtype=float))
+    except Exception:
+        return None, None
+
+
+def extract_timeseries(sim, cell, draw, seed):
+    """Annualised TS rows for STI prevalences + incidence + key syph variants."""
+    rows = []
+    base = dict(cell=cell['label'], care=cell['care'], pn=cell['pn'],
+                bp=cell['bp'], poc=bool(cell['poc']),
+                draw=int(draw), seed=int(seed))
+    for disease_name, result_names in TS_RESULTS.items():
+        dres = sim.results.get(disease_name)
+        if dres is None:
+            continue
+        for rname in result_names:
+            if rname not in dres:
+                continue
+            years, values = _annualize(dres[rname])
+            if years is None:
+                continue
+            for y, v in zip(years, values):
+                rows.append({**base,
+                             'disease': disease_name, 'result_name': rname,
+                             'year': int(y), 'value': float(v)})
+    return rows
+
+
+def extract_snapshots(sim, cell, draw, seed):
+    """Age x sex prevalence at SNAPSHOT_YEARS for each SNAPSHOT_BASES entry."""
+    rows = []
+    base = dict(cell=cell['label'], care=cell['care'], pn=cell['pn'],
+                bp=cell['bp'], poc=bool(cell['poc']),
+                draw=int(draw), seed=int(seed))
+    for disease_name, bases in SNAPSHOT_BASES.items():
+        dres = sim.results.get(disease_name)
+        if dres is None:
+            continue
+        all_keys = list(dres.keys())
+        for b in bases:
+            prefix = b + '_'
+            for key in all_keys:
+                if not key.startswith(prefix):
+                    continue
+                suffix = key[len(prefix):]
+                parts = suffix.split('_')
+                if len(parts) != 3 or parts[0] not in ('f', 'm'):
+                    continue
+                try:
+                    age1 = int(parts[1]); age2 = int(parts[2])
+                except ValueError:
+                    continue
+                years, values = _annualize(dres[key])
+                if years is None:
+                    continue
+                for snap_year in SNAPSHOT_YEARS:
+                    if snap_year not in years:
+                        continue
+                    idx = int(np.where(years == snap_year)[0][0])
+                    rows.append({**base,
+                                 'disease': disease_name, 'result_name': b,
+                                 'sex': parts[0], 'age_bin': f'{age1}_{age2}',
+                                 'year': int(snap_year),
+                                 'value': float(values[idx])})
+    return rows
 
 
 def run_one(task):
     try:
         sim = build_sim(task['cell'], task['seed'], task['sim_pars'])
         sim.run()
-        return extract(sim, task['cell'], task['draw'], task['seed'])
+        summary = extract(sim, task['cell'], task['draw'], task['seed'])
+        ts = extract_timeseries(sim, task['cell'], task['draw'], task['seed'])
+        snap = extract_snapshots(sim, task['cell'], task['draw'], task['seed'])
+        return {'summary': summary, 'ts': ts, 'snap': snap}
     except Exception as e:
-        return dict(cell=task['cell']['label'], draw=int(task['draw']),
-                    seed=int(task['seed']), status=f'error: {type(e).__name__}: {e}')
+        return {'summary': dict(cell=task['cell']['label'], draw=int(task['draw']),
+                                seed=int(task['seed']),
+                                status=f'error: {type(e).__name__}: {e}'),
+                'ts': [], 'snap': []}
 
 
 def main():
@@ -149,6 +293,8 @@ def main():
     draws = pd.read_csv(DRAWS_CSV)
     cells = build_cells()
     outfile = OUT / 'scenarios.jsonl'
+    ts_parquet = OUT / 'scenarios_timeseries.parquet'
+    snap_parquet = OUT / 'scenarios_snapshots.parquet'
 
     if smoke:
         # minimal wiring check: a spanning handful of cells, 1 draw, small pop.
@@ -162,6 +308,8 @@ def main():
         draws = draws.head(1)
         n_seeds, n_workers = 1, min(6, n_workers)
         outfile = OUT / 'scenarios_smoke.jsonl'
+        ts_parquet = OUT / 'scenarios_smoke_timeseries.parquet'
+        snap_parquet = OUT / 'scenarios_smoke_snapshots.parquet'
     else:
         n_draws_env = os.environ.get('N_DRAWS')
         if n_draws_env:
@@ -180,12 +328,16 @@ def main():
 
     t0 = time.time()
     n_ok = n_err = 0
+    all_ts, all_snap = [], []
     with mp.Pool(n_workers, maxtasksperchild=5) as pool, outfile.open('w') as f:
-        for i, res in enumerate(pool.imap_unordered(run_one, tasks, chunksize=1), 1):
+        for i, payload in enumerate(pool.imap_unordered(run_one, tasks, chunksize=1), 1):
+            res = payload['summary']
             f.write(json.dumps(res) + '\n')
             f.flush()
             if res.get('status') == 'ok':
                 n_ok += 1
+                all_ts.extend(payload['ts'])
+                all_snap.extend(payload['snap'])
             else:
                 n_err += 1
                 if n_err <= 10:
@@ -197,6 +349,14 @@ def main():
                 print(f'  [{i}/{len(tasks)}] {el:.0f}s eta={eta:.0f}s '
                       f'ok={n_ok} err={n_err}', flush=True)
     print(f'[scenarios] done in {time.time()-t0:.0f}s. ok={n_ok} err={n_err} -> {outfile}')
+    if all_ts:
+        ts_df = pd.DataFrame(all_ts)
+        ts_df.to_parquet(ts_parquet, index=False)
+        print(f'  ts -> {ts_parquet.name}: {len(ts_df)} rows')
+    if all_snap:
+        snap_df = pd.DataFrame(all_snap)
+        snap_df.to_parquet(snap_parquet, index=False)
+        print(f'  snap -> {snap_parquet.name}: {len(snap_df)} rows')
 
 
 if __name__ == '__main__':

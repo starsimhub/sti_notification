@@ -53,6 +53,7 @@ archive/04_soc_vs_poc_pn_wiring/outputs/tx_events*.csv
 
 # Scenario run outputs (large, regenerable from run_scenarios.py)
 results/*.jsonl
+results/*_smoke_*
 
 # Slide decks and Office temp/lock files (kept local)
 docs/*.pptx
