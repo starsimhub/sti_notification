@@ -1,0 +1,48 @@
+exp 04 (2026-06-23) — NG β prior shifted up, stisim fix/ng-tx
+  NG prior override: ng.beta_m2f = ('NG β (M→F)', 0.1, 0.6, True)
+  cmd: run_ensemble.py --out-dir /home/robyn/sti_notification/experiments/04_2026-06-23_ng_higher_beta_post_treatfix/outputs --n-draws 500 --target-size 50 --n-seeds 3 --n-workers 60 --seed 45
+
+
+=== PHASE 1: 500-draw LHS, seed=45 ===
+  wrote 500 prior rows to /home/robyn/sti_notification/experiments/04_2026-06-23_ng_higher_beta_post_treatfix/outputs/phase1_priors.csv
+
+Phase 1: running 500 sims on 60 workers...
+  [  50/500] 493s  eta=4435s
+  [ 100/500] 949s  eta=3795s
+  [ 150/500] 1404s  eta=3277s
+  [ 200/500] 1850s  eta=2775s
+  [ 250/500] 2301s  eta=2301s
+  [ 300/500] 2466s  eta=1644s
+  [ 350/500] 2859s  eta=1225s
+  [ 400/500] 3321s  eta=830s
+  [ 450/500] 3756s  eta=417s
+  [ 500/500] 4148s  eta=0s
+  done in 4148.1s
+
+=== CANDIDATE SELECTION ===
+  Phase 1 ok:              500
+  sustained:               222
+  sustained AND 5+/9:      31
+  sustained AND ==4/9:     79
+  backfilled with 4/9:     19
+  wrote 50 candidates to /home/robyn/sti_notification/experiments/04_2026-06-23_ng_higher_beta_post_treatfix/outputs/phase2_candidates.csv
+
+=== PHASE 2: 50 candidates × 3 seeds ===
+
+Phase 2: running 150 sims on 60 workers...
+  [  50/150] 491s  eta=983s
+  [ 100/150] 952s  eta=476s
+  [ 150/150] 1363s  eta=0s
+  done in 1363.3s
+
+Wrote per-draw summary to /home/robyn/sti_notification/experiments/04_2026-06-23_ng_higher_beta_post_treatfix/outputs/ensemble_summary.csv
+Robust ensemble (sustained 3/3 AND mean n_pass ≥ 4): 27 draws → /home/robyn/sti_notification/experiments/04_2026-06-23_ng_higher_beta_post_treatfix/outputs/draws_used.csv
+
+=== ENSEMBLE STATS ===
+  candidates evaluated:    50
+  robust draws:            27
+  median nontrep_f:        0.149
+  median trep_f:           0.278
+  median fsw_prev_2019:    0.611
+  median HIV ratio:        3.616
+  median n_pass:           4.00
