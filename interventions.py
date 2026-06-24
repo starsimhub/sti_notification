@@ -732,15 +732,21 @@ class CondomCounseling(ss.Intervention):
 
     When an agent is treated for an STI, with probability ``coverage`` they are
     enrolled in a protection window of ``dur``: during it their re-acquisition
-    susceptibility (``rel_sus``) for the discharging STIs is multiplied by
-    ``(1 - eff)``. Acquisition only (ng/ct/tv); onward transmission and syph
-    rel_sus are left untouched. Each step previously-managed agents are reset to
-    1.0 and the currently-protected set re-applied, so expiry needs no extra
-    bookkeeping beyond ``ti_protect_end``.
+    susceptibility (``rel_sus``) for the protected diseases is multiplied by
+    ``(1 - eff)``. Acquisition only; onward transmission is left untouched.
+    Each step previously-managed agents are reset to 1.0 and the currently-
+    protected set re-applied, so expiry needs no extra bookkeeping beyond
+    ``ti_protect_end``.
+
+    Default protected diseases are NG / CT / TV / syph. Syph is included
+    because PN-driven curative treatment without a protection window drives
+    re-infection churn (cured agent returns to fully-susceptible immediately),
+    which inflates incidence even as prevalence drops. Adding syph to the
+    protection window breaks that loop and lets BP blunt the PN-driven churn.
     """
 
     def __init__(self, coverage=0.5, eff=0.5, dur=ss.months(6),
-                 diseases=('ng', 'ct', 'tv'),
+                 diseases=('ng', 'ct', 'tv', 'syph'),
                  trigger_tx=('ng_tx', 'ct_tx', 'metronidazole', 'syph_tx'),
                  start=2027, name='condom_counseling', *args, **kwargs):
         super().__init__(name=name)

@@ -109,6 +109,22 @@ def build_sim(cell, seed, sim_pars):
                    syph_symp_test_prob=pd.read_csv(SYMP_TEST_CSV),
                    syph_anc_probs=ANC_PROBS_REALISTIC)
     set_pars_local(sim, sim_pars)
+    # Apply care_seek_mult to syph symptomatic test interventions. make_sim
+    # only scales NG/CT/TV p_symp_care; syph care-seeking is gated by the
+    # symptomatic test's rel_test, which set_pars_local may overwrite to its
+    # calibrated value. Compose the multiplier on top afterward.
+    csm = CARE_SEEKING[cell['care']]
+    if csm != 1.0:
+        for name in ('syph_symp_test', 'syph_symp_test_poc', 'syph_rash_test'):
+            intv = sim.pars['interventions'].get(name) if hasattr(sim.pars['interventions'], 'get') else None
+            if intv is None:
+                # interventions list, not ndict — search by name
+                for cand in sim.pars['interventions']:
+                    if getattr(cand, 'name', None) == name:
+                        intv = cand
+                        break
+            if intv is not None and hasattr(intv.pars, 'rel_test'):
+                intv.pars.rel_test *= csm
     if cell['bp'] != 'none':
         bp = BUNDLED_PREVENTION[cell['bp']]
         cond = CondomCounseling(coverage=bp['coverage'], eff=bp['eff'],
