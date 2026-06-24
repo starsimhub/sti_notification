@@ -1,0 +1,74 @@
+exp 05 pilot (2026-06-24) — K=5 sim-averaging, 20 LHS draws, no filtering
+  wrote 20 priors to /home/robyn/sti_notification/experiments/05_2026-06-24_kseed_pilot/outputs/priors.csv
+  100 sims on 60 workers...
+    [ 20/100] 447s
+    [ 40/100] 467s
+    [ 60/100] 505s
+    [ 80/100] 873s
+    [100/100] 892s
+  done in 892s
+
+Wrote /home/robyn/sti_notification/experiments/05_2026-06-24_kseed_pilot/outputs/per_draw_means.csv
+
+=== Per-draw means (K=5 seeds) ===
+ draw |     HIV  trep_F  ntrep_F  hiv_ratio     FSW |  syph_pf   ng_pf   ct_pf   tv_pf | n_sus
+    0 |   4.99%   0.02%    0.00%      2.75    0.0% |    0.00%   7.74%  13.11%  28.11% | 4/5
+    1 |  14.53%  25.06%   11.42%      2.95   56.9% |   12.03%   7.52%   0.06%  13.57% | 4/5
+    2 |  13.27%  28.97%   16.33%      4.34   68.7% |   17.77%   1.09%  11.71%  18.02% | 5/5
+    3 |  14.21%  26.30%   16.32%      4.91   69.3% |   13.68%   7.33%   1.12%   9.40% | 5/5
+    4 |  10.72%  32.38%   19.73%      2.76   67.2% |   14.88%   1.42%   5.71%   0.00% | 4/5
+    5 |   9.44%  37.12%   17.46%      2.74   68.2% |   21.41%   8.29%  20.55%  21.06% | 5/5
+    6 |  13.66%  19.05%    8.56%      5.44   49.6% |    7.03%   5.69%   7.87%  28.53% | 5/5
+    7 |  13.81%   9.00%    4.52%      2.90   23.6% |    3.82%   7.67%   5.13%   0.14% | 3/5
+    8 |  11.62%  32.68%   18.61%      2.96   77.9% |   18.91%  14.21%  12.16%  11.35% | 5/5
+    9 |  14.62%  29.29%   15.87%      4.04   60.4% |   14.47%   2.74%  27.86%   0.00% | 4/5
+   10 |   8.96%  21.89%   13.10%      2.30   56.0% |    9.88%   3.63%   0.65%  22.00% | 5/5
+   11 |  12.73%  19.52%    8.90%      3.77   31.2% |    7.26%   0.88%  15.72%   0.00% | 4/5
+   12 |   7.91%   5.51%    2.86%      1.60   12.2% |    2.70%   9.16%  20.67%  32.21% | 4/5
+   13 |  14.39%   8.85%    3.76%      2.45   21.7% |    3.40%   4.81%   6.23%   8.69% | 4/5
+   14 |  12.46%  36.87%   25.54%      3.33   77.9% |   22.75%   7.27%  25.87%   0.03% | 4/5
+   15 |  15.29%  37.41%   24.78%      3.24   71.5% |   19.46%  11.68%  13.69%   4.46% | 5/5
+   16 |  10.70%  28.46%   13.39%      3.11   69.0% |   14.74%  12.89%   0.57%  29.02% | 5/5
+   17 |  10.38%  11.50%    5.32%      2.74   29.0% |    4.50%   8.91%  20.55%   2.75% | 4/5
+   18 |  11.83%  23.86%   14.08%      3.17   52.3% |   11.44%   0.38%   1.23%  32.71% | 5/5
+   19 |   9.62%  33.02%   18.52%      2.88   73.5% |   17.40%   1.98%   8.84%   0.00% | 4/5
+Traceback (most recent call last):
+  File "/home/robyn/sti_notification/experiments/05_2026-06-24_kseed_pilot/run.py", line 189, in <module>
+    main()
+  File "/home/robyn/sti_notification/experiments/05_2026-06-24_kseed_pilot/run.py", line 167, in main
+    spread = (maxs - mins)
+              ~~~~~^~~~~~
+  File "/home/robyn/miniconda/envs/starsim/lib/python3.11/site-packages/pandas/core/ops/common.py", line 85, in new_method
+    return method(self, other)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/robyn/miniconda/envs/starsim/lib/python3.11/site-packages/pandas/core/arraylike.py", line 198, in __sub__
+    return self._arith_method(other, operator.sub)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/robyn/miniconda/envs/starsim/lib/python3.11/site-packages/pandas/core/frame.py", line 9151, in _arith_method
+    new_data = self._dispatch_frame_op(other, op, axis=axis)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/robyn/miniconda/envs/starsim/lib/python3.11/site-packages/pandas/core/frame.py", line 9194, in _dispatch_frame_op
+    bm = self._mgr.operate_blockwise(
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/robyn/miniconda/envs/starsim/lib/python3.11/site-packages/pandas/core/internals/managers.py", line 1691, in operate_blockwise
+    return operate_blockwise(self, other, array_op)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/robyn/miniconda/envs/starsim/lib/python3.11/site-packages/pandas/core/internals/ops.py", line 65, in operate_blockwise
+    res_values = array_op(lvals, rvals)
+                 ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/robyn/miniconda/envs/starsim/lib/python3.11/site-packages/pandas/core/ops/array_ops.py", line 289, in arithmetic_op
+    res_values = _na_arithmetic_op(left, right, op)  # type: ignore[arg-type]
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/robyn/miniconda/envs/starsim/lib/python3.11/site-packages/pandas/core/ops/array_ops.py", line 220, in _na_arithmetic_op
+    result = func(left, right)
+             ^^^^^^^^^^^^^^^^^
+  File "/home/robyn/miniconda/envs/starsim/lib/python3.11/site-packages/pandas/core/computation/expressions.py", line 252, in evaluate
+    return _evaluate(op, op_str, left_op, right_op)  # type: ignore[misc]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/robyn/miniconda/envs/starsim/lib/python3.11/site-packages/pandas/core/computation/expressions.py", line 141, in _evaluate_numexpr
+    result = _evaluate_standard(op, op_str, left_op, right_op)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/robyn/miniconda/envs/starsim/lib/python3.11/site-packages/pandas/core/computation/expressions.py", line 83, in _evaluate_standard
+    return op(left_op, right_op)
+           ^^^^^^^^^^^^^^^^^^^^^
+TypeError: numpy boolean subtract, the `-` operator, is not supported, use the bitwise_xor, the `^` operator, or the logical_xor function instead.
