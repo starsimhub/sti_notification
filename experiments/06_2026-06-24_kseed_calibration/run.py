@@ -124,7 +124,7 @@ def extract_snapshots(sim):
         for base in bases:
             for age in SNAP_AGES:
                 for sex in ('f', 'm'):
-                    key = f'{base}_{age}_{sex}'
+                    key = f'{base}_{sex}_{age}'
                     if key not in dres:
                         continue
                     vals = np.asarray(dres[key].values, dtype=float)
