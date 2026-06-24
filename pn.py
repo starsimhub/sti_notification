@@ -203,31 +203,37 @@ class PartnerNotification(ss.Intervention):
         # fires on the NEXT timestep (deferred), so this ordering doesn't
         # affect the count today — but measure before to be robust to any
         # future change that fires treatment inline.
-        # Index-side: was PN warranted? An index has "no STI" iff their own
-        # treatment was in tx.outcomes[d].unnecessary for SOME d (so they got
-        # treated) AND was NOT in outcomes[d].(successful | unsuccessful) for
-        # ANY d (so no real infection was being treated).
+        # Index-side: was PN warranted? Restricted to NG + CT + syph, the
+        # three discrete tests where "unnecessary" treatment unambiguously
+        # means "the test was wrong". Metronidazole is excluded because it
+        # treats both TV and BV — a "no-TV" outcome doesn't imply unnecessary
+        # tx (BV may be the indication).
+        #
+        # An index has "no STI" iff their own treatment was in
+        # tx.outcomes[d].unnecessary for at least one of ng_tx / ct_tx / syph_tx,
+        # AND was NOT in outcomes[d].(successful | unsuccessful) for any of them.
         #
         # We CAN'T just check `dis.infected[index_uids]` here, because
         # STITreatment.change_states -> clear_infection has already run this
         # step. A successfully-treated confirmed-positive index would look
         # no-STI by the time pn.step is reached. tx.outcomes is the right
         # source: it freezes "had STI at treatment time" before clearance.
-        target_diseases = ('ng', 'ct', 'tv', 'syph')
+        clean_index_set = ss.uids()
         had_sti_set = ss.uids()
-        for tx_name in ('ng_tx', 'ct_tx', 'metronidazole', 'syph_tx'):
+        for tx_name, d_key in (('ng_tx', 'ng'), ('ct_tx', 'ct'), ('syph_tx', 'syph')):
             tx = self.sim.interventions.get(tx_name)
             if tx is None:
                 continue
+            # All agents whose tx fired this step.
+            clean_index_set = clean_index_set | (tx.ti_treated == ti).uids
             out = getattr(tx, 'outcomes', None)
-            if out is None:
+            if out is None or d_key not in out or not hasattr(out[d_key], 'get'):
                 continue
-            for key, val in out.items():
-                if key not in target_diseases or not hasattr(val, 'get'):
-                    continue
-                had_sti_set = had_sti_set | val.get('successful', ss.uids()) | val.get('unsuccessful', ss.uids())
-        false_alarm = index_uids.remove(had_sti_set)
-        self.results['new_index_total'][ti] += len(index_uids)
+            had_sti_set = (had_sti_set
+                | out[d_key].get('successful', ss.uids())
+                | out[d_key].get('unsuccessful', ss.uids()))
+        false_alarm = clean_index_set.remove(had_sti_set)
+        self.results['new_index_total'][ti] += len(clean_index_set)
         self.results['new_index_no_sti'][ti] += len(false_alarm)
 
         # Partner-side: of partners notified / attending, what fraction have no
@@ -236,7 +242,7 @@ class PartnerNotification(ss.Intervention):
         # a "was PN warranted?" signal. Partners are NOT in tx.outcomes this
         # step (they get queued for next-step tx), so dis.infected is safe.
         any_sti = None
-        for d in target_diseases:
+        for d in ('ng', 'ct', 'tv', 'syph'):
             dis = self.sim.diseases.get(d)
             if dis is None or not hasattr(dis, 'infected'):
                 continue
