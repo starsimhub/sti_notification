@@ -19,11 +19,13 @@ extinction_penalty = 100 * |{disease : all K=5 seeds extinct on disease}|
 GoF = MAE + extinction_penalty   # lower = better
 ```
 
-Weights (per pilot decision): `{trep_f_2016, nontrep_f_2016,
-hiv_trep_ratio_2016, pf_2035_2040_ng, pf_2035_2040_ct} = 2`; all other
-targets = 1.
+Weights: `{trep_f_2016, nontrep_f_2016, hiv_trep_ratio_2016,
+pf_2035_2040_ng, pf_2035_2040_ct} = 2`; `{ni_2030_2040_ng,
+ni_2030_2040_ct, ni_2030_2040_tv} = 0.5` (soft tiebreaker — catches
+draws that match prevalence by holding people infected too long, even
+when prev is in band); all other targets = 1.
 
-Targets (11):
+Targets (14):
 | target | band | from |
 |---|---|---|
 | hiv_prev_2010_2020 | [11.5, 15.5]% | UNAIDS |
@@ -37,6 +39,9 @@ Targets (11):
 | pf_2035_2040_ng | [1.0, 2.5]% | sti_data.csv |
 | pf_2035_2040_ct | [9, 15]% | sti_data.csv |
 | pf_2035_2040_tv | [7, 14]% | sti_data.csv |
+| ni_2030_2040_ng | [200, 400]k/yr | sti_data.csv |
+| ni_2030_2040_ct | [300, 600]k/yr | sti_data.csv |
+| ni_2030_2040_tv | [1100, 2200]k/yr | sti_data.csv |
 
 Stages:
 1. **Smoke** (20 draws, same as exp 05 pilot): verify plumbing — GoF
