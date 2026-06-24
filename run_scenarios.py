@@ -87,7 +87,7 @@ SNAPSHOT_YEARS = (2027, 2030, 2035, 2040)
 
 DRAWS_CSV = Path(os.environ.get(
     'DRAWS',
-    REPO / 'experiments' / '03_2026-06-22_calibration_bv_in_vds' / 'outputs' / 'draws_used.csv'))
+    REPO / 'experiments' / '04_2026-06-23_ng_higher_beta_post_treatfix' / 'outputs' / 'draws_used.csv'))
 
 
 def build_cells():
