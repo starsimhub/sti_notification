@@ -64,7 +64,7 @@ SNAP_BASES = {'ng': ['prevalence'], 'ct': ['prevalence'], 'tv': ['prevalence'],
               'hiv': ['prevalence'], 'syph': ['trep_prevalence', 'prevalence']}
 
 TARGETS = {
-    'hiv_prev_2010_2020':  (0.115, 0.155),
+    'hiv_prev_15_49_2010_2020': (0.115, 0.155),
     'trep_f_2016':         (0.020, 0.040),
     'nontrep_f_2016':      (0.005, 0.015),
     'hiv_trep_ratio_2016': (3.0,   6.0),
