@@ -45,10 +45,6 @@ PN_INTENSITY = {
         notify_rates={'stable': 0.75, 'casual': 0.65},
         attendance_rates={'stable': {'f': 0.92, 'm': 0.80},
                           'casual': {'f': 0.80, 'm': 0.70}}),
-    'maximum': dict(
-        notify_rates={'stable': 0.90, 'casual': 0.90},
-        attendance_rates={'stable': {'f': 0.95, 'm': 0.90},
-                          'casual': {'f': 0.90, 'm': 0.85}}),
 }
 
 # --- Symptomatic care-seeking (single axis: care_seek_mult) ---
@@ -61,7 +57,6 @@ CARE_SEEKING = {
     'low':      1.25,
     'moderate': 1.5,
     'high':     1.8,
-    'maximum':  2.2,
 }
 
 # --- Bundled prevention for the diagnosed (single axis: coverage) ---
@@ -73,7 +68,6 @@ BUNDLED_PREVENTION = {
     'low':      dict(coverage=0.25, eff=0.50, dur_months=6),
     'moderate': dict(coverage=0.50, eff=0.50, dur_months=6),
     'high':     dict(coverage=0.75, eff=0.50, dur_months=6),
-    'maximum':  dict(coverage=1.00, eff=0.50, dur_months=6),
 }
 
 PN_LEVELS = list(PN_INTENSITY)
