@@ -57,7 +57,7 @@ N_DRAWS = int(os.environ.get('N_DRAWS', 20))
 N_WORKERS = int(os.environ.get('N_WORKERS', 60))
 
 DISEASES = ('hiv', 'syph', 'ng', 'ct', 'tv')
-TS_RESULT_NAMES = ['prevalence', 'prevalence_f', 'prevalence_m', 'new_infections']
+TS_RESULT_NAMES = ['prevalence', 'prevalence_f', 'prevalence_m', 'prevalence_15_49', 'new_infections']
 SNAP_YEARS = (2016, 2027, 2035, 2040)
 SNAP_AGES = ['15_20', '20_25', '25_30', '30_35', '35_50', '50_65']
 SNAP_BASES = {'ng': ['prevalence'], 'ct': ['prevalence'], 'tv': ['prevalence'],

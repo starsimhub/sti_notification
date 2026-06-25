@@ -205,7 +205,8 @@ def extract_calibration_summary(sim, draw_idx: int, seed: int) -> dict:
     _, trep_no_hiv        = grab(r_trep, 'syph_prev_no_hiv')
     _, nontrep_has_hiv    = grab(r_nontrep, 'syph_prev_has_hiv')
     _, nontrep_no_hiv     = grab(r_nontrep, 'syph_prev_no_hiv')
-    _, hiv_prev           = grab(sim.results['hiv'], 'prevalence')
+    yrs_hiv, hiv_prev     = grab(sim.results['hiv'], 'prevalence')
+    _, hiv_prev_15_49     = grab(sim.results['hiv'], 'prevalence_15_49')
 
     def at(arr, ys, year):
         i = np.argmin(np.abs(ys - year))
@@ -309,7 +310,8 @@ def extract_calibration_summary(sim, draw_idx: int, seed: int) -> dict:
         'hiv_pos_nontrep_2016':         hiv_pos_nontrep,
         'hiv_neg_nontrep_2016':         hiv_neg_nontrep,
         'hiv_trep_ratio_2016':          float(hiv_trep_ratio) if not np.isnan(hiv_trep_ratio) else None,
-        'hiv_prev_2010_2020':           avg(hiv_prev, yrs, 2010, 2020),
+        'hiv_prev_2010_2020':           avg(hiv_prev, yrs_hiv, 2010, 2020),
+        'hiv_prev_15_49_2010_2020':     avg(hiv_prev_15_49, yrs_hiv, 2010, 2020),
         'passes':                       passes,
         'n_pass':                       int(n_pass),
         'status':                       'ok',
