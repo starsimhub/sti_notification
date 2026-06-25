@@ -110,7 +110,7 @@ def main():
         for sex, col in [('f', F_COLOR), ('m', M_COLOR)]:
             s = ts[(ts.disease == d) & (ts.result_name == f'prevalence_{sex}')]
             g = s.groupby('year').value
-            med = g.median(); lo = g.min(); hi = g.max()
+            med = g.median(); lo = g.quantile(0.25); hi = g.quantile(0.75)
             yr = med.index.values
             ax.fill_between(yr, lo.values * 100, hi.values * 100, color=col, alpha=0.15, lw=0)
             ax.plot(yr, med.values * 100, color=col, lw=1.5,
@@ -140,7 +140,7 @@ def main():
     for ax, d in zip(axes[1], DISEASES):
         s = ts[(ts.disease == d) & (ts.result_name == 'new_infections')]
         g = s.groupby('year').value
-        med = g.median() / 1e3; lo = g.min() / 1e3; hi = g.max() / 1e3
+        med = g.median() / 1e3; lo = g.quantile(0.25) / 1e3; hi = g.quantile(0.75) / 1e3
         yr = med.index.values
         ax.fill_between(yr, lo.values, hi.values, color=DATA_C, alpha=0.15, lw=0)
         ax.plot(yr, med.values, color=DATA_C, lw=1.5, label='model')
@@ -165,8 +165,8 @@ def main():
             for ab in AGES:
                 g = ad[(ad.sex == sex) & (ad.age == ab)].value
                 med.append(g.median() * 100 if len(g) else np.nan)
-                lo.append(g.min() * 100 if len(g) else np.nan)
-                hi.append(g.max() * 100 if len(g) else np.nan)
+                lo.append(g.quantile(0.25) * 100 if len(g) else np.nan)
+                hi.append(g.quantile(0.75) * 100 if len(g) else np.nan)
             med = np.array(med)
             yerr = np.vstack([med - np.array(lo), np.array(hi) - med])
             ax.bar(x + off, med, w, color=col, alpha=0.85)
@@ -193,7 +193,7 @@ def main():
             ax.set_ylabel(f'prevalence (%), {SNAP_YEAR}', fontsize=8.5)
 
     fig.text(0.5, 0.012,
-             f'Exp 06 K=5 calibration, {label} ({len(kept_ids)} draws): line/bar = median, band/whisker = min-max range. '
+             f'Exp 06 K=5 calibration, {label} ({len(kept_ids)} draws): line/bar = median, band/whisker = 25-75 IQR across draws. '
              'Diamonds = data (programme surveillance, ZIMPHIA). HIV/NG/CT/TV new-inf data = whole-pop counts; '
              f'syphilis has no new-inf data overlay. HIV age panel overlays ZIMPHIA 2016 + 2020; '
              f'syph age is treponemal. Age panels at {SNAP_YEAR}.',

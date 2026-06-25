@@ -52,17 +52,24 @@ class SyndromicPN(PartnerNotification):
 
 class POCPN(PartnerNotification):
     """
-    Partner notification adapted for POC etiological testing.
+    Partner notification for the POC arm, switching at ``intv_year``.
 
-    On attendance, routes partners through:
+    The POC arm must be identical to the SOC arm before ``intv_year``:
+    pre-switch, attendees are routed through syndromic management exactly
+    as :class:`SyndromicPN` does (by sex, to syndromic_vds/uds). Only at
+    ``intv_year`` does routing switch to the POC etiological cascade:
       1. The POC NG/CT/TV panel (etiological dx, replaces syndromic_vds/uds).
       2. The POC syph PN test (rpr, non-treponemal RDT; 0.90 sens across
          primary/secondary/latent/tertiary, 0.05 FP on cured).
 
-    Looks up both routed interventions by name through ``self.sim`` at
-    step time. Stashing refs at construction would bind to instances
-    that the sim has since cloned (their state arrays would be stale /
-    unallocated).
+    Without this time switch, pre-2027 PN attendees in the POC arm would be
+    routed to ``panel``/``syph_pn_test`` (both gated to ``start=intv_year``),
+    so they'd receive no treatment while the SOC arm treats the same
+    attendees via syndromic management — a deterministic pre-2027 divergence.
+
+    Looks up routed interventions by name through ``self.sim`` at step time.
+    Stashing refs at construction would bind to instances that the sim has
+    since cloned (their state arrays would be stale / unallocated).
 
     Cycle prevention + diagnostic results come from the base
     :class:`sti.PartnerNotification`.
@@ -72,16 +79,39 @@ class POCPN(PartnerNotification):
         panel_name: name of the symptomatic-testing panel intervention to
             route NG/CT/TV testing through (defaults to ``'panel'``).
         syph_pn_test_name: name of the syph PN test (rpr product).
+        syndromic_vds_name: women's syndromic-mgmt intervention (pre-switch).
+        syndromic_uds_name: men's syndromic-mgmt intervention (pre-switch).
+        intv_year: year the POC routing switches on. Default 2027.
     """
     def __init__(self, eligibility, panel_name='panel',
-                 syph_pn_test_name='syph_pn_test', **kwargs):
+                 syph_pn_test_name='syph_pn_test',
+                 syndromic_vds_name='syndromic_vds',
+                 syndromic_uds_name='syndromic_uds',
+                 intv_year=2027, **kwargs):
         super().__init__(eligibility=eligibility, test=None, **kwargs)
         self._panel_name = panel_name
         self._syph_pn_test_name = syph_pn_test_name
+        self._syndromic_vds_name = syndromic_vds_name
+        self._syndromic_uds_name = syndromic_uds_name
+        self._intv_year = intv_year
 
     def notify_attendees(self, uids):
         if not len(uids):
             return
+        # Pre-switch: route through syndromic management, identical to the
+        # SOC arm (SyndromicPN), so the POC arm matches SOC before intv_year.
+        if self.sim.now < self._intv_year:
+            ppl = self.sim.people
+            vds = self.sim.interventions.get(self._syndromic_vds_name)
+            uds = self.sim.interventions.get(self._syndromic_uds_name)
+            f_uids = uids[ppl.female[uids]]
+            m_uids = uids[ppl.male[uids]]
+            if len(f_uids) and vds is not None:
+                vds.step(uids=f_uids)
+            if len(m_uids) and uds is not None:
+                uds.step(uids=m_uids)
+            return
+        # Post-switch: POC etiological cascade.
         panel = self.sim.interventions.get(self._panel_name)
         if panel is not None:
             panel.step(uids=uids)
@@ -734,9 +764,14 @@ class CondomCounseling(ss.Intervention):
     enrolled in a protection window of ``dur``: during it their re-acquisition
     susceptibility (``rel_sus``) for the protected diseases is multiplied by
     ``(1 - eff)``. Acquisition only; onward transmission is left untouched.
-    Each step previously-managed agents are reset to 1.0 and the currently-
-    protected set re-applied, so expiry needs no extra bookkeeping beyond
-    ``ti_protect_end``.
+
+    The multiplier is applied multiplicatively each step, matching how the
+    disease risk factors and coinfection connectors (hiv_sti, bv) compose on
+    ``rel_sus``. Each disease's ``step_state`` resets ``rel_sus[:] = 1`` and
+    connectors re-apply their cofactors before interventions run, so
+    multiplying the currently-protected set here both composes with those
+    cofactors and self-expires when an agent leaves the protected set — no
+    reset bookkeeping needed beyond ``ti_protect_end``.
 
     Default protected diseases are NG / CT / TV / syph. Syph is included
     because PN-driven curative treatment without a protection window drives
@@ -760,7 +795,6 @@ class CondomCounseling(ss.Intervention):
         self.trigger_tx = list(trigger_tx)
         self.start = start
         self._window_steps = None
-        self._managed = ss.uids()
         self.define_states(
             ss.FloatArr('ti_protect_end', default=np.nan),
         )
@@ -796,16 +830,17 @@ class CondomCounseling(ss.Intervention):
                 self.ti_protect_end[enroll] = ti + self._window_steps
 
         protected = (self.ti_protect_end > ti).uids
+        if not len(protected):
+            return
+        # Multiply, don't overwrite: step_state has reset rel_sus[:]=1 and
+        # connectors have re-applied their cofactors this step, so this
+        # composes with them and self-expires when agents leave `protected`.
         factor = 1.0 - float(self.pars.eff)
         for d in self.diseases:
             dis = sim.diseases.get(d)
             if dis is None:
                 continue
-            if len(self._managed):
-                dis.rel_sus[self._managed] = 1.0
-            if len(protected):
-                dis.rel_sus[protected] = factor
-        self._managed = protected
+            dis.rel_sus[protected] *= factor
         return
 
     def init_results(self):
@@ -821,6 +856,6 @@ class CondomCounseling(ss.Intervention):
     def update_results(self):
         super().update_results()
         ti = self.ti
-        self.results['n_protected'][ti] = len(self._managed)
+        self.results['n_protected'][ti] = int((self.ti_protect_end > ti).sum())
         self.results['new_enrolled'][ti] = int((self.ti_protect_end == ti + self._window_steps).sum())
         return

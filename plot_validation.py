@@ -56,7 +56,7 @@ def main():
             sub = s[s.cell == cell]
             g = sub.groupby('year').value
             med = g.median() / 1e3
-            lo, hi = g.min() / 1e3, g.max() / 1e3
+            lo, hi = g.quantile(0.25) / 1e3, g.quantile(0.75) / 1e3
             yr = med.index.values
             ax.fill_between(yr, lo.values, hi.values, color=color, alpha=0.10, lw=0)
             ax.plot(yr, med.values, color=color, lw=1.2, ls=ls, label=label)
@@ -79,8 +79,8 @@ def main():
         for cell, _, _, _ in CELL_ORDER:
             vals = kavg.loc[kavg.cell == cell, col] / 1e6  # millions
             med.append(vals.median())
-            lo.append(vals.min())
-            hi.append(vals.max())
+            lo.append(vals.quantile(0.25))
+            hi.append(vals.quantile(0.75))
         med, lo, hi = np.array(med), np.array(lo), np.array(hi)
         yerr = np.vstack([med - lo, hi - med])
         colors = [c for _, _, c, _ in CELL_ORDER]
@@ -97,9 +97,9 @@ def main():
 
     fig.text(0.5, 0.012,
              'Validation run: 5 cells x 5 draws (exp 06 top 5) x K=5 seeds. '
-             'Top: annual new infections, line = K=5-then-cross-draw median, band = cross-draw min-max. '
+             'Top: annual new infections, line = K=5-then-cross-draw median, band = cross-draw 25-75 IQR. '
              'Dotted vertical = intervention start (2027). '
-             'Bottom: cumulative new infections 2027-40 (median + min-max across 5 draws).',
+             'Bottom: cumulative new infections 2027-40 (median + 25-75 IQR across draws).',
              ha='center', fontsize=6.8, color='#666')
     fig.subplots_adjust(left=0.06, right=0.995, top=0.94, bottom=0.16, wspace=0.32, hspace=0.45)
     out = REPO / 'results' / 'fig_validation_overview.png'
