@@ -859,3 +859,141 @@ class CondomCounseling(ss.Intervention):
         self.results['n_protected'][ti] = int((self.ti_protect_end > ti).sum())
         self.results['new_enrolled'][ti] = int((self.ti_protect_end == ti + self._window_steps).sum())
         return
+
+
+class CareSeekScaler(ss.Intervention):
+    """Defer the symptomatic care-seeking multiplier to intv_year.
+
+    Mirrors how POC / PN / BP activate at intv_year while pre-2027 behavior
+    matches the calibrated SOC baseline. Without this, scaling NG/CT/TV
+    `p_symp_care` or syph testing `rel_test` at sim construction rewrites
+    history all the way back to 1985 and pre-2027 trajectories diverge
+    across cells with different `care` settings.
+
+    On the first step at or after `start`:
+      * NG / CT / TV `pars.p_symp_care` is multiplied (sex-stratified, clipped
+        to 1.0).
+      * Each named syph testing intervention's `pars.rel_test` is multiplied
+        by the scalar form of the multiplier.
+
+    Note: `p_symp_care` is read at infection time (`set_care_seeking`), not
+    at care-seeking time. Agents already infected when this fires keep their
+    stamped `ti_seeks_care`; only new infections after `start` use the
+    scaled probability. A few-month transition period is expected.
+    """
+
+    def __init__(self, mult=1.0, start=2027,
+                 diseases=('ng', 'ct', 'tv'),
+                 syph_test_interventions=('syph_symp_test', 'syph_symp_test_poc',
+                                          'syph_rash_test'),
+                 name='care_seek_scaler', *args, **kwargs):
+        super().__init__(name=name)
+        self.update_pars(*args, **kwargs)
+        if hasattr(mult, '__len__'):
+            self.mult_f = float(mult[0])
+            self.mult_m = float(mult[1])
+        else:
+            self.mult_f = self.mult_m = float(mult)
+        self.start = start
+        self.diseases = list(diseases)
+        self.syph_test_interventions = list(syph_test_interventions)
+        self._fired = False
+        return
+
+    def _find_intv(self, name):
+        intvs = self.sim.interventions
+        if hasattr(intvs, 'get'):
+            found = intvs.get(name)
+            if found is not None:
+                return found
+        for cand in intvs:
+            if getattr(cand, 'name', None) == name:
+                return cand
+        return None
+
+    def _find_disease(self, name):
+        ds = self.sim.diseases
+        if hasattr(ds, 'get'):
+            found = ds.get(name)
+            if found is not None:
+                return found
+        for cand in ds:
+            if getattr(cand, 'name', None) == name:
+                return cand
+        return None
+
+    def step(self):
+        if self._fired or self.sim.now < self.start:
+            return
+        for d_name in self.diseases:
+            disease = self._find_disease(d_name)
+            if disease is None:
+                continue
+            curr = disease.pars.p_symp_care
+            disease.pars.p_symp_care = [min(1.0, float(curr[0]) * self.mult_f),
+                                        min(1.0, float(curr[1]) * self.mult_m)]
+        mult_scalar = (self.mult_f + self.mult_m) / 2.0
+        if mult_scalar != 1.0:
+            for intv_name in self.syph_test_interventions:
+                intv = self._find_intv(intv_name)
+                if intv is None or not hasattr(intv, 'pars'):
+                    continue
+                if hasattr(intv.pars, 'rel_test'):
+                    intv.pars.rel_test = intv.pars.rel_test * mult_scalar
+        self._fired = True
+        return
+
+
+class PNIntensitySwitch(ss.Intervention):
+    """Defer the PN intensity ladder to intv_year.
+
+    PartnerNotification runs at the baseline notify/attend rates from sim
+    start (matching the calibration). At `start` (intv_year), this
+    intervention swaps the existing PN's notify/attend Bernoulli
+    probability callables to the scenario level. Without this, cells with
+    different PN intensities have different pre-2027 trajectories because
+    PN has been acting on transmission since 1985.
+
+    Args:
+        notify_rates: same shape accepted by ``pn_rates`` (dict edge->prob
+            or edge->{f,m}->prob).
+        attendance_rates: same shape.
+        start: simulation year at which the switch fires.
+        pn_name: name of the PN intervention to mutate (default 'pn').
+    """
+
+    def __init__(self, notify_rates, attendance_rates, start=2027,
+                 pn_name='pn', name='pn_intensity_switch', *args, **kwargs):
+        super().__init__(name=name)
+        self.update_pars(*args, **kwargs)
+        self.notify_rates = notify_rates
+        self.attendance_rates = attendance_rates
+        self.start = start
+        self.pn_name = pn_name
+        self._fired = False
+        return
+
+    def _find_intv(self, name):
+        intvs = self.sim.interventions
+        if hasattr(intvs, 'get'):
+            found = intvs.get(name)
+            if found is not None:
+                return found
+        for cand in intvs:
+            if getattr(cand, 'name', None) == name:
+                return cand
+        return None
+
+    def step(self):
+        if self._fired or self.sim.now < self.start:
+            return
+        pn = self._find_intv(self.pn_name)
+        if pn is None or not hasattr(pn, 'pars'):
+            return
+        from pn import pn_rates as _pn_rates
+        if hasattr(pn.pars, 'p_notify_current'):
+            pn.pars.p_notify_current.set(p=_pn_rates(self.notify_rates))
+        if hasattr(pn.pars, 'p_attends_current'):
+            pn.pars.p_attends_current.set(p=_pn_rates(self.attendance_rates))
+        self._fired = True
+        return

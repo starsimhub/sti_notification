@@ -95,15 +95,28 @@ class PartnerNotification(ss.Intervention):
 
     def init_results(self):
         super().init_results()
+        # Sex-stratified versions of the index/notify/attend funnel are added
+        # for every count below so VDS (female) vs UDS (male) channels can be
+        # separated downstream. Under SOC syndromic management the BV-dominant
+        # VDS etiology drives the female false-alarm rate well above the male
+        # UDS one; aggregating across sexes hides this.
         self.define_results(
             ss.Result('new_notified', dtype=int, label='Partners notified'),
+            ss.Result('new_notified_f', dtype=int, label='Partners notified (F)', auto_plot=False),
+            ss.Result('new_notified_m', dtype=int, label='Partners notified (M)', auto_plot=False),
             ss.Result('new_attending', dtype=int, label='Partners attending'),
+            ss.Result('new_attending_f', dtype=int, label='Partners attending (F)', auto_plot=False),
+            ss.Result('new_attending_m', dtype=int, label='Partners attending (M)', auto_plot=False),
             ss.Result('new_notified_current', dtype=int, label='Current partners notified', auto_plot=False),
             ss.Result('new_notified_previous', dtype=int, label='Prior partners notified', auto_plot=False),
             # ---- PN justification: did the index actually need to alert anyone? ----
             # Total PN triggers this step (size of eligibility pool).
             ss.Result('new_index_total', dtype=int,
                       label='PN triggers (index cases)', auto_plot=False),
+            ss.Result('new_index_total_f', dtype=int,
+                      label='PN triggers, female index', auto_plot=False),
+            ss.Result('new_index_total_m', dtype=int,
+                      label='PN triggers, male index', auto_plot=False),
             # Index false-alarm: PN triggered but the index has no current STI.
             # The headline "was PN warranted?" metric. Under SOC syndromic,
             # BV-only women presenting at VDS become indices despite no STI →
@@ -112,6 +125,12 @@ class PartnerNotification(ss.Intervention):
             ss.Result('new_index_no_sti', dtype=int,
                       label='PN triggers with no current STI (false alarm)',
                       auto_plot=False),
+            ss.Result('new_index_no_sti_f', dtype=int,
+                      label='PN triggers, female index, no STI',
+                      auto_plot=False),
+            ss.Result('new_index_no_sti_m', dtype=int,
+                      label='PN triggers, male index, no STI',
+                      auto_plot=False),
             # ---- Partner outcome (downstream signal, NOT a PN-warranted metric) ----
             # Of partners notified/attending, what fraction currently have no STI.
             # Reflects transmission-link enrichment + Bernoulli filters. A negative
@@ -119,9 +138,17 @@ class PartnerNotification(ss.Intervention):
             ss.Result('new_notified_no_sti', dtype=int,
                       label='PN notified, no current STI',
                       auto_plot=False),
+            ss.Result('new_notified_no_sti_f', dtype=int,
+                      label='PN notified, female, no STI', auto_plot=False),
+            ss.Result('new_notified_no_sti_m', dtype=int,
+                      label='PN notified, male, no STI', auto_plot=False),
             ss.Result('new_attended_no_sti', dtype=int,
                       label='PN attendees with no current STI',
                       auto_plot=False),
+            ss.Result('new_attended_no_sti_f', dtype=int,
+                      label='PN attendees, female, no STI', auto_plot=False),
+            ss.Result('new_attended_no_sti_m', dtype=int,
+                      label='PN attendees, male, no STI', auto_plot=False),
         )
         return
 
@@ -233,14 +260,36 @@ class PartnerNotification(ss.Intervention):
                 | out[d_key].get('successful', ss.uids())
                 | out[d_key].get('unsuccessful', ss.uids()))
         false_alarm = clean_index_set.remove(had_sti_set)
+        female = self.sim.people.female
         self.results['new_index_total'][ti] += len(clean_index_set)
         self.results['new_index_no_sti'][ti] += len(false_alarm)
+        if len(clean_index_set):
+            f_index = female[clean_index_set]
+            self.results['new_index_total_f'][ti] += int(f_index.sum())
+            self.results['new_index_total_m'][ti] += int((~f_index).sum())
+        if len(false_alarm):
+            f_false = female[false_alarm]
+            self.results['new_index_no_sti_f'][ti] += int(f_false.sum())
+            self.results['new_index_no_sti_m'][ti] += int((~f_false).sum())
 
-        # Partner-side: of partners notified / attending, what fraction have no
-        # current STI. A negative partner test from a correctly-triggered PN is
-        # still a worthwhile test, so this is a transmission-link signal, NOT
-        # a "was PN warranted?" signal. Partners are NOT in tx.outcomes this
-        # step (they get queued for next-step tx), so dis.infected is safe.
+        # Notify / attend totals broken out by partner sex. The aggregate
+        # `new_notified` / `new_attending` are set unconditionally below (line
+        # ~323), so we only record the _f / _m splits here.
+        if len(all_notified):
+            f_not = female[all_notified]
+            self.results['new_notified_f'][ti] += int(f_not.sum())
+            self.results['new_notified_m'][ti] += int((~f_not).sum())
+        if len(all_attending):
+            f_att = female[all_attending]
+            self.results['new_attending_f'][ti] += int(f_att.sum())
+            self.results['new_attending_m'][ti] += int((~f_att).sum())
+
+        # Partner-side STI status: of partners notified / attending, what
+        # fraction have no current STI. A negative partner test from a
+        # correctly-triggered PN is still a worthwhile test, so this is a
+        # transmission-link signal, NOT a "was PN warranted?" signal. Partners
+        # are NOT in tx.outcomes this step (they get queued for next-step tx),
+        # so dis.infected is safe.
         any_sti = None
         for d in ('ng', 'ct', 'tv', 'syph'):
             dis = self.sim.diseases.get(d)
@@ -249,9 +298,17 @@ class PartnerNotification(ss.Intervention):
             any_sti = dis.infected if any_sti is None else (any_sti | dis.infected)
         if any_sti is not None:
             if len(all_notified):
-                self.results['new_notified_no_sti'][ti] += int((~any_sti[all_notified]).sum())
+                no_sti_not = ~any_sti[all_notified]
+                self.results['new_notified_no_sti'][ti] += int(no_sti_not.sum())
+                f_not = female[all_notified]
+                self.results['new_notified_no_sti_f'][ti] += int((no_sti_not & f_not).sum())
+                self.results['new_notified_no_sti_m'][ti] += int((no_sti_not & ~f_not).sum())
             if len(all_attending):
-                self.results['new_attended_no_sti'][ti] += int((~any_sti[all_attending]).sum())
+                no_sti_att = ~any_sti[all_attending]
+                self.results['new_attended_no_sti'][ti] += int(no_sti_att.sum())
+                f_att = female[all_attending]
+                self.results['new_attended_no_sti_f'][ti] += int((no_sti_att & f_att).sum())
+                self.results['new_attended_no_sti_m'][ti] += int((no_sti_att & ~f_att).sum())
 
         if len(all_attending):
             self.ti_notified[all_attending] = self.ti

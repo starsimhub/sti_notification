@@ -51,7 +51,8 @@ os.chdir(REPO)
 
 from _pipeline import row_to_sim_pars, set_pars_local, SYMP_TEST_CSV  # noqa
 from model import make_sim                                            # noqa
-from interventions import ANC_PROBS_REALISTIC, CondomCounseling       # noqa
+from interventions import (ANC_PROBS_REALISTIC, CondomCounseling,     # noqa
+                           CareSeekScaler, PNIntensitySwitch)
 from scenarios import CARE_SEEKING, PN_INTENSITY, BUNDLED_PREVENTION  # noqa
 
 OUT = REPO / 'results'
@@ -101,34 +102,41 @@ def build_cells():
 
 
 def build_sim(cell, seed, sim_pars):
+    # All sims are built with calibrated-baseline parameters and lever
+    # interventions are deferred to intv_year, mirroring how POC / BP
+    # activate at 2027 in the user's earlier fix. Without this discipline
+    # any scenario lever (CS, PN intensity, BP) baked into construction
+    # rewrites history back to 1985 and pre-2027 trajectories diverge
+    # across cells.
+    #   - care_seek_mult held at 1.0; CareSeekScaler bumps NG/CT/TV
+    #     p_symp_care + syph testing rel_test at intv_year
+    #   - PN built at baseline rates (matches calibration); PNIntensitySwitch
+    #     swaps to the cell's intensity at intv_year
+    #   - CondomCounseling already uses start=INTV_YEAR internally
     sim = make_sim(seed=seed, start=1985, stop=END_YEAR, n_agents=N_AGENTS,
-                   poc=cell['poc'], pn_pars=PN_INTENSITY[cell['pn']],
-                   care_seek_mult=CARE_SEEKING[cell['care']],
+                   poc=cell['poc'], pn_pars=PN_INTENSITY['baseline'],
+                   care_seek_mult=1.0,
                    fetal_health=False, verbose=-1,
                    syph_symp_test_prob=pd.read_csv(SYMP_TEST_CSV),
                    syph_anc_probs=ANC_PROBS_REALISTIC)
     set_pars_local(sim, sim_pars)
-    # Apply care_seek_mult to syph symptomatic test interventions. make_sim
-    # only scales NG/CT/TV p_symp_care; syph care-seeking is gated by the
-    # symptomatic test's rel_test, which set_pars_local may overwrite to its
-    # calibrated value. Compose the multiplier on top afterward.
+    extra_intvs = []
     csm = CARE_SEEKING[cell['care']]
     if csm != 1.0:
-        for name in ('syph_symp_test', 'syph_symp_test_poc', 'syph_rash_test'):
-            intv = sim.pars['interventions'].get(name) if hasattr(sim.pars['interventions'], 'get') else None
-            if intv is None:
-                # interventions list, not ndict — search by name
-                for cand in sim.pars['interventions']:
-                    if getattr(cand, 'name', None) == name:
-                        intv = cand
-                        break
-            if intv is not None and hasattr(intv.pars, 'rel_test'):
-                intv.pars.rel_test *= csm
+        extra_intvs.append(CareSeekScaler(mult=csm, start=INTV_YEAR))
+    if cell['pn'] != 'baseline':
+        pn_int = PN_INTENSITY[cell['pn']]
+        extra_intvs.append(PNIntensitySwitch(
+            notify_rates=pn_int['notify_rates'],
+            attendance_rates=pn_int['attendance_rates'],
+            start=INTV_YEAR))
     if cell['bp'] != 'none':
         bp = BUNDLED_PREVENTION[cell['bp']]
-        cond = CondomCounseling(coverage=bp['coverage'], eff=bp['eff'],
-                                dur=ss.months(bp['dur_months']), start=INTV_YEAR)
-        sim.pars['interventions'] = list(sim.pars['interventions']) + [cond]
+        extra_intvs.append(CondomCounseling(coverage=bp['coverage'], eff=bp['eff'],
+                                            dur=ss.months(bp['dur_months']),
+                                            start=INTV_YEAR))
+    if extra_intvs:
+        sim.pars['interventions'] = list(sim.pars['interventions']) + extra_intvs
     return sim
 
 
@@ -179,13 +187,21 @@ def extract(sim, cell, draw, sub_idx, seed):
             row['syph_sti_prev_end'] = float(
                 sr['sexually_transmissible_prevalence'].values[-1])
 
-    # PN: total + channel split + false-alarm precision endpoints.
+    # PN: total + channel split + false-alarm precision endpoints + sex split.
     pn = sim.interventions.get('pn')
     if pn is not None:
-        for k in ('new_notified', 'new_attending',
-                  'new_notified_current', 'new_notified_previous',
-                  'new_index_total', 'new_index_no_sti',
-                  'new_notified_no_sti', 'new_attended_no_sti'):
+        pn_keys = ['new_notified', 'new_attending',
+                   'new_notified_current', 'new_notified_previous',
+                   'new_index_total', 'new_index_no_sti',
+                   'new_notified_no_sti', 'new_attended_no_sti']
+        # Sex-stratified versions of the index / notify / attend cascade —
+        # VDS (female) vs UDS (male) channels separately so the BV-dominant
+        # VDS false-alarm rate isn't averaged away by the male channel.
+        for base in ('new_index_total', 'new_index_no_sti',
+                     'new_notified', 'new_notified_no_sti',
+                     'new_attending', 'new_attended_no_sti'):
+            pn_keys += [f'{base}_f', f'{base}_m']
+        for k in pn_keys:
             if k in pn.results:
                 row[f'pn_{k}'] = _wsum(pn.results[k], yv)
 
