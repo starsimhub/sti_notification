@@ -1,0 +1,59 @@
+
+=== PHASE 1: 1000-draw LHS, seed=45 ===
+  wrote 1000 prior rows to /home/robyn/sti_notification/experiments/04_calibration_per_disease_sustain/outputs/phase1_priors.csv
+
+Phase 1: running 1000 sims on 60 workers...
+  [  50/1000] 696s  eta=13228s
+  [ 100/1000] 1152s  eta=10364s
+  [ 150/1000] 1598s  eta=9057s
+  [ 200/1000] 2024s  eta=8097s
+  [ 250/1000] 2589s  eta=7766s
+  [ 300/1000] 2945s  eta=6873s
+/home/robyn/stisim/stisim/diseases/hiv.py:658: RuntimeWarning: invalid value encountered in cast
+  self.ti_zero[uids] = ti + dur_post_art.astype(int)
+  [ 350/1000] 3649s  eta=6777s
+  [ 400/1000] 4365s  eta=6547s
+  [ 450/1000] 5139s  eta=6281s
+  [ 500/1000] 5791s  eta=5791s
+  [ 550/1000] 6189s  eta=5064s
+  [ 600/1000] 6495s  eta=4330s
+  [ 650/1000] 6861s  eta=3694s
+  [ 700/1000] 7295s  eta=3126s
+  [ 750/1000] 7729s  eta=2576s
+  [ 800/1000] 8118s  eta=2030s
+  [ 850/1000] 8466s  eta=1494s
+  [ 900/1000] 8797s  eta=977s
+  [ 950/1000] 9222s  eta=485s
+  [1000/1000] 9615s  eta=0s
+  done in 9616.0s
+
+=== CANDIDATE SELECTION ===
+  Phase 1 ok:              1000
+  sustained:               307
+  sustained AND 5+/9:      46
+  sustained AND ==4/9:     114
+  backfilled with 4/9:     4
+  wrote 50 candidates to /home/robyn/sti_notification/experiments/04_calibration_per_disease_sustain/outputs/phase2_candidates.csv
+
+=== PHASE 2: 50 candidates × 3 seeds ===
+
+Phase 2: running 150 sims on 60 workers...
+  [  50/150] 495s  eta=990s
+  [ 100/150] 954s  eta=477s
+  [ 150/150] 1367s  eta=0s
+  done in 1367.0s
+
+Wrote per-draw summary to /home/robyn/sti_notification/experiments/04_calibration_per_disease_sustain/outputs/ensemble_summary.csv
+Robust ensemble (sustained 3/3 AND mean n_pass ≥ 4): 26 draws → /home/robyn/sti_notification/experiments/04_calibration_per_disease_sustain/outputs/draws_used.csv
+
+=== ENSEMBLE STATS ===
+  candidates evaluated:    50
+  robust draws:            26
+  median nontrep_f:        0.133
+  median trep_f:           0.270
+  median fsw_prev_2019:    0.605
+  median HIV ratio:        3.400
+  median n_pass:           4.17
+exp 04 — calibration with per-disease sustainability
+cmd: /home/robyn/miniconda/envs/starsim/bin/python /home/robyn/sti_notification/calibration/artifacts/scripts/run_ensemble.py --out-dir /home/robyn/sti_notification/experiments/04_calibration_per_disease_sustain/outputs --n-draws 1000 --target-size 50 --n-seeds 3 --n-workers 60 --seed 45
+

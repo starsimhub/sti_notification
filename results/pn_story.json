@@ -1,0 +1,35 @@
+{
+  "draw": 66,
+  "partner_win": [
+    2024,
+    2025
+  ],
+  "pn_win": [
+    2027,
+    2040
+  ],
+  "partner_median": {
+    "f": 1.0,
+    "m": 1.0
+  },
+  "partner_mean": {
+    "f": 1.8570911066835718,
+    "m": 1.82068345323741
+  },
+  "under": {
+    "all": 3007,
+    "some": 3007,
+    "none": 25453,
+    "n_index": 31467
+  },
+  "over": {
+    "n_notified": 6346,
+    "n_notified_no_sti": 449,
+    "n_attended": 4215,
+    "n_attended_no_sti": 229
+  },
+  "overtx": {
+    "n_treated": 42188,
+    "n_treated_no_sti": 7230
+  }
+}

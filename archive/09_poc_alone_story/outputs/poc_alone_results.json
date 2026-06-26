@@ -1,0 +1,64 @@
+{
+  "draw": 726,
+  "seed": 0,
+  "arms": {
+    "SOC": {
+      "ct_prev_end": 0.08967013406018802,
+      "ct_prev_mean": 0.0829400013253904,
+      "ct_inc": 15285030.0,
+      "ct_tx_total": 20476320.0,
+      "ct_tx_success": 9790110.0,
+      "ct_tx_unnecessary": 9657000.0,
+      "cohort_reinf": 0.42,
+      "tree": {
+        "cohort": 100,
+        "not_notified": {
+          "total": 86,
+          "no_partner": 9,
+          "had_partner_silent": 77,
+          "reinfected": 36,
+          "stayed_clear": 50
+        },
+        "notified": {
+          "total": 14,
+          "partner_attended": 9,
+          "partner_not_attended": 5,
+          "attended_partner_cured": 2,
+          "attended_partner_not_cured": 7,
+          "notattend_reinf_index": 1,
+          "notattend_reinf_by_that_partner": 1,
+          "notattend_clear": 4
+        }
+      }
+    },
+    "POC": {
+      "ct_prev_end": 0.10140735384101908,
+      "ct_prev_mean": 0.08429714503812022,
+      "ct_inc": 20598120.0,
+      "ct_tx_total": 13674660.0,
+      "ct_tx_success": 10849770.0,
+      "ct_tx_unnecessary": 1587750.0,
+      "cohort_reinf": 0.49,
+      "tree": {
+        "cohort": 100,
+        "not_notified": {
+          "total": 80,
+          "no_partner": 10,
+          "had_partner_silent": 70,
+          "reinfected": 37,
+          "stayed_clear": 43
+        },
+        "notified": {
+          "total": 20,
+          "partner_attended": 16,
+          "partner_not_attended": 4,
+          "attended_partner_cured": 13,
+          "attended_partner_not_cured": 3,
+          "notattend_reinf_index": 3,
+          "notattend_reinf_by_that_partner": 3,
+          "notattend_clear": 1
+        }
+      }
+    }
+  }
+}

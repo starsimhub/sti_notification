@@ -1,0 +1,28 @@
+# Exp 08 — PN x bundled-prevention scenario sweep (ensemble)
+# Consumed implicitly via run.py + scenarios.py.
+
+# --- Sweep grid -------------------------------------------------------
+# 10 cells x N_DRAWS x N_SEEDS sims:
+#   SOC              : syndromic dx,    baseline PN, no bundled prevention
+#   POC_pn_baseline  : POC dx,          baseline PN, no BP    (POC reference)
+#   POC_pn_{low,moderate,high,maximum}   POC dx, PN ladder, no BP
+#   POC_bp_{low,moderate,high,maximum}   POC dx, baseline PN, BP coverage ladder
+cells: 10
+pn_intensity_levels: [baseline, low, moderate, high, maximum]
+bp_coverage_levels:  [none, low, moderate, high, maximum]    # none == POC_pn_baseline
+
+# --- Ensemble input ---------------------------------------------------
+# Default: exp 04's 26-draw per-disease sustainability ensemble.
+# Override with DRAWS env var to point at the BV-in-VDS-calibrated re-fire
+# once it lands (see README "Prerequisite" + SUMMARY caveat).
+draws_csv:    experiments/04_calibration_per_disease_sustain/outputs/draws_used.csv
+
+# --- Sim sizing -------------------------------------------------------
+n_agents:     10_000
+start_year:   1985
+intv_year:    2027     # POC switch + BundledPrevention onset
+end_year:     2040
+n_seeds:      1        # env override: N_SEEDS
+
+# --- Compute ----------------------------------------------------------
+n_workers:    60       # env override: N_WORKERS  (IDM Azure VM)

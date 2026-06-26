@@ -1,0 +1,15 @@
+[exp08] 10 cells x 26 draws x 1 seeds = 260 sims | draws=/home/robyn/sti_notification/experiments/04_calibration_per_disease_sustain/outputs/draws_used.csv
+  [20/260] 210s eta=2525s ok=20 err=0
+  [40/260] 214s eta=1177s ok=40 err=0
+  [60/260] 413s eta=1377s ok=60 err=0
+  [80/260] 423s eta=951s ok=80 err=0
+  [100/260] 430s eta=688s ok=100 err=0
+  [120/260] 632s eta=738s ok=120 err=0
+  [140/260] 637s eta=546s ok=140 err=0
+  [160/260] 698s eta=436s ok=160 err=0
+  [180/260] 846s eta=376s ok=180 err=0
+  [200/260] 850s eta=255s ok=200 err=0
+  [220/260] 1172s eta=213s ok=220 err=0
+  [240/260] 1226s eta=102s ok=240 err=0
+  [260/260] 1548s eta=0s ok=260 err=0
+[exp08] done in 1548s. ok=260 err=0 -> /home/robyn/sti_notification/experiments/08_pn_bp_scenarios/outputs/results.jsonl

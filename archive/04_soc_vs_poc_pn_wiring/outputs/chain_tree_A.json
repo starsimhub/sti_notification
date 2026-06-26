@@ -1,0 +1,20 @@
+{
+  "cohort": 100,
+  "not_notified": {
+    "total": 76,
+    "no_partner": 16,
+    "had_partner_silent": 60,
+    "reinfected": 34,
+    "stayed_clear": 42
+  },
+  "notified": {
+    "total": 24,
+    "partner_attended": 15,
+    "partner_not_attended": 9,
+    "attended_partner_cured": 8,
+    "attended_partner_not_cured": 7,
+    "notattend_reinf_index": 5,
+    "notattend_reinf_by_that_partner": 5,
+    "notattend_clear": 4
+  }
+}

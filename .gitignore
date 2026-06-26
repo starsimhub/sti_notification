@@ -45,3 +45,26 @@ revision_plan.md
 # salvaged to experiments/*/nroy/ alongside the SUMMARY.
 experiments/*/outputs/hm_zim*/
 experiments/*/outputs/series.pkl
+
+# Archived exp 04 raw per-event logs (large, reproducible from run.py)
+archive/04_soc_vs_poc_pn_wiring/outputs/pn_dyads*.csv
+archive/04_soc_vs_poc_pn_wiring/outputs/trans_events*.csv
+archive/04_soc_vs_poc_pn_wiring/outputs/tx_events*.csv
+
+# Scenario run outputs (large, regenerable from run_scenarios.py)
+results/*.jsonl
+results/*_smoke_*
+
+# Slide decks and Office temp/lock files (kept local)
+docs/*.pptx
+~$*
+*.code-workspace
+
+# brainstorming visual companion
+.superpowers/
+
+# Sciris pickle dumps anywhere (large binaries)
+**/*.obj
+
+# Local figure archive (kept off the tree)
+figures/_archive/

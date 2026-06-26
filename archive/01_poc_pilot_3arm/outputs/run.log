@@ -1,0 +1,12 @@
+Sampled 10 draws (seed=7) from /home/robyn/sti_notification/calibration/artifacts/draws_used.csv
+Arms: ['A_soc', 'B_poc_baseline', 'C1_poc_pn_1_5x', 'C2_poc_pn_2x', 'C3_poc_pn_3x']
+Total sims: 150 (10 draws × 3 seeds × 5 arms)
+  [ 25/150] 84s eta=421s ok=25 err=0
+  [ 50/150] 86s eta=172s ok=50 err=0
+  [ 75/150] 162s eta=162s ok=75 err=0
+  [100/150] 168s eta=84s ok=100 err=0
+  [125/150] 221s eta=44s ok=125 err=0
+  [150/150] 236s eta=0s ok=150 err=0
+
+Done in 236.3s. ok=150 err=0
+Wrote 150 rows to /home/robyn/sti_notification/experiments/01_poc_pilot_3arm/outputs/results.jsonl

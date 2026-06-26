@@ -1,0 +1,23 @@
+[scenarios] 126 cells x 3 draws x 1 seeds = 378 sims | n_agents=10000 | draws=draws_used.csv
+  [20/378] 212s eta=3787s ok=20 err=0
+  [40/378] 212s eta=1791s ok=40 err=0
+  [60/378] 420s eta=2229s ok=60 err=0
+  [80/378] 423s eta=1574s ok=80 err=0
+  [100/378] 424s eta=1177s ok=100 err=0
+  [120/378] 631s eta=1357s ok=120 err=0
+  [140/378] 637s eta=1082s ok=140 err=0
+  [160/378] 638s eta=870s ok=160 err=0
+  [180/378] 844s eta=929s ok=180 err=0
+  [200/378] 851s eta=757s ok=200 err=0
+  [220/378] 853s eta=613s ok=220 err=0
+  [240/378] 1056s eta=607s ok=240 err=0
+  [260/378] 1059s eta=480s ok=260 err=0
+  [280/378] 1061s eta=371s ok=280 err=0
+  [300/378] 1264s eta=329s ok=300 err=0
+  [320/378] 1266s eta=229s ok=320 err=0
+  [340/378] 1268s eta=142s ok=340 err=0
+  [360/378] 1438s eta=72s ok=360 err=0
+  [378/378] 1441s eta=0s ok=378 err=0
+[scenarios] done in 1441s. ok=378 err=0 -> /home/robyn/sti_notification/results/scenarios.jsonl
+  ts -> scenarios_timeseries.parquet: 571536 rows
+  snap -> scenarios_snapshots.parquet: 193536 rows

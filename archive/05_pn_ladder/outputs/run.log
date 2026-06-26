@@ -1,0 +1,26 @@
+[exp05] PN ladder, draw=773 seed=0 n_agents=10000 window=(2030, 2034)
+[exp05] === rung x0 (mult=0 ept=False) ===
+[exp05]   ct_prev=0.203 reinf=0.59 mean_notified=0.00 pn_attending=0
+[exp05] === rung x1 (mult=1 ept=False) ===
+[exp05]   ct_prev=0.198 reinf=0.55 mean_notified=0.18 pn_attending=407,160
+[exp05] === rung x2 (mult=2 ept=False) ===
+[exp05]   ct_prev=0.191 reinf=0.57 mean_notified=0.38 pn_attending=1,529,460
+[exp05] === rung x3 (mult=3 ept=False) ===
+[exp05]   ct_prev=0.180 reinf=0.56 mean_notified=0.58 pn_attending=2,923,200
+[exp05] === rung x5 (mult=5 ept=False) ===
+[exp05]   ct_prev=0.147 reinf=0.71 mean_notified=0.98 pn_attending=6,931,290
+[exp05] === rung x8 (mult=8 ept=False) ===
+[exp05]   ct_prev=0.132 reinf=0.66 mean_notified=1.12 pn_attending=8,350,260
+[exp05] === rung EPT (mult=5 ept=True) ===
+[exp05]   ct_prev=0.146 reinf=0.66 mean_notified=0.98 pn_attending=7,066,140
+
+[exp05] === LADDER (CT, draw 773, window 2030-34) ===
+rung  ct_prev_window_mean  ct_new_inf_window  cohort_reinf_rate  mean_notified_per_index  pn_attending_window
+  x0                0.203     11,442,240.000              0.590                    0.000                0.000
+  x1                0.198     11,330,880.000              0.550                    0.181          407,160.000
+  x2                0.191     11,395,260.000              0.570                    0.379        1,529,460.000
+  x3                0.180     11,472,690.000              0.560                    0.579        2,923,200.000
+  x5                0.147     11,804,160.000              0.710                    0.977        6,931,290.000
+  x8                0.132     11,586,660.000              0.660                    1.124        8,350,260.000
+ EPT                0.146     11,845,050.000              0.660                    0.978        7,066,140.000
+[exp05] done.

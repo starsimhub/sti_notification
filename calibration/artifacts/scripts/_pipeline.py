@@ -196,8 +196,8 @@ def extract_calibration_summary(sim, draw_idx: int, seed: int) -> dict:
     yrs_inf, new_inf  = grab(r, 'new_infections')
     _, fsw_prev       = grab(r, 'prevalence_sw')
     _, client_prev    = grab(r, 'prevalence_client')
-    _, nontrep_f      = grab(r, 'nontrep_prevalence_15_64_f')
-    _, trep_f         = grab(r, 'trep_prevalence_15_64_f')
+    _, nontrep_f      = grab(r, 'nontrep_prevalence_f')
+    _, trep_f         = grab(r, 'trep_prevalence_f')
 
     r_trep    = sim.results['syph_hiv_trep']
     r_nontrep = sim.results['syph_hiv_nontrep']
@@ -205,7 +205,8 @@ def extract_calibration_summary(sim, draw_idx: int, seed: int) -> dict:
     _, trep_no_hiv        = grab(r_trep, 'syph_prev_no_hiv')
     _, nontrep_has_hiv    = grab(r_nontrep, 'syph_prev_has_hiv')
     _, nontrep_no_hiv     = grab(r_nontrep, 'syph_prev_no_hiv')
-    _, hiv_prev           = grab(sim.results['hiv'], 'prevalence')
+    yrs_hiv, hiv_prev     = grab(sim.results['hiv'], 'prevalence')
+    _, hiv_prev_15_49     = grab(sim.results['hiv'], 'prevalence_15_49')
 
     def at(arr, ys, year):
         i = np.argmin(np.abs(ys - year))
@@ -228,7 +229,30 @@ def extract_calibration_summary(sim, draw_idx: int, seed: int) -> dict:
     ll_v     = plateau_shares.get('late_latent',  0.0)
     ni_late  = avg(new_inf, yrs_inf, 2030, 2040)
     pf_late  = avg(prev_f,  yrs, 2035, 2040)
-    sustained = bool(ni_late > 0 and pf_late >= 0.001)
+
+    # Per-disease sustainability — each STI must have nonzero new
+    # infections in 2030-2040 AND >= 0.1% female prevalence in 2035-2040.
+    # Catches NG/CT/TV draws that ride the extinction edge; the previous
+    # syph-only check let those through silently (exp 03 had 23/53 draws
+    # with NG or TV beta_m2f < 0.05, near the sustainability threshold).
+    # BV is in equilibrium and isn't checked.
+    def _disease_sustained(name):
+        rd = sim.results.get(name)
+        if rd is None:
+            return True, float('nan'), float('nan')
+        ys_pf, pf_arr = grab(rd, 'prevalence_f')
+        ys_ni, ni_arr = grab(rd, 'new_infections')
+        pf_l = avg(pf_arr, ys_pf, 2035, 2040)
+        ni_l = avg(ni_arr, ys_ni, 2030, 2040)
+        ok = bool(ni_l > 0 and pf_l >= 0.001)
+        return ok, pf_l, ni_l
+
+    sus_hiv,  pf_hiv,  ni_hiv  = _disease_sustained('hiv')
+    sus_ng,   pf_ng,   ni_ng   = _disease_sustained('ng')
+    sus_ct,   pf_ct,   ni_ct   = _disease_sustained('ct')
+    sus_tv,   pf_tv,   ni_tv   = _disease_sustained('tv')
+    sus_syph = bool(ni_late > 0 and pf_late >= 0.001)
+    sustained = sus_hiv and sus_syph and sus_ng and sus_ct and sus_tv
 
     hiv_pos_trep    = at(trep_has_hiv,    yrs_ana, 2016)
     hiv_neg_trep    = at(trep_no_hiv,     yrs_ana, 2016)
@@ -263,12 +287,31 @@ def extract_calibration_summary(sim, draw_idx: int, seed: int) -> dict:
         'client_prev_2016':             at(client_prev, yrs, 2016),
         'overall_prev_f_2035_2040_mean': pf_late,
         'new_inf_2030_2040_mean':       ni_late,
+        # Per-disease sustainability diagnostics — written for every sim
+        # so we can audit why a draw was rejected (e.g. low NG beta
+        # extinguishing NG even when syph sustains).
+        'sustained_hiv':   sus_hiv,
+        'sustained_syph':  sus_syph,
+        'sustained_ng':    sus_ng,
+        'sustained_ct':    sus_ct,
+        'sustained_tv':    sus_tv,
+        'pf_2035_2040_hiv':  pf_hiv,
+        'pf_2035_2040_syph': pf_late,
+        'pf_2035_2040_ng':   pf_ng,
+        'pf_2035_2040_ct':   pf_ct,
+        'pf_2035_2040_tv':   pf_tv,
+        'ni_2030_2040_hiv':  ni_hiv,
+        'ni_2030_2040_syph': ni_late,
+        'ni_2030_2040_ng':   ni_ng,
+        'ni_2030_2040_ct':   ni_ct,
+        'ni_2030_2040_tv':   ni_tv,
         'hiv_pos_trep_2016':            hiv_pos_trep,
         'hiv_neg_trep_2016':            hiv_neg_trep,
         'hiv_pos_nontrep_2016':         hiv_pos_nontrep,
         'hiv_neg_nontrep_2016':         hiv_neg_nontrep,
         'hiv_trep_ratio_2016':          float(hiv_trep_ratio) if not np.isnan(hiv_trep_ratio) else None,
-        'hiv_prev_2010_2020':           avg(hiv_prev, yrs, 2010, 2020),
+        'hiv_prev_2010_2020':           avg(hiv_prev, yrs_hiv, 2010, 2020),
+        'hiv_prev_15_49_2010_2020':     avg(hiv_prev_15_49, yrs_hiv, 2010, 2020),
         'passes':                       passes,
         'n_pass':                       int(n_pass),
         'status':                       'ok',
@@ -290,11 +333,13 @@ TIME_SERIES_RESULTS = {
         'new_infections',
         'prevalence', 'prevalence_f', 'prevalence_m',
         'prevalence_sw', 'prevalence_client',
-        'trep_prevalence_15_64',
-        'trep_prevalence_15_64_f', 'trep_prevalence_15_64_m',
-        'nontrep_prevalence_15_64',
-        'nontrep_prevalence_15_64_f', 'nontrep_prevalence_15_64_m',
-        'active_prevalence', 'active_prevalence_f', 'active_prevalence_m',
+        # trep / nontrep denominators are sexually-active adults within the
+        # syph module's `age_range` (set to 15-64 in model.py to match the
+        # ZIMPHIA household-survey reference).
+        'trep_prevalence',
+        'trep_prevalence_f', 'trep_prevalence_m',
+        'nontrep_prevalence',
+        'nontrep_prevalence_f', 'nontrep_prevalence_m',
         'sexually_transmissible_prevalence',
         'sexually_transmissible_prevalence_f',
         'sexually_transmissible_prevalence_m',
@@ -311,7 +356,7 @@ SNAPSHOT_BASES = {
     'ct':   ['prevalence'],
     'tv':   ['prevalence'],
     'syph': ['trep_prevalence', 'nontrep_prevalence',
-             'active_prevalence', 'sexually_transmissible_prevalence',
+             'sexually_transmissible_prevalence',
              'symptomatic_prevalence', 'primary_prevalence'],
 }
 

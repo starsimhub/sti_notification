@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>STI undertreatment — story pitch</title>
+<style>
+  :root{
+    --ink:#15202b; --muted:#64748b; --line:#e2e8f0;
+    --bg:#ffffff; --bg-alt:#f7f8fa;
+    --red:#c0392b; --green:#2e7d32; --blue:#1f6fb2; --amber:#d98324;
+    --s0:#cbd5e1; --s1:#fcd34d; --s2:#fb923c; --s3:#ef4444; --s4:#b91c1c; --s5:#7f1d1d;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Helvetica,Arial,sans-serif;
+       color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased;line-height:1.5}
+  .scroller{scroll-snap-type:y proximity}
+  section{min-height:100vh;scroll-snap-align:start;display:flex;flex-direction:column;justify-content:center;
+          padding:64px 7vw;border-bottom:1px solid var(--line)}
+  section:nth-child(even){background:var(--bg-alt)}
+  .wrap{max-width:1000px;margin:0 auto;width:100%}
+  .kicker{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:14px}
+  h1{font-size:48px;line-height:1.1;margin:0 0 18px;font-weight:800;letter-spacing:-.02em}
+  h2{font-size:34px;line-height:1.15;margin:0 0 16px;font-weight:750;letter-spacing:-.015em}
+  p.lead{font-size:20px;color:#334155;max-width:760px;margin:0 0 8px}
+  p.note{font-size:14px;color:var(--muted);max-width:720px}
+  .badge{position:fixed;top:14px;right:16px;z-index:10;background:#fff;border:1px solid var(--line);
+         border-radius:999px;padding:6px 12px;font-size:12px;color:var(--muted);box-shadow:0 1px 4px rgba(0,0,0,.05)}
+  .em{color:var(--red);font-weight:700}
+  .emg{color:var(--green);font-weight:700}
+  .emb{color:var(--blue);font-weight:700}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center}
+  @media(max-width:820px){.grid2{grid-template-columns:1fr}h1{font-size:36px}h2{font-size:27px}}
+  .bars{font-size:14px;color:#334155}
+  .bar-row{display:flex;align-items:center;gap:10px;margin:7px 0}
+  .bar-row .lab{width:130px;text-align:right;color:#475569;font-size:13px}
+  .bar-track{flex:1;background:#eef2f7;border-radius:5px;height:22px;position:relative}
+  .bar-fill{height:100%;border-radius:5px}
+  .bar-val{font-variant-numeric:tabular-nums;color:#334155;width:46px;font-size:13px}
+  .funnel-step{display:flex;align-items:center;gap:14px;margin:10px 0}
+  .fbar{height:38px;border-radius:6px;display:flex;align-items:center;justify-content:flex-end;
+        padding-right:10px;color:#fff;font-weight:700;font-variant-numeric:tabular-nums}
+  .flab{width:230px;font-size:14px;color:#334155}
+  .drop{color:var(--red);font-size:12px;font-weight:600;margin-left:8px}
+  .src{display:flex;gap:8px;margin-top:6px}
+  .src div{flex:1;text-align:center;padding:10px 4px;border-radius:6px;font-size:12px}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:10px}
+  .legend span{display:inline-flex;align-items:center;gap:5px}
+  .dot{width:11px;height:11px;border-radius:50%;display:inline-block}
+  .takeaway{margin-top:22px;padding:14px 18px;border-left:4px solid var(--ink);background:#fff;font-size:16px;color:#1e293b}
+  section:nth-child(even) .takeaway{background:var(--bg-alt)}
+  .small{font-size:13px;color:var(--muted)}
+  .pageno{position:absolute;left:7vw;font-size:13px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="badge">Preliminary · model draw 773 · 1 seed · illustrative where noted</div>
+<div class="scroller">
+
+<!-- 1 — TITLE / INTENT -->
+<section>
+  <div class="wrap">
+    <div class="kicker">What I'm building</div>
+    <h1>Most women with a treatable STI<br>never actually get cured.</h1>
+    <p class="lead">A scroll-through data story — built on our Zimbabwe STI model — that follows women through infection, symptoms, care, treatment, and <em>re</em>infection. It shows where the cascade leaks, why partner notification helps less than you'd hope, and where <span class="emg">point-of-care diagnostics</span> could change the picture.</p>
+    <p class="note">Two acts. <b>Act 1 — the problem:</b> undertreatment, and the collateral harm of imprecise diagnosis. <b>Act 2 — the question:</b> what do POC etiological tests buy us, directly (treating her) and indirectly (smarter notification + behaviour change)? This pitch shows the spine and two real early results.</p>
+  </div>
+</section>
+
+<!-- 2 — THE CASCADE (illustrative) -->
+<section>
+  <div class="wrap">
+    <div class="kicker">Act 1 · the cascade</div>
+    <h2>Under syndromic management, infection rarely ends in a cure.</h2>
+    <div class="grid2">
+      <div>
+        <p class="lead" style="font-size:18px">Take 100 women who acquire chlamydia. Each step of the care cascade sheds most of the remainder — silent infections, no care sought, or imperfect treatment.</p>
+        <div class="legend">
+          <span><span class="dot" style="background:var(--s3)"></span>lost at this step</span>
+          <span><span class="dot" style="background:#334155"></span>still on the path to cure</span>
+        </div>
+        <p class="note" style="margin-top:14px">Illustrative, built from the model's symptom &amp; care-seeking assumptions — the final numbers come from the calibrated ensemble.</p>
+      </div>
+      <div>
+        <div class="funnel-step"><div class="flab">Acquire chlamydia</div><div class="fbar" style="width:100%;background:#334155">100</div></div>
+        <div class="funnel-step"><div class="flab">Develop symptoms</div><div class="fbar" style="width:30%;background:#334155">30</div><span class="drop">70 silent</span></div>
+        <div class="funnel-step"><div class="flab">Seek care</div><div class="fbar" style="width:15%;background:#334155">15</div><span class="drop">−15</span></div>
+        <div class="funnel-step"><div class="flab">Correctly treated</div><div class="fbar" style="width:12%;background:var(--green)">12</div><span class="drop">−3</span></div>
+      </div>
+    </div>
+    <div class="takeaway">~<b>1 in 8</b> infections ends in a cure. Most never produce symptoms — so syndromic care never sees them.</div>
+  </div>
+</section>
+
+<!-- 3 — TREATED BUT REINFECTED (REAL exp04) -->
+<section>
+  <div class="wrap">
+    <div class="kicker">Act 1 · treated ≠ cured &nbsp;·&nbsp; <span style="color:var(--green)">real model result</span></div>
+    <h2>Even the women we <em>do</em> cure are reinfected within the year.</h2>
+    <div class="grid2">
+      <div>
+        <p class="lead" style="font-size:18px">We traced 100 women cured of chlamydia for 12 months. Nearly half were reinfected — and almost always by <b>their own untreated regular partners</b>, not by sex-work contacts.</p>
+        <div class="takeaway" style="border-color:var(--red)">The bottleneck isn't a hidden reservoir PN can't reach. It's the woman's <span class="em">own concurrent partners going untreated</span> — which partner notification <em>can</em> address.</div>
+        <p class="note" style="margin-top:14px">From the agent-level chain trace (exp 04, POC arm). Reinfection source captured at the moment of transmission.</p>
+      </div>
+      <div>
+        <div class="bars">
+          <div style="font-size:14px;color:#475569;margin-bottom:8px">Of 100 women cured of chlamydia, one year on:</div>
+          <div class="bar-row"><div class="lab">Reinfected</div><div class="bar-track"><div class="bar-fill" style="width:45%;background:var(--red)"></div></div><div class="bar-val">45</div></div>
+          <div class="bar-row"><div class="lab">Still clear</div><div class="bar-track"><div class="bar-fill" style="width:55%;background:var(--green)"></div></div><div class="bar-val">55</div></div>
+          <div style="font-size:14px;color:#475569;margin:16px 0 8px">Who reinfected the 45?</div>
+          <div class="src">
+            <div style="background:#fde2e2;color:#7f1d1d"><b>~90%</b><br>own regular partner</div>
+            <div style="background:#fef3c7;color:#92400e"><b>~10%</b><br>new partner</div>
+            <div style="background:#e2e8f0;color:#475569"><b>~0%</b><br>sex-work contact</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 4 — UNNECESSARY PN (concept) -->
+<section>
+  <div class="wrap">
+    <div class="kicker">Act 1 · the collateral harm</div>
+    <h2>Syndromic diagnosis also drives <em>unnecessary</em> partner notification.</h2>
+    <div class="grid2">
+      <div>
+        <p class="lead" style="font-size:18px">Most women presenting with vaginal discharge actually have <b>bacterial vaginosis</b>, not an STI — but syndromic management treats them as STI cases and prompts them to notify partners. Each notification carries a risk of intimate-partner violence.</p>
+        <div class="takeaway" style="border-color:var(--amber)">A test that says "this is BV, not an STI" prevents a notification that was never warranted — an <span style="color:var(--amber);font-weight:700">ancillary benefit of accurate diagnosis</span> we can quantify.</div>
+        <p class="note" style="margin-top:14px">Magnitudes to be drawn from the model (BV-driven over-treatment → notification volume). Shown here as the concept.</p>
+      </div>
+      <div>
+        <div class="bars">
+          <div style="font-size:14px;color:#475569;margin-bottom:8px">Women notifying a partner after VDS treatment (illustrative):</div>
+          <div class="bar-row"><div class="lab">Truly had an STI</div><div class="bar-track"><div class="bar-fill" style="width:40%;background:var(--green)"></div></div><div class="bar-val">40%</div></div>
+          <div class="bar-row"><div class="lab">BV only — needless</div><div class="bar-track"><div class="bar-fill" style="width:60%;background:var(--amber)"></div></div><div class="bar-val">60%</div></div>
+          <div style="margin-top:14px;font-size:13px;color:var(--red)">↳ each needless notification = avoidable IPV/GBV risk</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5 — THE POC QUESTION + REAL exp07 plane -->
+<section>
+  <div class="wrap">
+    <div class="kicker">Act 2 · the question &nbsp;·&nbsp; <span style="color:var(--green)">real model result</span></div>
+    <h2>Can point-of-care diagnostics break this — and how?</h2>
+    <div class="grid2">
+      <div>
+        <p class="lead" style="font-size:18px">Two levers, and they act on <b>different parts</b> of the problem:</p>
+        <p style="margin:6px 0"><span class="emg">Partner notification</span> (treat her partners) cuts <b>prevalence</b> — but barely touches new infections.</p>
+        <p style="margin:6px 0"><span class="emb">Condoms / counselling for the diagnosed</span> cut <b>incidence</b> — the new infections PN can't stop.</p>
+        <div class="takeaway" style="border-color:var(--green)">Used together they're <b>synergistic</b>: PN drags more partners into treatment, enlarging the pool condoms then protect. The combined corner reaches the lowest prevalence <em>and</em> incidence.</div>
+        <p class="note" style="margin-top:14px">Chlamydia, draw 773 (exps 05–07). Magnitudes preliminary; the <em>shape</em> — orthogonal levers, synergy — is the finding.</p>
+      </div>
+      <div>
+        <svg viewBox="0 0 600 360" width="100%" style="background:#fff;border:1px solid var(--line);border-radius:8px">
+          <!-- axes -->
+          <line x1="60" y1="320" x2="575" y2="320" stroke="#94a3b8" stroke-width="1"/>
+          <line x1="60" y1="40" x2="60" y2="320" stroke="#94a3b8" stroke-width="1"/>
+          <text x="317" y="350" text-anchor="middle" font-size="13" fill="#475569">CT incidence — new infections (millions) →</text>
+          <text x="20" y="180" text-anchor="middle" font-size="13" fill="#475569" transform="rotate(-90 20 180)">CT prevalence →</text>
+          <text x="60" y="335" font-size="11" fill="#94a3b8">fewer ◀</text>
+          <!-- condom ladder (blue, moves left) -->
+          <polyline points="485.5,70.5 411,98.5 365.6,113.8" fill="none" stroke="#1f6fb2" stroke-width="2.5"/>
+          <circle cx="485.5" cy="70.5" r="5" fill="#1f6fb2"/><circle cx="411" cy="98.5" r="5" fill="#1f6fb2"/><circle cx="365.6" cy="113.8" r="5" fill="#1f6fb2"/>
+          <text x="350" y="108" text-anchor="end" font-size="12" fill="#1f6fb2" font-weight="700">condoms →</text>
+          <!-- PN ladder (green, moves down) -->
+          <polyline points="485.5,70.5 501,116.4 537.8,200.4 514.4,238.5" fill="none" stroke="#2e7d32" stroke-width="2.5"/>
+          <circle cx="485.5" cy="70.5" r="5" fill="#2e7d32"/><circle cx="501" cy="116.4" r="5" fill="#2e7d32"/><circle cx="537.8" cy="200.4" r="5" fill="#2e7d32"/><circle cx="514.4" cy="238.5" r="5" fill="#2e7d32"/>
+          <text x="548" y="220" font-size="12" fill="#2e7d32" font-weight="700">PN</text>
+          <text x="548" y="234" font-size="12" fill="#2e7d32" font-weight="700">↓</text>
+          <!-- base label -->
+          <text x="480" y="60" text-anchor="end" font-size="11" fill="#64748b">today (SOC)</text>
+          <!-- combined corner star -->
+          <polygon points="101,272 105,283 117,283 107,290 111,302 101,295 91,302 95,290 85,283 97,283" fill="#15202b"/>
+          <text x="118" y="288" font-size="12" fill="#15202b" font-weight="700">PN + condoms</text>
+          <text x="118" y="302" font-size="11" fill="#64748b">lowest of both</text>
+        </svg>
+        <div class="legend" style="justify-content:center">
+          <span><span class="dot" style="background:#2e7d32"></span>scaling PN</span>
+          <span><span class="dot" style="background:#1f6fb2"></span>scaling condoms</span>
+          <span><span class="dot" style="background:#15202b"></span>both combined</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 6 — CLOSE -->
+<section>
+  <div class="wrap">
+    <div class="kicker">The pitch</div>
+    <h2>The story writes itself from the model — I want to <em>tell</em> it well.</h2>
+    <p class="lead">A polished, scrollable data-journalism piece: the problem (undertreatment + needless notification), then the case for POC diagnostics — primary benefit (curing her) capped by reinfection, ancillary benefits (smarter notification, behaviour change) with real upside.</p>
+    <p class="note">Next: build it on the sustained ~50-draw ensemble so every number is defensible, then layer the interactive POC explorer. This pitch = draw 773, single seed — directions, not final magnitudes.</p>
+  </div>
+</section>
+
+</div>
+</body>
+</html>

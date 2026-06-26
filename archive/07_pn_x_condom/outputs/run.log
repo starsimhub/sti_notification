@@ -1,0 +1,34 @@
+[exp07] PN×condom grid, draw=773 seed=0
+[exp07] === PN×1, condom 0.0 ===
+[exp07]   prev=0.198 inc=11,330,880 reinf=0.55
+[exp07] === PN×1, condom 0.5 ===
+[exp07]   prev=0.187 inc=10,655,760 reinf=0.53
+[exp07] === PN×1, condom 1.0 ===
+[exp07]   prev=0.181 inc=10,246,860 reinf=0.51
+[exp07] === PN×3, condom 0.0 ===
+[exp07]   prev=0.180 inc=11,472,690 reinf=0.56
+[exp07] === PN×3, condom 0.5 ===
+[exp07]   prev=0.162 inc=9,921,480 reinf=0.58
+[exp07] === PN×3, condom 1.0 ===
+[exp07]   prev=0.151 inc=9,131,520 reinf=0.51
+[exp07] === PN×8, condom 0.0 ===
+[exp07]   prev=0.132 inc=11,586,660 reinf=0.66
+[exp07] === PN×8, condom 0.5 ===
+[exp07]   prev=0.121 inc=8,669,550 reinf=0.50
+[exp07] === PN×8, condom 1.0 ===
+[exp07]   prev=0.115 inc=7,874,370 reinf=0.45
+
+[exp07] === PREVALENCE grid (rows=PN, cols=condom cov) ===
+condom_cov    0.0    0.5    1.0
+pn_mult                        
+1           0.198  0.187  0.181
+3           0.180  0.162  0.151
+8           0.132  0.121  0.115
+
+[exp07] === INCIDENCE grid (millions) ===
+condom_cov    0.0    0.5    1.0
+pn_mult                        
+1           11.33  10.66  10.25
+3           11.47   9.92   9.13
+8           11.59   8.67   7.87
+[exp07] done.

@@ -1,0 +1,13 @@
+# Sizing for the exp 03 LHS calibration on stisim rc1.5.7.
+# Consumed by run.py; mirrors the underlying run_ensemble.py CLI args.
+n_draws:      1000   # Phase 1 LHS sample size
+seed:         45     # LHS seed (arbitrary; pinned for reproducibility)
+target_size:  100    # Phase 2 candidate pool target (rounded up from 95)
+n_seeds:      3      # seeds per draw in Phase 2 robustness rerun
+n_workers:    60     # IDM Azure VM; leaves half the box for other tenants
+
+# Hardcoded by the institutional pipeline (calibration/artifacts/scripts/_pipeline.py):
+#   sim model:       sti_notification model.py make_sim(which='all')
+#   priors:          sti_notification priors.py (17 priors after exp 41)
+#   target bands:    TARGET_BANDS in _pipeline.py
+#   acceptance:      sustained 3/3 AND mean n_pass >= 4

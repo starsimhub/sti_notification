@@ -3,8 +3,8 @@
 **Project**: Health impact of demand-generation strategies (general outreach + partner notification) on STI **undertreatment**, complementing the prior `syph_dx_zim` overtreatment work.
 
 **Diseases (7)**: HIV, syphilis, GUD (placeholder), NG, CT, TV, BV.
-**Settings**: Zimbabwe (prelim), then Kenya + South Africa.
-**Timeline**: preliminary results in ~2 weeks; full analysis ~July.
+**Settings**: Zimbabwe (active); Kenya + South Africa deferred.
+**Deliverable**: ~July 2026.
 
 ---
 
@@ -19,108 +19,102 @@
 
 | Question | Decision |
 |----|----|
-| Repo | `sti_notification` (existing stub repo, modernized) |
-| Geographies | ZW first; KE + ZA next |
+| Repo | `sti_notification` on `scenarios/zimbabwe` branch |
+| Geographies | Zimbabwe only for July deliverable; KE + ZA deferred |
 | Diseases | All 7 from day 1 (HIV + syph + GUDP + NG/CT/TV + BV) |
 | Health endpoints | APO + ABO + DALYs (primary); HIV infections, onward syph transmission, GUD-mediated HIV (secondary) |
-| PN mechanism | Use `PriorPartners` network + repo's existing `PartnerNotification` class with notify-vs-attend split for current and previous partners; recall window treated as a parameter |
-| Care-seeking lever | Vary `p_symp_care` (NG/CT/TV same value; syph is per-stage `p_symp_primary`/`p_symp_secondary`) |
-| Custom PN class | Promote to stisim layer 2 (replace base `PartnerNotification`) |
+| PN mechanism | Edge-stratified `PartnerNotification` from `pn.py`; notify-vs-attend split by edge type and partner sex |
+| Care-seeking lever | Scalar `care_seek_mult` on NG/CT/TV `p_symp_care` (`make_sim(care_seek_mult=…)`); syph held at baseline |
+| Bundled prevention | `CondomCounseling` (interventions.py): coverage of the diagnosed enrolled in a `rel_sus`-reduction window for ng/ct/tv |
+| Diagnostic accuracy | SOC syndromic (`SyndromicManagement` via VDS/UDS) vs POC etiological panel; selected by `poc=` flag in `make_testing` |
 
-## Where things live (layer hierarchy)
+## Current state (2026-06-22)
 
-- **Layer 1 (`starsim`)** — no changes expected.
-- **Layer 2 (`stisim`)** — promote the upgraded `PartnerNotification` class (notify×attend, current+previous network split) here. Fix `gud_syph` connector signature and attribute typo (`syphilis` vs `syph`) as a side PR. Fix `hiv_bv` explicit-construction sim-linking bug as a side issue.
-- **Layer 3 (`sti_notification`)** — sim assembly, scenario logic, country-specific data, outcome accounting, run scripts, plots.
+**Calibration baseline on stisim rc1.5.7.** See `experiments/02_2026-06-22_calibration_per_disease_sustain/SUMMARY.md` (the active baseline, 26 draws under a per-disease sustainability filter); the earlier 53-draw syph-only-filter ensemble is superseded but its time-series + age × sex snapshot parquets remain as a historical reference under `experiments/01_2026-06-15_calibration_rc1.5.7/outputs/`. Draws used: `experiments/02_2026-06-22_calibration_per_disease_sustain/outputs/draws_used.csv`. 17 priors. **This baseline predates the BV-in-VDS edit (`SimpleBV` + `bv_care`); re-fire before the headline factorial.**
 
-## Repo state after modernization (this session)
-
-`model.py` (renamed from `vds_model.py`), `hiv_model.py`, `interventions.py` updated for stisim v1.5.5:
-- Switched to `sti.Sim` (auto demographics path available, not yet used)
-- Dropped `**time_units` everywhere — sim defaults to monthly dt
-- `ART/VMMC` use `coverage=` (renamed from `coverage_data=`)
-- `BV` (full CST model) replaces `SimpleBV`; BV no longer in syndromic-VDS eligibility (uses internal care-seeking)
-- `GUDPlaceholder` instantiated as `name='gudp'` to bypass buggy `gud_syph` auto-connector
-- Connectors auto-added by `sti.Sim` (workaround for explicit-construction bug)
-- `which='all'` builds all 7 diseases; smoke-tested over 1990–1993, 500 agents (~1.2s)
-
-## Known issues to fix before scenarios
-
-1. **`PartnerNotification` set-and bug** (`interventions.py:337,344`): `successful_m_idx = nw.p1[fp_edge_inds] & m_idx` is wrong — set-and on UID arrays, not the edge intersection that's intended. **Fix when promoting to stisim.**
-2. **Syphilis testing not wired**: `make_syph_testing` returns only `SyphTx` for the smoke test. Need `SyphDx` product CSV in `data/` and either a symptomatic test pathway, ANC pathway, or both.
-3. **APO/ABO outcome accounting**: not yet implemented. Reuse `FetalHealth` connector from the ANC screening repo for syph-driven adverse pregnancy outcomes; need design for HIV+other STIs.
-4. **DALY accounting**: no module yet. Standard approach: post-hoc weights on incident cases, deaths, and APO/ABO, applied during result processing.
-5. **`hiv_bv` and `gud_syph` connector bugs**: workarounds in place (auto-add + name='gudp'). Fix upstream in stisim before promotion PR.
-6. **Country data**: only ZW data files present (`asfr.csv`, `deaths.csv`, `age_dist_1990.csv`, `condom_use.csv`, `n_art.csv`, `n_vmmc.csv`, `init_prev_*.csv`). Need KE + ZA equivalents.
+**Scenarios scaffolding.** `interventions.py` has `SyndromicPN`, `POCPN`, `make_testing`, `make_pn`, and `CondomCounseling` ready; `model.py` builds the 7-disease sim with `FetalHealth` wired via `custom=`. The three scenario ladders live in `scenarios.py`. The factorial is driven by the single root `run_scenarios.py` (smoke-tested) — see *Wiring scenarios off the calibrated ensemble* below.
 
 ## Scenario design
 
-### Levers
-- **PN coverage**: 4 levels (none / low / med / high) — already structured in `run_pn_scens.py`. Vary both `p_notify` and `p_attends`, separately for `current` and `previous` partners.
-- **PN recall window**: `dur_recall` ∈ {3 mo, 6 mo, 12 mo}.
-- **Care-seeking intensity**: multiplier on `p_symp_care` ∈ {1.0×, 1.25×, 1.5×, 2.0×}. Same multiplier for NG/CT/TV; separate setting for syphilis primary/secondary.
-- **Diagnostic accuracy**: SOC syndromic vs POC etiological (already structured via `poc=` flag). Important for the dx→PN-precision arm.
+### Wiring scenarios off the calibrated ensemble
 
-### Scenario grid (prelim, ZW only)
-A 2 × 4 × 3 × 4 grid (192 cells) is too much for prelim. Instead, three orthogonal sweeps:
+Scenarios run through the single root `run_scenarios.py` (not per-experiment
+folders — only calibrations live under `experiments/`). The driver:
 
-1. **PN sweep** — fix dx=SOC, care-seeking=baseline, recall=6mo; vary PN coverage 4 ways.
-2. **Outreach sweep** — fix dx=SOC, PN=med, recall=6mo; vary care-seeking 4 ways.
-3. **Dx × PN interaction** — 2 dx × 4 PN coverage = 8 cells, fixed care-seeking baseline. This is where the "better dx → less unnecessary PN" story lands.
+1. **Loads draws from the current calibration baseline**:
+   `experiments/02_2026-06-22_calibration_per_disease_sustain/outputs/draws_used.csv`
+   (override with the `DRAWS` env var after recalibration). **Not**
+   `calibration/artifacts/draws_used.csv` — that's the older baseline,
+   historical only.
+2. **Applies each draw via `_pipeline.set_pars_local`** (in
+   `calibration/artifacts/scripts/_pipeline.py`). `sti.Sim` stores
+   modules in lists not dicts, so dict-style overrides silently miss;
+   `set_pars_local` matches by `mod.name`. Do not reimplement this.
+3. **Layers the three levers on the loaded draw** (not in place of it):
+   `care_seek_mult=CARE_SEEKING[c]` and `pn_pars=PN_INTENSITY[p]` into
+   `make_sim`, and a `CondomCounseling(**BUNDLED_PREVENTION[b])` when
+   bundled prevention is on. The draw sets calibrated transmission /
+   network parameters; the levers sit on top.
+4. **Ladders are defined once in `scenarios.py`** (`CARE_SEEKING`,
+   `PN_INTENSITY`, `BUNDLED_PREVENTION`), so cells stay declarative and
+   the same levels feed any figure.
 
-Each cell × 20 stochastic seeds = ~250 sims for the prelim. Fits on a laptop.
+### Wiring check before the full run
+
+Before running at full ensemble size, run the **smoke check** end-to-end
+(`SMOKE=1 python run_scenarios.py`): 6 spanning cells (SOC, POC-plain, and each
+lever at its maximum, plus all-max), 1 draw, 2k agents. Its purpose is catching
+silent failures — draws not loaded, a lever not applied, cells not differing —
+not reproducing headline results. Verify each lever moves prevalence /
+incidence / treatment-precision in the right direction.
+
+### Levers (the three ladders in `scenarios.py`)
+- **Symptomatic care-seeking** — `CARE_SEEKING`: scalar `care_seek_mult` on NG/CT/TV `p_symp_care`, baseline 1.0 → 2.2 (female care-seeking saturates near 2×). Scales the VDS pathway only.
+- **Partner notification** — `PN_INTENSITY`: single axis co-varying notify + attend rates (edge type × partner sex) from SOC baseline to a plausible maximum.
+- **Bundled prevention** — `BUNDLED_PREVENTION`: coverage of the diagnosed enrolled in a `CondomCounseling` `rel_sus`-reduction window (eff + duration fixed; coverage is the axis).
+
+Each ladder has 5 rungs (baseline/none → maximum). Diagnostic accuracy (SOC vs POC) is the framing arm, set by the `poc=` flag.
+
+### Scenario design — full factorial (ZW)
+- `SOC` — syndromic standard of care, all levers baseline (the reference).
+- `POC × CARE_SEEKING × PN_INTENSITY × BUNDLED_PREVENTION` = 5 × 5 × 5 = 125 cells; the (baseline, baseline, none) corner is "POC plain". 126 distinct cells total.
+
+Each cell propagated through the 26-draw ensemble. The factorial surfaces both main effects (each lever's dose-response) and interactions (e.g. does PN add to bundled prevention, or substitute?). Single-lever response and the "better dx → less unnecessary PN" contrast both fall out as slices. Full run ≈ 126 × 26 ≈ 3300 sims (~95 min on 60 cores at 1 seed).
 
 ### Endpoints
 | Endpoint | Source | Notes |
 |----|----|----|
 | HIV new infections | `hiv.results.new_infections` | Stratify by sex |
-| Syph active prevalence | `syph.results.active_prevalence` | |
-| Syph onward transmission averted | Counterfactual diff | Need to record at module level |
-| Adverse pregnancy outcomes | `FetalHealth` (port from anc_sti_screening) | Syph + HIV |
+| Syph symptomatic prevalence | `syph.results.symptomatic_prevalence` | Primary + secondary stages |
+| Syph onward transmission averted | Counterfactual diff | Recorded at module level |
+| Adverse pregnancy outcomes | `FetalHealth` connector (wired) | Syph + HIV |
 | Adverse birth outcomes | Same | Stillbirth, preterm, LBW |
 | DALYs | Post-hoc on incident cases + deaths + APOs | Standard weights |
 | Treatments delivered | per-treatment `new_treated` | Already tracked |
 | Unnecessary treatments | per-treatment `new_treated_unnecessary` | Already tracked; key metric for dx arm |
-| Notifications sent / partners attending | New on PN class | Need to add results |
-| Unnecessary notifications | Notifications to true-negative partners | New metric — the central outcome for the dx arm |
+| Notifications sent / partners attending | `pn.results.new_notified`, `new_attending` | Already tracked on `PartnerNotification` |
+| Unnecessary notifications | Notifications to true-negative partners | New metric needed for the dx arm |
 
-## Phasing
+## Manuscript framing (locked in from the calibration)
 
-### Phase 0 — completed today (smoke test)
-- Modernized for stisim v1.5.5
-- All 7 diseases run end-to-end
-- ZW data in place; KE/ZA pending
-
-### Phase 1 — preliminary results (~2 weeks)
-1. Wire syphilis testing (SyphTest + SyphDx product, basic symptomatic pathway).
-2. Port `FetalHealth` from `anc_sti_screening` for APO/ABO accounting (syphilis-driven first).
-3. Add DALY post-processing (post-hoc weights on standard outputs).
-4. Fix `PartnerNotification` set-and bug locally; add notification-counting results.
-5. Add unnecessary-notification metric.
-6. Run the three orthogonal sweeps × 20 seeds on uncalibrated default pars in ZW.
-7. Generate prelim plots: PN-coverage threshold curves, care-seeking threshold curves, dx×PN interaction.
-8. Document methods + outline approach.
-
-**What this prelim does NOT have:** calibration, KE/ZA, full DALY set, PN class promoted to stisim.
-
-### Phase 2 — calibration (handed off to calibration skill)
-- ZW first, then KE + ZA.
-- Targets: existing ZW data already in `syph_dx_zim`; need KE + ZA equivalents.
-- Distinct calibration questions to scope with `calib:getting-started` when ready.
-
-### Phase 3 — promotion + final analysis (~July)
-1. Promote `PartnerNotification` (with bug fix and feature parity) to stisim layer 2; submit PR.
-2. Fix `gud_syph` and `hiv_bv` connector bugs upstream; submit PRs.
-3. Re-run the full scenario grid on calibrated pars across 3 countries.
-4. Threshold analyses (minimum PN coverage / care-seeking intensity for X% impact).
-5. Decision-relevant analyses: cost per averted APO, EVPI on key parameters (defer to `calib:decision-analysis` skill).
+- **HIV calibrates cleanly** — ensemble median 11.4% whole-pop 2010–20 in the UNAIDS band. HIV is the headline.
+- **Syph absolute prev overshoots ZIMPHIA** (medians trep 25.9%, nontrep 12.9% vs targets 2.7%, 0.8%) — this is a model structural ceiling, documented honestly. Syph results are **relative-effect contrasts** under PN scenarios, not absolute calibration.
+- **Relative-effect endpoints** (primary/secondary syph share, HIV+/HIV− trep ratio, FSW prev) land in their bands.
 
 ## Next concrete steps (ordered)
 
-1. **Prelim sims working without testing**: confirm uncalibrated 7-disease ZW sim produces sensible directional dynamics over 1990–2040.
-2. **Wire syph testing + APO tracking**: port FetalHealth + add SyphDx product.
-3. **Fix PN bug + add results**: get the notification-counting metrics in.
-4. **Run orthogonal sweeps**: 3 × 4 × 20 seeds = 240 sims.
-5. **Plots**: threshold curves + dx×PN interaction.
+1. **Review the `CARE_SEEKING` levels** in `scenarios.py` (new ladder; values provisional).
+2. **Recalibrate (BV-aware).** The active baseline predates the `SimpleBV` + `bv_care` VDS edit. Re-fire calibration, then point `run_scenarios.py` at the new ensemble via the `DRAWS` env var (or update the default path).
+3. **Run the factorial.** `conda run -n starsim env N_SEEDS=1 N_WORKERS=60 python run_scenarios.py` (smoke check first). Output → `results/scenarios.jsonl`.
+4. **Add the unnecessary-notification metric.** Tag attendees whose true-negative status across all four PN diseases (ng/ct/tv/syph) means the notification was unwarranted.
+5. **DALY post-processing.** Apply standard weights to incident cases, deaths, and APO/ABO outputs.
+6. **Endpoint reporting.** Figures in `figures/`: main-effect dose-response per lever, interaction slices, and the dx contrast (POC vs SOC: treatment precision, unnecessary PN). Report with ensemble quantile envelopes.
 
-After step 5: review prelim with stakeholders, decide what to harden for July.
+## Recalibration triggers
+
+Recalibrate if any of:
+- Any change to `model.py` that affects calibrated endpoints (new disease, new connector, changed natural-history defaults). **Currently triggered: the BV-in-VDS edit (`SimpleBV` + `bv_care`) changed the VDS care-seeking pathway after the active ensemble was fit.**
+- A stisim minor version bump (1.6.x) — parameter scales are not transferable across minor versions per `calibration/recalibration_guide.md`.
+- Refreshed ZIMPHIA / UNAIDS data that shifts target bands beyond the 80% CI.
+
+See `calibration/recalibration_guide.md` for the full when-to-recalibrate criteria.

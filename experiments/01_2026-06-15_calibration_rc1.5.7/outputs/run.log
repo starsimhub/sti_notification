@@ -1,0 +1,62 @@
+
+=== PHASE 1: 1000-draw LHS, seed=45 ===
+  wrote 1000 prior rows to /home/robyn/sti_notification/experiments/03_calibration_rc1.5.7/outputs/phase1_priors.csv
+
+Phase 1: running 1000 sims on 60 workers...
+  [  50/1000] 495s  eta=9396s
+  [ 100/1000] 953s  eta=8574s
+  [ 150/1000] 1402s  eta=7943s
+  [ 200/1000] 1820s  eta=7280s
+  [ 250/1000] 2261s  eta=6782s
+  [ 300/1000] 2455s  eta=5729s
+/home/robyn/stisim/stisim/diseases/hiv.py:658: RuntimeWarning: invalid value encountered in cast
+  self.ti_zero[uids] = ti + dur_post_art.astype(int)
+  [ 350/1000] 2848s  eta=5289s
+  [ 400/1000] 3291s  eta=4936s
+  [ 450/1000] 3730s  eta=4559s
+  [ 500/1000] 4145s  eta=4145s
+  [ 550/1000] 4527s  eta=3704s
+  [ 600/1000] 4828s  eta=3219s
+  [ 650/1000] 5199s  eta=2800s
+  [ 700/1000] 5639s  eta=2417s
+  [ 750/1000] 6070s  eta=2023s
+  [ 800/1000] 6477s  eta=1619s
+  [ 850/1000] 6817s  eta=1203s
+  [ 900/1000] 7130s  eta=792s
+  [ 950/1000] 7560s  eta=398s
+  [1000/1000] 7955s  eta=0s
+  done in 7955.6s
+
+=== CANDIDATE SELECTION ===
+  Phase 1 ok:              1000
+  sustained:               758
+  sustained AND 5+/9:      95
+  sustained AND ==4/9:     301
+  backfilled with 4/9:     5
+  wrote 100 candidates to /home/robyn/sti_notification/experiments/03_calibration_rc1.5.7/outputs/phase2_candidates.csv
+
+=== PHASE 2: 100 candidates × 3 seeds ===
+
+Phase 2: running 300 sims on 60 workers...
+  [  50/300] 469s  eta=2346s
+  [ 100/300] 916s  eta=1832s
+  [ 150/300] 1357s  eta=1357s
+  [ 200/300] 1786s  eta=893s
+  [ 250/300] 2214s  eta=443s
+  [ 300/300] 2370s  eta=0s
+  done in 2370.2s
+
+Wrote per-draw summary to /home/robyn/sti_notification/experiments/03_calibration_rc1.5.7/outputs/ensemble_summary.csv
+Robust ensemble (sustained 3/3 AND mean n_pass ≥ 4): 53 draws → /home/robyn/sti_notification/experiments/03_calibration_rc1.5.7/outputs/draws_used.csv
+
+=== ENSEMBLE STATS ===
+  candidates evaluated:    100
+  robust draws:            53
+  median nontrep_f:        0.129
+  median trep_f:           0.259
+  median fsw_prev_2019:    0.581
+  median HIV ratio:        3.611
+  median n_pass:           4.00
+exp 03 — calibration on rc1.5.7
+cmd: /home/robyn/miniconda/envs/starsim/bin/python /home/robyn/sti_notification/calibration/artifacts/scripts/run_ensemble.py --out-dir /home/robyn/sti_notification/experiments/03_calibration_rc1.5.7/outputs --n-draws 1000 --target-size 100 --n-seeds 3 --n-workers 60 --seed 45
+

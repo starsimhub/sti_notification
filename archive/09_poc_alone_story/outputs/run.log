@@ -1,0 +1,6 @@
+[poc_story] draw=726 seed=0
+[poc_story] running SOC...
+[poc_story] SOC: prev=0.083 inc=15,285,030 success=9,790,110 unnec=9,657,000
+[poc_story] running POC...
+[poc_story] POC: prev=0.084 inc=20,598,120 success=10,849,770 unnec=1,587,750
+[poc_story] wrote /Users/robynstuart/gf/sti_notification/experiments/09_poc_alone_story/outputs/poc_alone_results.json

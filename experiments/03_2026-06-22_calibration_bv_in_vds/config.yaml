@@ -1,0 +1,16 @@
+# Sizing for the BV-in-VDS calibration re-fire.
+# Mirrors experiments/02_2026-06-22_calibration_per_disease_sustain.
+n_draws:      500    # Phase 1 LHS sample size (half of exp 02 to halve wall time)
+seed:         45     # SAME LHS seed as exp 02 for draw-by-draw comparability
+target_size:  50     # Phase 2 candidate pool target
+n_seeds:      3      # seeds per draw in Phase 2 robustness rerun
+n_workers:    60     # IDM Azure VM
+
+# Only difference from exp 02:
+#   The current model.py uses SimpleBV() with the bv_care clause in
+#   interventions.seeking_care_vds (commit 169adc5). Symptomatic BV agents
+#   now present for VDS care; some get treated for ng/ct/tv unnecessarily.
+#   This adds care-seeking volume → slightly shifts calibrated betas.
+#
+# Priors unchanged from exp 02 (17 parameters in priors.py).
+# Filter unchanged: HIV/syph/NG/CT/TV all must sustain through 2030-2040.

@@ -53,11 +53,12 @@ Parameters opened over time:
       overshoot Robyn flagged on exp 39 figures.
     * CT: raise ct.beta_m2f range from [0.02, 0.30] to [0.05, 0.50]
       to chase the 5x under-calibration vs surveillance data.
-    * Syph leakage (new mechanism via stisim feat/marital-act-decay):
-      open structuredsexual.stable_act_decay in [0.02, 0.20] (per-yr
-      linear decay of stable-edge coital frequency) and
-      structuredsexual.client_marital_act_mult in [0.3, 1.0]
-      (multiplier on stable-edge acts when male partner is a client).
+- exp 41 (2026-06-15): recalibration on stisim rc1.5.7 — dropped
+  structuredsexual.stable_act_decay and
+  structuredsexual.client_marital_act_mult priors, since the
+  feat/marital-act-decay branch isn't landing in this stisim release
+  and we'd rather recalibrate cleanly on a tagged version than carry
+  a local MFNetwork subclass. Other priors unchanged.
 
 Condom effectiveness, p_symp_secondary, p_symp_care, and most
 network parameters remain fixed (set in model.py).
@@ -89,8 +90,4 @@ calib_pars = sc.objdict({
     # HIV-syph coupling (exp 32+)
     'hiv_syph.rel_sus_syph_hiv':    ('HIV→syph rel_sus',          1.0,   3.0,   True),
     'hiv_syph.rel_trans_syph_hiv':  ('HIV→syph rel_trans',        1.0,   2.5,   True),
-    # Stable-edge coital decay + client wife-displacement (exp 40+, requires
-    # stisim feat/marital-act-decay branch)
-    'structuredsexual.stable_act_decay':        ('Stable coital decay (/yr)', 0.02, 0.20, False),
-    'structuredsexual.client_marital_act_mult': ('Client wife act mult',      0.3,  1.0,  False),
 })
