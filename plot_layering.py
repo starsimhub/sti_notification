@@ -21,9 +21,10 @@ FIGS = REPO / 'figures'
 TS = REPO / 'results' / 'scenarios_timeseries.parquet'
 FONT = '/Users/robynstuart/gf/syph_dx_zim/assets/LibertinusSans-Regular.otf'
 
-LEVELS5 = ['baseline', 'low', 'moderate', 'high', 'maximum']
-BP = ['none', 'low', 'moderate', 'high', 'maximum']
-XLAB = ['base', 'low', 'mod', 'high', 'max']
+LEVELS = ['baseline', 'low', 'moderate', 'high']
+BP = ['none', 'low', 'moderate', 'high']
+XLAB = ['base', 'low', 'mod', 'high']
+N_LEVELS = len(LEVELS)
 DISEASES = ['ng', 'ct', 'tv', 'syph']
 DNAME = {'ng': 'Gonorrhoea (NG)', 'ct': 'Chlamydia (CT)',
          'tv': 'Trichomoniasis (TV)', 'syph': 'Syphilis'}
@@ -55,7 +56,7 @@ def ser(prev_d, cells):
 
 
 def panel(ax, prev_d, lines, dname):
-    x = np.arange(5)
+    x = np.arange(N_LEVELS)
     soc, poc = prev_d['SOC'] * 100, prev_d[cell()] * 100
     ax.axhline(soc, color=SOC_C, ls='--', lw=1.1, zorder=1)
     ax.axhline(poc, color=POC_C, ls=':', lw=1.1, zorder=1)
@@ -97,8 +98,8 @@ def main():
 
     # L1: each lever alone, others at baseline
     def lines_1way(pd_):
-        return [('care-seeking', CARE_C, ser(pd_, [cell(c=v) for v in LEVELS5]), None),
-                ('partner notification', PN_C, ser(pd_, [cell(p=v) for v in LEVELS5]), None),
+        return [('care-seeking', CARE_C, ser(pd_, [cell(c=v) for v in LEVELS]), None),
+                ('partner notification', PN_C, ser(pd_, [cell(p=v) for v in LEVELS]), None),
                 ('bundled prevention', BP_C, ser(pd_, [cell(b=v) for v in BP]), None)]
     figure('fig_layering_1way.png', lines_1way, ('SOC', 'POC-plain'),
            f'POC arm, median of {ndraws} pilot draws. Each line scales one lever with the other two at baseline '
@@ -107,10 +108,10 @@ def main():
 
     # L2: cumulative ladder PN -> +BP -> +care-seeking
     def lines_cum(pd_):
-        pn = ser(pd_, [cell(p=LEVELS5[k]) for k in range(5)])
-        pnbp = ser(pd_, [cell(p=LEVELS5[k], b=BP[k]) for k in range(5)])
-        all3 = ser(pd_, [cell(c=LEVELS5[k], p=LEVELS5[k], b=BP[k]) for k in range(5)])
-        poc_top = np.full(5, pd_[cell()] * 100)
+        pn = ser(pd_, [cell(p=LEVELS[k]) for k in range(N_LEVELS)])
+        pnbp = ser(pd_, [cell(p=LEVELS[k], b=BP[k]) for k in range(N_LEVELS)])
+        all3 = ser(pd_, [cell(c=LEVELS[k], p=LEVELS[k], b=BP[k]) for k in range(N_LEVELS)])
+        poc_top = np.full(N_LEVELS, pd_[cell()] * 100)
         return [('+ care-seeking', '#1b4f8a', all3, pnbp),
                 ('+ bundled prevention', '#4a90d9', pnbp, pn),
                 ('partner notification', '#9ecae1', pn, poc_top)]

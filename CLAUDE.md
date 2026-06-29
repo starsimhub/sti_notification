@@ -15,15 +15,28 @@ work (PN/condom ladders, wiring + story runs) is under `archive/`.
 
 ## State of play
 
-**Active calibration baseline.** `experiments/04_2026-06-23_ng_higher_beta_post_treatfix/` — **27-draw robust ensemble** on **stisim `fix/ng-tx`** (off rc1.5.8, commit `731bc1d`) with the same 17 priors as exp 03 except **NG `beta_m2f` lifted from log-uniform [0.020, 0.299] to [0.10, 0.60]**. Same per-disease sustainability filter (HIV/syph/NG/CT/TV all required to sustain through 2030–2040). Draws live at `experiments/04_2026-06-23_ng_higher_beta_post_treatfix/outputs/draws_used.csv`. Full report in that folder's `SUMMARY.md`. Promoted because exp 03's NG sustainability relied on a stisim `rel_treat` NaN bug that made `GonorrheaTreatment` a no-op for the small fraction of agents whose state slot was inactive at `Arr.init_vals` time; under the patched stisim, exp 03's NG β range can't sustain NG. **Caveat:** ensemble median NG prev 2035–40 is 9.3% (IQR 3.1–11.1%) vs ~3–8% empirical band — brackets the data but tilts hot.
+**Active calibration baseline.** `experiments/06_2026-06-24_kseed_calibration/` — **500-draw LHS × K=5 sim-averaging** single-phase calibration with continuous weighted goodness-of-fit (replaces exp 04's two-phase LHS + binary per-disease sustainability filter). Same 17 priors as exp 04, same stisim `fix/ng-tx` base (off rc1.5.8, commit `731bc1d`). 311/500 draws (62%) all-five-diseases sustaining; top-30 by GoF used as the ensemble. Default `DRAWS_CSV` in `run_scenarios.py`: `experiments/06_2026-06-24_kseed_calibration/outputs/draws_used.csv`. Full report in that folder's `SUMMARY.md`. NG prev now brackets the empirical band cleanly (top-30 fixed exp 04's "tilts hot" caveat); syph absolute structural ceiling persists.
 
 **Historical baselines.**
-- `experiments/03_2026-06-22_calibration_bv_in_vds/` — 26-draw ensemble on stisim rc1.5.7 with NG `beta_m2f` ∈ [0.020, 0.299]. Sustained NG only via the rel_treat NaN bug. Superseded by exp 04 once the bug was patched; kept for reference. 14/27 of exp 04's retained draws share `draw_idx` with exp 03 (these had NG β above the new effective floor).
-- `experiments/02_2026-06-22_calibration_per_disease_sustain/` — exp 02's 26-draw ensemble against the pre-BV-in-VDS model. Same priors + filter as exp 03; superseded but kept for reference. Note: zero overlap in retained `draw_idx` with exp 03 (the BV-in-VDS edit moves the passing region of the LHS hyper-cube).
-- `experiments/01_2026-06-15_calibration_rc1.5.7/` — 53-draw ensemble on the same model but with a syph-only sustainability filter. Superseded because 23/53 draws had NG or TV `beta_m2f` < 0.05, near the extinction threshold.
+- `experiments/05_2026-06-24_kseed_pilot/` — K=5 sim-averaging pilot that validated the single-phase framework against exp 04; small-N predecessor to exp 06.
+- `experiments/04_2026-06-23_ng_higher_beta_post_treatfix/` — 27-draw robust ensemble on stisim `fix/ng-tx`, NG `beta_m2f` ∈ [0.10, 0.60], two-phase LHS + sustainability filter. Superseded by exp 06's K=5 + continuous-GoF approach; kept for reference.
+- `experiments/03_2026-06-22_calibration_bv_in_vds/` — 26-draw ensemble on stisim rc1.5.7. Sustained NG only via the rel_treat NaN bug. Superseded.
+- `experiments/02_2026-06-22_calibration_per_disease_sustain/` — pre-BV-in-VDS ensemble. Superseded.
+- `experiments/01_2026-06-15_calibration_rc1.5.7/` — 53-draw ensemble with syph-only sustainability filter. Superseded.
 - 169-draw ensemble on `main` under `calibration/artifacts/` against an older stisim base. The 41-experiment development history is on the `archive/calibration-2026-06` tag.
 
-**Active work.** POC scenario factorial on the `scenarios/zimbabwe` branch, driven by root `run_scenarios.py`: `SOC` + `POC × CARE_SEEKING × PN_INTENSITY × BUNDLED_PREVENTION` (5×5×5 = 125, + SOC = 126 cells), propagated through the exp 04 27-draw ensemble (was exp 03's 26-draw before stisim treatment-fix), reporting the endpoints in `ANALYSIS_PLAN.md`. `SMOKE=1` runs a 6-cell wiring check.
+**Active work.** POC scenario factorial driven by root `run_scenarios.py`: `SOC` + `POC × CARE_SEEKING × PN_INTENSITY × BUNDLED_PREVENTION` (4×4×4 = 64 + SOC = **65 cells**, after collapsing ladders to baseline/low/moderate/high — exp 04 had 5×5×5 = 125 cells). Paired K=5 seeds (`seed = draw_idx*1000 + sub_idx`) match the exp 06 calibration so SOC reproduces the calibration's K=5 mean exactly. **Scenarios branch (`scenarios/zimbabwe`) merged to `main` as PR #7 on 2026-06-26.** First full run landed 2026-06-26: 65 cells × 5 draws × K=5 = 1625 sims (~2.5h on 80 workers). Outputs in `results/`; figures in `figures/`.
+
+## VM-only data files (note for the local agent)
+
+The full-run outputs in `results/` are large and not all committed to the repo. When working locally (Mac), be aware:
+
+- `results/scenarios.kavg.csv` (~340 KB) — **IS committed**. K=5-averaged scalar table, 65 cells × 5 draws = 325 rows. Source for any plot that only needs cumulative or endpoint metrics (e.g. `plot_validation_yield.py`, the bar panels in `plot_validation.py`).
+- `results/scenarios_timeseries.parquet` (~1.7 MB) — **NOT committed**, lives on the IDM Azure VM (this machine). Per-(cell, draw, year, disease, result_name) K-averaged TS. Source for `plot_layering.py`, `plot_layering_newinf.py`, `plot_epi.py`, the TS panels in `plot_validation.py`.
+- `results/scenarios_snapshots.parquet` (~880 KB) — **NOT committed**, VM only. Per-(cell, draw, year, age, sex, disease) K-averaged age × sex snapshots. Source for the age × sex panels in `plot_epi.py`.
+- `results/scenarios.jsonl` (~5.7 MB) — **NOT committed**, VM only. Per-sim raw scalars (regenerable from `run_scenarios.py`).
+
+If a plot script needs a parquet that isn't there locally, either `scp` it from the VM or rerun `run_scenarios.py` on the VM. The kavg CSV is enough for scalar/bar plots and for any plot that aggregates across draws into a single number per cell.
 
 ## Intake
 
