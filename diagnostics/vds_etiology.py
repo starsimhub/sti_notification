@@ -34,9 +34,8 @@ from model import make_sim                                            # noqa
 from interventions import ANC_PROBS_REALISTIC                         # noqa
 from analyzers import VDSEtiology                                     # noqa
 
-CALIB = REPO / 'experiments' / '03_2026-06-22_calibration_bv_in_vds' / 'outputs'
+CALIB = REPO / 'experiments' / '06_2026-06-24_kseed_calibration' / 'outputs'
 DRAWS = CALIB / 'draws_used.csv'
-ENS = CALIB / 'ensemble_summary.csv'
 FONT = '/Users/robynstuart/gf/syph_dx_zim/assets/LibertinusSans-Regular.otf'
 
 MARGINALS = VDSEtiology.MARGINALS
@@ -46,12 +45,8 @@ COMBOS = VDSEtiology.COMBOS
 def pick_draw():
     if os.environ.get('DRAW'):
         return int(os.environ['DRAW'])
-    used = pd.read_csv(DRAWS)
-    summ = pd.read_csv(ENS)
-    col = 'n_pass_mean' if 'n_pass_mean' in summ.columns else 'n_pass'
-    sel = (summ[summ.draw_idx.isin(used.draw_idx)][['draw_idx', col]]
-           .sort_values(col).reset_index(drop=True))
-    return int(sel.iloc[len(sel) // 2].draw_idx)
+    used = pd.read_csv(DRAWS).sort_values('retention_rank').reset_index(drop=True)
+    return int(used.iloc[len(used) // 2].draw_idx)
 
 
 def pooled(res, mask, key):

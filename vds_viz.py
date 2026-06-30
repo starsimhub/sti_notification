@@ -53,7 +53,7 @@ def upset(vds_prev, marg, combo):
     cols = [c for c in sorted(COMBOS, key=lambda c: combo[c], reverse=True) if combo[c] > 0]
     n = len(cols)
 
-    fig = pl.figure(figsize=(8.2, 4.6))
+    fig = pl.figure(figsize=(9.7, 5))
     gs = GridSpec(2, 2, width_ratios=[0.85, 5], height_ratios=[2.6, 1.5],
                   hspace=0.08, wspace=0.20, left=0.08, right=0.995, top=0.985, bottom=0.13)
     ax_bar = fig.add_subplot(gs[0, 1])
