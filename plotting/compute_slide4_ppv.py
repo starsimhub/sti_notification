@@ -4,12 +4,17 @@ for Slide 4.
 Sens/spec inputs come from three places:
 
 * NG / CT under SOC syndromic management: the female tx_mix in
-  ``scenarios.py`` — ``all3=0.40``, ``ngct=0.10``, ``mtnz=0.25``,
-  ``none=0.25`` (both cerv and noncerv strata use the same mix in this
-  project). NG treatment fires on ``all3 + ngct = 0.50`` regardless of
-  infection status, so sens = 1 - spec = 0.50 for both NG and CT.
+  ``interventions.py``. The cerv table (used when the woman IS
+  symptomatic for NG or CT) gives ``all3=0.50``, ``ngct=0.20``, so
+  ``P(treated for NG/CT | has NG/CT) = 0.70`` → sens = 0.70. The
+  noncerv table (used when she is NOT symptomatic for NG/CT) gives
+  ``all3=0.40``, ``ngct=0.10``, so ``P(treated for NG/CT | no NG/CT) =
+  0.50`` → 1 - spec = 0.50, spec = 0.50.
 * TV under SOC syndromic management: metronidazole fires on
-  ``all3 + mtnz = 0.65`` → sens = 0.65, spec = 0.35.
+  ``all3 + mtnz`` in either mix (cerv: 0.50+0.15=0.65; noncerv:
+  0.40+0.25=0.65), and metro-routing doesn't depend on TV status
+  itself, so sens_TV = spec_TV rate = 0.65 (i.e. sens = 0.65,
+  spec = 0.35).
 * POC panel (NG / CT / TV): ``interventions.py::POC_SENS = POC_SPEC = 0.95``.
 
 Syphilis follows a different pathway (RPR or dual RDT at ANC + PN, not
@@ -43,9 +48,9 @@ DISEASES = [('ng', 'Gonorrhoea'),
             ('syph', 'Syphilis')]
 
 SENS = {
-    ('SOC', 'ng'):   0.50,   # tx_mix: all3 + ngct
-    ('SOC', 'ct'):   0.50,   # same routing as NG
-    ('SOC', 'tv'):   0.65,   # tx_mix: all3 + mtnz (metronidazole)
+    ('SOC', 'ng'):   0.70,   # tx_mix_cerv: all3 (0.50) + ngct (0.20)
+    ('SOC', 'ct'):   0.70,   # NG/CT are co-routed
+    ('SOC', 'tv'):   0.65,   # tx_mix: all3 + mtnz in either mix
     ('SOC', 'syph'): 0.70,   # dual RDT, weighted across active stages
     ('POC', 'ng'):   0.95,   # POC_SENS
     ('POC', 'ct'):   0.95,
@@ -53,9 +58,9 @@ SENS = {
     ('POC', 'syph'): 0.90,   # RPR (syph_dx.csv, rows 44-50)
 }
 SPEC = {
-    ('SOC', 'ng'):   0.50,   # tx_mix: mtnz + none
+    ('SOC', 'ng'):   0.50,   # tx_mix_noncerv: 1 - (all3 0.40 + ngct 0.10)
     ('SOC', 'ct'):   0.50,
-    ('SOC', 'tv'):   0.35,   # tx_mix: ngct + none
+    ('SOC', 'tv'):   0.35,   # 1 - 0.65 metro rate
     ('SOC', 'syph'): 0.85,   # dual RDT weighted (naive 0.99 + cured 0.05)
     ('POC', 'ng'):   0.95,   # POC_SPEC
     ('POC', 'ct'):   0.95,
