@@ -89,7 +89,7 @@ def main():
     sn = pd.read_parquet(SNAP).query("cell == 'SOC' and year == @SNAP_YEAR")
     ndraws = ts.draw.nunique()
 
-    fig, axes = pl.subplots(2, 5, figsize=(9.7, 5))
+    fig, axes = pl.subplots(2, 5, figsize=(12.15, 5))
 
     # --- top row: prevalence TS by sex (median + range) + data ---
     for ax, d in zip(axes[0], DISEASES):
@@ -149,11 +149,11 @@ def main():
         if d == 'ng':
             ax.set_ylabel(f'prevalence (%), {SNAP_YEAR}', fontsize=8.5)
 
-    fig.text(0.5, 0.015,
-             f'SOC (syndromic) model, {ndraws} calibration draws: line/bar = median, band/whisker = range. '
-             'Diamonds = data (programme surveillance, ZIMPHIA). HIV age panel overlays ZIMPHIA 2016 + 2020; '
-             'syphilis age is treponemal. Model age panels at 2027.',
-             ha='center', fontsize=6.8, color='#666666')
+    # fig.text(0.5, 0.015,
+    #          f'SOC (syndromic) model, {ndraws} calibration draws: line/bar = median, band/whisker = range. '
+    #          'Diamonds = data (programme surveillance, ZIMPHIA). HIV age panel overlays ZIMPHIA 2016 + 2020; '
+    #          'syphilis age is treponemal. Model age panels at 2027.',
+    #          ha='center', fontsize=6.8, color='#666666')
     fig.subplots_adjust(left=0.06, right=0.995, top=0.93, bottom=0.13, wspace=0.32, hspace=0.42)
     p = FIGS / 'supplementary' / 'fig_epi_overview.png'
     p.parent.mkdir(parents=True, exist_ok=True)

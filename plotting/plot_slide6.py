@@ -128,9 +128,9 @@ def build_ts_grid_figure(k, ts, arms, arm_c, suptitle,
     # Subset the timeseries to only the arms we plot -- keeps memory + IO down
     ts_sub = ts[ts.cell.isin(arms.values())]
 
-    fig = pl.figure(figsize=(13, 6.4))
+    fig = pl.figure(figsize=(12.15, 5.08))
     outer = GridSpec(2, 4, figure=fig, left=0.065, right=0.985,
-                     top=0.82, bottom=0.10, hspace=0.42, wspace=0.32)
+                     top=0.92, bottom=0.10, hspace=0.42, wspace=0.32)
 
     for c, (d, dname) in enumerate(DISEASES):
         # Row 0: prevalence
@@ -161,13 +161,13 @@ def build_ts_grid_figure(k, ts, arms, arm_c, suptitle,
         if c == 0:
             ax_ts.set_ylabel('new infections / yr (M)', fontsize=10.5)
 
-    fig.suptitle(suptitle, fontsize=12.5, y=0.965)
-    caption = ('Ensemble of 5 calibrated draws (exp 06 top-5). '
-               'Lines = median across draws; bands = 25–75 IQR. '
-               'Vertical dashed line = intervention start (2027).')
-    if caption_note:
-        caption = caption + ' ' + caption_note
-    fig.text(0.5, 0.02, caption, ha='center', fontsize=8.5, color='#666666')
+    # fig.suptitle(suptitle, fontsize=12.5, y=0.965)
+    # caption = ('Ensemble of 5 calibrated draws (exp 06 top-5). '
+    #            'Lines = median across draws; bands = 25–75 IQR. '
+    #            'Vertical dashed line = intervention start (2027).')
+    # if caption_note:
+    #     caption = caption + ' ' + caption_note
+    # fig.text(0.5, 0.02, caption, ha='center', fontsize=8.5, color='#666666')
 
     FIGS.mkdir(exist_ok=True)
     p = FIGS / out_name

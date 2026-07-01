@@ -59,7 +59,7 @@ def per_disease_over_panel(ax, k, disease, fs=10):
     ax.set_ylim(0, 118)  # extra headroom so 95%+ labels don't clip
     ax.set_xticks([])
     ax.tick_params(axis='y', labelsize=fs - 1)
-    ax.spines[['top', 'right', 'bottom']].set_visible(False)
+    ax.spines[['top', 'right']].set_visible(False)
 
 
 def upset_riff_panel(ax, ot, fs=11):
@@ -135,8 +135,8 @@ def pn_summary_panel(ax, s, fs=11):
     ax.set_xticks([])
     ax.tick_params(axis='y', labelsize=fs - 2)
     ax.set_ylabel('male-partner notifs / year (M)', fontsize=fs - 1)
-    ax.set_title('...cascading into unwarranted PN', fontsize=fs + 2, pad=8)
-    ax.spines[['top', 'right', 'bottom']].set_visible(False)
+    ax.set_title('...cascading into\nunwarranted PN', fontsize=fs + 2, pad=8)
+    ax.spines[['top', 'right']].set_visible(False)
 
 
 def main():
@@ -151,10 +151,10 @@ def main():
     # inside the upset panel).
     ot['count'] = ot['count'] / YEARS
 
-    fig = pl.figure(figsize=(11.5, 7.2))
-    outer = GridSpec(2, 6, figure=fig, height_ratios=[1, 2.6],
+    fig = pl.figure(figsize=(8, 4.9))
+    outer = GridSpec(2, 6, figure=fig, height_ratios=[1.5, 2.6],
                      left=0.06, right=0.985, top=0.88, bottom=0.14,
-                     hspace=0.75, wspace=0.55)
+                     hspace=0.5, wspace=0.55)
 
     # Top strip: 4 per-disease over% panels (columns 1-4 of the 6-wide grid;
     # leaves columns 0 and 5 empty so the top row doesn't span the full width)
@@ -176,11 +176,11 @@ def main():
     fig.suptitle('Syndromic management (SOC) generates substantial '
                  'overtreatment and unwarranted partner notification',
                  fontsize=13, y=0.96)
-    fig.text(0.5, 0.03,
-             'Top: median across draws from scenarios.kavg.csv (SOC cell), 2027–40, female indices. '
-             'Bottom: SocOvertreatmentTracer (5 seeds, draw 263), 2027–40, VDS-presenting women; drugs '
-             '= ng_tx / ct_tx / metronidazole; STIs = NG / CT / TV / syph (BV excluded).',
-             ha='center', fontsize=8, color='#666666')
+    # fig.text(0.5, 0.03,
+    #          'Top: median across draws from scenarios.kavg.csv (SOC cell), 2027–40, female indices. '
+    #          'Bottom: SocOvertreatmentTracer (5 seeds, draw 263), 2027–40, VDS-presenting women; drugs '
+    #          '= ng_tx / ct_tx / metronidazole; STIs = NG / CT / TV / syph (BV excluded).',
+    #          ha='center', fontsize=8, color='#666666')
 
     FIGS.mkdir(exist_ok=True)
     p = FIGS / 'fig_slide3.png'

@@ -33,10 +33,10 @@ def main():
     # 4.25 x 5.88 inches -- portrait. Bars on top (larger), matrix + set on
     # bottom. Bar row taller than matrix row for readability of the tall
     # first bar (~62% BV-only).
-    fig = pl.figure(figsize=(4.25, 5.88))
+    fig = pl.figure(figsize=(5.88, 4.25))
     gs = GridSpec(2, 2, figure=fig,
                   width_ratios=[0.85, 5], height_ratios=[3.6, 1.6],
-                  left=0.16, right=0.985, top=0.94, bottom=0.11,
+                  left=0.01, right=0.985, top=0.94, bottom=0.11,
                   hspace=0.06, wspace=0.14)
     ax_bar = fig.add_subplot(gs[0, 1])
     ax_mat = fig.add_subplot(gs[1, 1], sharex=ax_bar)
