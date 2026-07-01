@@ -41,13 +41,19 @@ conda run -n starsim env N_DRAWS=5 N_SEEDS=5 N_WORKERS=80 python run_scenarios.p
 | `scenarios.py` | The three scenario ladders: `CARE_SEEKING`, `PN_INTENSITY`, `BUNDLED_PREVENTION` |
 | `run_scenarios.py` | **Scenario driver**: SOC + POC 3-factor full factorial over the calibrated ensemble |
 | `experiments/` | **Calibrations only** (dated, sequential): `01_2026-06-15_…` through `06_2026-06-24_kseed_calibration/` (active baseline) |
-| `figures/` | Scenario figures (PNGs); generating scripts at repo root (`plot_*.py`) |
-| `results/` | Scenario run outputs. `scenarios.kavg.csv` (K=5-averaged scalars) committed; per-sim `scenarios.jsonl` + time-series / snapshot parquets are VM-only — see [CLAUDE.md](CLAUDE.md) §"VM-only data files" |
+| `plotting/` | Deck plotting scripts (`plot_slide3.py` … `plot_slide13.py` + shared helpers). See [plotting/README.md](plotting/README.md) |
+| `exploratory/` | Superseded / one-off plot + analysis scripts. See [exploratory/README.md](exploratory/README.md) |
+| `figures/` | Deck slide PNGs at the top level; `figures/archive/` = superseded exploratory figures; `figures/supplementary/` = supplementary materials |
+| `results/` | Scenario run outputs. `scenarios.kavg.csv` (K=5-averaged scalars) + `specificity.csv` + `soc_overtreatment.csv` committed; per-sim `scenarios.jsonl` + time-series / snapshot parquets are VM-only — see [CLAUDE.md](CLAUDE.md) §"VM-only data files" |
 | `archive/` | Superseded exploratory experiments (PN/condom ladders, wiring/story runs) |
 | `data/` | Zimbabwe demographic + initial-prevalence CSVs |
+| `diagnostics/` | Analysis / instrumentation scripts (`specificity_tracer.py`, `vds_etiology.py`) that produce derived CSVs for the deck plots |
 | `ANALYSIS_PLAN.md` | Scope, levers, factorial design, endpoints |
 
-Convention: only **calibration** runs live under `experiments/` (each its own dated folder, with figures in that folder). Scenario runs go through the single root `run_scenarios.py`; their figures live in `figures/`.
+Conventions:
+- **Calibration** runs live under `experiments/` (each its own dated folder, with figures in that folder).
+- **Scenario** runs go through the single root `run_scenarios.py`; the deck figures live in `figures/`.
+- **Plotting** scripts live in `plotting/`; run them from the repo root (`conda run -n starsim python plotting/plot_slide6.py`).
 
 ## Scenario design
 

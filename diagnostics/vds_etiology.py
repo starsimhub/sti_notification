@@ -117,7 +117,8 @@ def main():
              'Marginals overlap (coinfection); combinations partition the VDS population.',
              ha='center', fontsize=7.5, color='#666666')
     fig.subplots_adjust(left=0.09, right=0.985, top=0.9, bottom=0.13, wspace=0.3)
-    p = REPO / 'figures' / 'diag_vds_etiology.png'
+    p = REPO / 'figures' / 'archive' / 'diag_vds_etiology.png'
+    p.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(p, dpi=200)
     print(f'\nSaved {p}\nSaved {OUT / "vds_etiology.csv"}')
 

@@ -31,12 +31,13 @@ work (PN/condom ladders, wiring + story runs) is under `archive/`.
 
 The full-run outputs in `results/` are large and not all committed to the repo. When working locally (Mac), be aware:
 
-- `results/scenarios.kavg.csv` (~340 KB) — **IS committed**. K=5-averaged scalar table, 65 cells × 5 draws = 325 rows. Source for any plot that only needs cumulative or endpoint metrics (e.g. `plot_validation_yield.py`, the bar panels in `plot_validation.py`).
-- `results/scenarios_timeseries.parquet` (~1.7 MB) — **NOT committed**, lives on the IDM Azure VM (this machine). Per-(cell, draw, year, disease, result_name) K-averaged TS. Source for `plot_layering.py`, `plot_layering_newinf.py`, `plot_epi.py`, the TS panels in `plot_validation.py`.
-- `results/scenarios_snapshots.parquet` (~880 KB) — **NOT committed**, VM only. Per-(cell, draw, year, age, sex, disease) K-averaged age × sex snapshots. Source for the age × sex panels in `plot_epi.py`.
+- `results/scenarios.kavg.csv` (~340 KB) — **IS committed**. K=5-averaged scalar table, 65 cells × 5 draws = 325 rows. Source for any deck plot that only needs cumulative or endpoint metrics (`plotting/plot_slide{3,5,12,13}.py`; the endpoint-bar insets in slides 6/9/10/11; the exploratory `plot_validation*.py` bars).
+- `results/scenarios_timeseries.parquet` (~1.7 MB) — **NOT committed**, lives on the IDM Azure VM. Per-(cell, draw, year, disease, result_name) K-averaged TS. Source for the deck time-series panels: `plotting/plot_slide{6,9,10,11}.py`. Also `exploratory/plot_layering*.py`, `plot_epi.py`, `plot_validation.py`.
+- `results/scenarios_snapshots.parquet` (~880 KB) — **NOT committed**, VM only. Per-(cell, draw, year, age, sex, disease) K-averaged age × sex snapshots. Source for the age × sex panels in `exploratory/plot_epi.py`.
 - `results/scenarios.jsonl` (~5.7 MB) — **NOT committed**, VM only. Per-sim raw scalars (regenerable from `run_scenarios.py`).
+- `results/specificity.csv`, `results/soc_overtreatment.csv` — **IS committed**. Person-level SOC vs POC treatment/PN over-rates + (n_drugs, n_actual_STIs) contingency for VDS presenters. Produced by `diagnostics/specificity_tracer.py`. Feed slides 3 + 5.
 
-If a plot script needs a parquet that isn't there locally, either `scp` it from the VM or rerun `run_scenarios.py` on the VM. The kavg CSV is enough for scalar/bar plots and for any plot that aggregates across draws into a single number per cell.
+If a deck plot needs a parquet that isn't there locally, either `scp` it from the VM or rerun `run_scenarios.py` on the VM. The kavg CSV is enough for scalar/bar-only plots.
 
 ## Intake
 
