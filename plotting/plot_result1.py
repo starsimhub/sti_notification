@@ -18,7 +18,7 @@ import matplotlib.pyplot as pl
 import matplotlib.patches as mpatches
 from matplotlib.gridspec import GridSpec, GridSpecFromSubplotSpec
 
-REPO = Path(__file__).resolve().parent
+REPO = Path(__file__).resolve().parent.parent
 KAVG = REPO / 'results' / 'scenarios.kavg.csv'
 SPEC = REPO / 'results' / 'specificity.csv'
 VDS_CSV = REPO / 'results' / 'vds_etiology.csv'
@@ -218,8 +218,11 @@ def main():
     #          f'Right: draw 68, VDS prev {vds_prev:.0%}.',
     #          ha='center', fontsize=8, color='#666666')
 
-    FIGS.mkdir(exist_ok=True)
-    p = FIGS / 'fig_result1.png'
+    # Superseded by plot_slide5 (grid) + plot_slide4_etiology (upset) for the
+    # deck; the standalone figure lives in figures/archive/.
+    out_dir = FIGS / 'archive'
+    out_dir.mkdir(parents=True, exist_ok=True)
+    p = out_dir / 'fig_result1.png'
     fig.savefig(p, dpi=200)
     print('wrote', p)
 

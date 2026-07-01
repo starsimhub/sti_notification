@@ -26,7 +26,7 @@ import sciris as sc
 import matplotlib.pyplot as pl
 from matplotlib.gridspec import GridSpec
 
-REPO = Path(__file__).resolve().parent
+REPO = Path(__file__).resolve().parent.parent
 KAVG = REPO / 'results' / 'scenarios.kavg.csv'
 SPEC = REPO / 'results' / 'specificity.csv'
 SOC_OT = REPO / 'results' / 'soc_overtreatment.csv'

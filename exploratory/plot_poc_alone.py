@@ -27,7 +27,7 @@ import sciris as sc
 import matplotlib.pyplot as pl
 import matplotlib.patches as mpatches
 
-REPO = Path(__file__).resolve().parent
+REPO = Path(__file__).resolve().parent.parent
 KAVG = REPO / 'results' / 'scenarios.kavg.csv'
 FIGS = REPO / 'figures'
 FONT = '/Users/robynstuart/gf/syph_dx_zim/assets/LibertinusSans-Regular.otf'
@@ -146,8 +146,8 @@ def main():
              'Bars = median across draws, whiskers = 25-75 IQR.',
              ha='center', fontsize=8.5, color='#666666')
 
-    FIGS.mkdir(exist_ok=True)
-    p = FIGS / 'fig_poc_alone.png'
+    p = FIGS / 'archive' / 'fig_poc_alone.png'
+    p.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(p, dpi=200)
     print('wrote', p)
 

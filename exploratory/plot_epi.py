@@ -20,7 +20,7 @@ import pandas as pd
 import sciris as sc
 import matplotlib.pyplot as pl
 
-REPO = Path(__file__).resolve().parent
+REPO = Path(__file__).resolve().parent.parent
 FIGS = REPO / 'figures'
 TS = REPO / 'results' / 'scenarios_timeseries.parquet'
 SNAP = REPO / 'results' / 'scenarios_snapshots.parquet'
@@ -155,7 +155,8 @@ def main():
              'syphilis age is treponemal. Model age panels at 2027.',
              ha='center', fontsize=6.8, color='#666666')
     fig.subplots_adjust(left=0.06, right=0.995, top=0.93, bottom=0.13, wspace=0.32, hspace=0.42)
-    p = FIGS / 'fig_epi_overview.png'
+    p = FIGS / 'supplementary' / 'fig_epi_overview.png'
+    p.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(p, dpi=200)
     print('wrote', p)
 

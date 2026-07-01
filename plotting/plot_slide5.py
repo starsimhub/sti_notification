@@ -28,7 +28,7 @@ from matplotlib.gridspec import GridSpec, GridSpecFromSubplotSpec
 from plot_result1 import (precision_panel, specificity_panel,
                           ARMS, ARM_C, DISEASES, SCALE, YEARS, FONT)
 
-REPO = Path(__file__).resolve().parent
+REPO = Path(__file__).resolve().parent.parent
 KAVG = REPO / 'results' / 'scenarios.kavg.csv'
 SPEC = REPO / 'results' / 'specificity.csv'
 FIGS = REPO / 'figures'

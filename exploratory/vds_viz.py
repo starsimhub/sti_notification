@@ -16,7 +16,7 @@ import sciris as sc
 import matplotlib.pyplot as pl
 from matplotlib.gridspec import GridSpec
 
-REPO = Path(__file__).resolve().parent
+REPO = Path(__file__).resolve().parent.parent
 FIGS = REPO / 'figures'
 CSV = REPO / 'results' / 'vds_etiology.csv'
 FONT = '/Users/robynstuart/gf/syph_dx_zim/assets/LibertinusSans-Regular.otf'
@@ -98,7 +98,8 @@ def upset(vds_prev, marg, combo):
     fig.text(0.5, 0.02, f'Vaginal-discharge prevalence {vds_prev:.0%} of women. '
              'Bars: share of VDS women in each mutually-exclusive infection set; left: carriage of each pathogen.',
              ha='center', fontsize=7.5, color='#666666')
-    p = FIGS / 'fig_vds_upset.png'
+    p = FIGS / 'archive' / 'fig_vds_upset.png'
+    p.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(p, dpi=200, bbox_inches='tight', pad_inches=0.06)
     print('wrote', p)
 
@@ -149,7 +150,8 @@ def burden(vds_prev, marg, combo):
     fig.text(0.5, 0.02, f'Single calibrated draw, women 15-49, syndromic arm. VDS prevalence {vds_prev:.0%}.',
              ha='center', fontsize=7.5, color='#666666')
     fig.subplots_adjust(left=0.07, right=0.985, top=0.92, bottom=0.12, wspace=0.25)
-    p = FIGS / 'fig_vds_burden.png'
+    p = FIGS / 'archive' / 'fig_vds_burden.png'
+    p.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(p, dpi=200)
     print('wrote', p)
 
@@ -178,7 +180,8 @@ def cooccur(vds_prev, marg, combo):
     fig.text(0.5, 0.03, 'Among VDS women: diagonal = carriage of each pathogen; '
              'off-diagonal = both present.', ha='center', fontsize=7.5, color='#666666')
     fig.subplots_adjust(left=0.10, right=0.99, top=0.99, bottom=0.12)
-    p = FIGS / 'fig_vds_cooccur.png'
+    p = FIGS / 'archive' / 'fig_vds_cooccur.png'
+    p.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(p, dpi=200, bbox_inches='tight', pad_inches=0.06)
     print('wrote', p)
 

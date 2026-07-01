@@ -22,8 +22,10 @@ import pandas as pd
 import matplotlib.pyplot as pl
 
 FONT = '/Users/robynstuart/gf/syph_dx_zim/assets/LibertinusSans-Regular.otf'
+# Paths below are relative to repo root; run this script from the repo root.
 REINF_CSV = 'archive/04_soc_vs_poc_pn_wiring/outputs/chains_A.csv'
-FIGURES_DIR = 'figures'
+FIGURES_DIR = 'figures'  # fig_cascades_4panel_soc.png (Slide 1)
+FIGURES_ARCHIVE = 'figures/archive'  # secondary cascade figures (superseded)
 
 BAR_COLOR = '#4a90d9'
 LOSS_COLOR = '#dddddd'
@@ -180,7 +182,7 @@ if __name__ == '__main__':
              f'reinfection {p_reinf:.0%} measured (exp 04). Preliminary: draw 773, single seed.',
              fontsize=11, color='#888888', ha='left')
     pl.tight_layout()
-    out = f'{FIGURES_DIR}/fig_cascade_ct_soc.png'
+    out = f'{FIGURES_ARCHIVE}/fig_cascade_ct_soc.png'
     pl.savefig(out, dpi=200, bbox_inches='tight')
     print(f'CT cured-at-12mo per 100 incident: {steps[-1]:.1f}')
     print(f'Saved {out}')
@@ -204,6 +206,6 @@ if __name__ == '__main__':
              'split requires the etiology mix of VDS presenters (ensemble). Preliminary: draw 773.',
              fontsize=11, color='#888888', ha='left')
     pl.tight_layout()
-    out2 = f'{FIGURES_DIR}/fig_cascade_vds_soc.png'
+    out2 = f'{FIGURES_ARCHIVE}/fig_cascade_vds_soc.png'
     pl.savefig(out2, dpi=200, bbox_inches='tight')
     print(f'Saved {out2}')

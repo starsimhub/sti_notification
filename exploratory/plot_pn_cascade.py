@@ -185,7 +185,7 @@ def main():
              'at each cascade step', ha='center', fontsize=7, color='#888')
 
     FIG.mkdir(parents=True, exist_ok=True)
-    p = FIG / 'fig_pn_cascade.png'
+    p = FIG / 'archive' / 'fig_pn_cascade.png'; p.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(p, dpi=200)
     plt.close(fig)
     print(f'wrote {p}')

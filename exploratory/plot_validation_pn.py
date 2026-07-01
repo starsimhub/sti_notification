@@ -24,7 +24,7 @@ import pandas as pd
 import sciris as sc
 import matplotlib.pyplot as pl
 
-REPO = Path(__file__).resolve().parent
+REPO = Path(__file__).resolve().parent.parent
 KAVG = REPO / 'results' / 'scenarios_smoke.kavg.csv'
 FIG_DIR = REPO / 'figures'
 FONT = '/Users/robynstuart/gf/syph_dx_zim/assets/LibertinusSans-Regular.otf'
@@ -133,7 +133,7 @@ def main():
              ha='center', fontsize=6.6, color='#666')
     fig.subplots_adjust(left=0.075, right=0.99, top=0.92, bottom=0.085,
                         wspace=0.32, hspace=0.5)
-    out = FIG_DIR / 'fig_validation_pn_cascade.png'
+    out = FIG_DIR / 'archive' / 'fig_validation_pn_cascade.png'; out.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out, dpi=200)
     print(f'wrote {out}')
 

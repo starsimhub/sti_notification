@@ -25,7 +25,7 @@ import sciris as sc
 import matplotlib.pyplot as pl
 from matplotlib.gridspec import GridSpec, GridSpecFromSubplotSpec
 
-REPO = Path(__file__).resolve().parent
+REPO = Path(__file__).resolve().parent.parent
 KAVG = REPO / 'results' / 'scenarios.kavg.csv'
 TS = REPO / 'results' / 'scenarios_timeseries.parquet'
 FIGS = REPO / 'figures'

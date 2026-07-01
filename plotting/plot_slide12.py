@@ -26,7 +26,7 @@ import matplotlib.pyplot as pl
 import matplotlib.patches as mpatches
 from matplotlib.gridspec import GridSpec
 
-REPO = Path(__file__).resolve().parent
+REPO = Path(__file__).resolve().parent.parent
 KAVG = REPO / 'results' / 'scenarios.kavg.csv'
 FIGS = REPO / 'figures'
 FONT = '/Users/robynstuart/gf/syph_dx_zim/assets/LibertinusSans-Regular.otf'

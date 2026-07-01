@@ -9,7 +9,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-REPO = Path(__file__).resolve().parent
+REPO = Path(__file__).resolve().parent.parent
 sys.path[:0] = [str(REPO), str(REPO / 'calibration/artifacts/scripts')]
 os.chdir(REPO)
 from _pipeline import row_to_sim_pars, set_pars_local, SYMP_TEST_CSV

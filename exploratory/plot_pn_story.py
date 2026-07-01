@@ -17,7 +17,7 @@ import pandas as pd
 import sciris as sc
 import matplotlib.pyplot as pl
 
-REPO = Path(__file__).resolve().parent
+REPO = Path(__file__).resolve().parent.parent
 FIGS = REPO / 'figures'
 JSON = REPO / 'results' / 'pn_story.json'
 PC = REPO / 'results' / 'pn_partner_counts.csv'
@@ -116,7 +116,8 @@ def main():
              'Under-notification (most index cases reach no partner) dominates; over-events are the syndromic false-positive burden.',
              ha='center', fontsize=7, color='#666666')
     fig.subplots_adjust(left=0.07, right=0.985, top=0.95, bottom=0.16, wspace=0.32)
-    p = FIGS / 'fig_pn_story_grounding.png'
+    p = FIGS / 'supplementary' / 'fig_pn_story_grounding.png'
+    p.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(p, dpi=200)
     print('wrote', p)
 

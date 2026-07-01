@@ -16,7 +16,7 @@ import pandas as pd
 import sciris as sc
 import matplotlib.pyplot as pl
 
-REPO = Path(__file__).resolve().parent
+REPO = Path(__file__).resolve().parent.parent
 FIGS = REPO / 'figures'
 TS = REPO / 'results' / 'scenarios_timeseries.parquet'
 FONT = '/Users/robynstuart/gf/syph_dx_zim/assets/LibertinusSans-Regular.otf'
@@ -88,8 +88,10 @@ def figure(fname, lines_for, ref_labels, footnote, prev, ndraws):
                fontsize=8.5, loc='upper center', bbox_to_anchor=(0.5, 1.0))
     fig.text(0.5, 0.02, footnote, ha='center', fontsize=7.5, color='#666666')
     fig.subplots_adjust(left=0.07, right=0.99, top=0.9, bottom=0.11, wspace=0.18, hspace=0.28)
-    fig.savefig(FIGS / fname, dpi=200)
-    print('wrote', FIGS / fname)
+    out = FIGS / 'archive' / fname
+    out.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(out, dpi=200)
+    print('wrote', out)
 
 
 def main():

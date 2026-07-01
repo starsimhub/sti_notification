@@ -21,7 +21,7 @@ import pandas as pd
 import sciris as sc
 import matplotlib.pyplot as pl
 
-REPO = Path(__file__).resolve().parent
+REPO = Path(__file__).resolve().parent.parent
 TS = REPO / 'results' / 'scenarios_smoke_timeseries.parquet'
 KAVG = REPO / 'results' / 'scenarios_smoke.kavg.csv'
 FIG_DIR = REPO / 'figures'
@@ -148,7 +148,7 @@ def main():
              ha='center', fontsize=6.4, color='#666')
     fig.subplots_adjust(left=0.07, right=0.99, top=0.97, bottom=0.045,
                         wspace=0.32, hspace=0.45)
-    out = FIG_DIR / 'fig_validation_overview.png'
+    out = FIG_DIR / 'archive' / 'fig_validation_overview.png'; out.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out, dpi=200)
     print(f'wrote {out}')
 
