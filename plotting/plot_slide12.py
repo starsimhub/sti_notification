@@ -155,7 +155,7 @@ def main():
 
     fig = pl.figure(figsize=(15, 11.5))
     outer = GridSpec(4, 1, figure=fig, height_ratios=[3, 3, 3, 1.4],
-                     left=0.055, right=0.99, top=0.88, bottom=0.06,
+                     left=0.055, right=0.99, top=0.95, bottom=0.06,
                      hspace=0.75)
 
     row_specs = [outer[r].subgridspec(1, 4, wspace=0.30) for r in range(3)]
@@ -181,18 +181,12 @@ def main():
     # Row 4: aggregate over-notification strip
     draw_over_notif_strip(fig, outer[3], k)
 
-    fig.suptitle('All metrics across the 11 layered scenarios',
-                 fontsize=14, y=0.960)
-    fig.text(0.5, 0.930,
-             'Rows 1-3 are per-disease (prev / incidence / over-tx + under-tx). '
-             'Bottom strip: aggregate over-notification (PN false-alarm rate).',
-             ha='center', fontsize=9.5, color='#666', style='italic')
     # Global legend for over-tx vs under-tx (row 3)
     fig.legend(handles=[
         mpatches.Patch(facecolor='#666', alpha=OVER_C_A, label='over-treatment'),
         mpatches.Patch(facecolor='#666', alpha=OVER_C_B, label='under-treatment'),
     ], fontsize=9, frameon=False, loc='upper right',
-        bbox_to_anchor=(0.99, 0.955),
+        bbox_to_anchor=(0.99, 0.99),
         handlelength=1.2, handletextpad=0.4, ncol=2)
 
     FIGS.mkdir(exist_ok=True)

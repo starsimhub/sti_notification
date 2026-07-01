@@ -116,22 +116,27 @@ def draw_endpoint_bar(ax, k, disease, col, arms, arm_c,
     ax.spines[['top', 'right']].set_visible(False)
 
 
-def build_ts_grid_figure(k, ts, arms, arm_c, suptitle,
-                         caption_note=None, out_name='fig.png'):
+def build_ts_grid_figure(k, ts, arms, arm_c, out_name='fig.png'):
     """2 rows x 4 disease columns, each cell = TS + endpoint bar.
 
     Row 0: prevalence.  Row 1: new_infections/yr (trimmed to 2039).
+
+    Legend placement adapts to the number of arms: 2 arms (slide 6) fit
+    inline in the NG-prevalence panel; more arms (slides 9-11) go below
+    the figure so they don't obscure the time-series lines.
     """
     sc.fonts(add=FONT)
     sc.options(font='Libertinus Sans', fontsize=11)
 
-    # Subset the timeseries to only the arms we plot -- keeps memory + IO down
     ts_sub = ts[ts.cell.isin(arms.values())]
+    inline_legend = len(arms) <= 2
+    fig_bottom = 0.10 if inline_legend else 0.18
 
     fig = pl.figure(figsize=(12.15, 5.08))
     outer = GridSpec(2, 4, figure=fig, left=0.065, right=0.985,
-                     top=0.92, bottom=0.10, hspace=0.42, wspace=0.32)
+                     top=0.92, bottom=fig_bottom, hspace=0.42, wspace=0.32)
 
+    ax_ts_ng_prev = None
     for c, (d, dname) in enumerate(DISEASES):
         # Row 0: prevalence
         inner_p = GridSpecFromSubplotSpec(1, 2, subplot_spec=outer[0, c],
@@ -145,8 +150,7 @@ def build_ts_grid_figure(k, ts, arms, arm_c, suptitle,
         ax_bar.set_title('2040', fontsize=9, pad=3, color='#666')
         if c == 0:
             ax_ts.set_ylabel('prevalence', fontsize=10.5)
-            ax_ts.legend(fontsize=8.5, frameon=False, loc='upper left',
-                         labelspacing=0.15, handlelength=1.4)
+            ax_ts_ng_prev = ax_ts
 
         # Row 1: incidence (trimmed to 2039 to avoid end-year artefact)
         inner_i = GridSpecFromSubplotSpec(1, 2, subplot_spec=outer[1, c],
@@ -161,13 +165,15 @@ def build_ts_grid_figure(k, ts, arms, arm_c, suptitle,
         if c == 0:
             ax_ts.set_ylabel('new infections / yr (M)', fontsize=10.5)
 
-    # fig.suptitle(suptitle, fontsize=12.5, y=0.965)
-    # caption = ('Ensemble of 5 calibrated draws (exp 06 top-5). '
-    #            'Lines = median across draws; bands = 25–75 IQR. '
-    #            'Vertical dashed line = intervention start (2027).')
-    # if caption_note:
-    #     caption = caption + ' ' + caption_note
-    # fig.text(0.5, 0.02, caption, ha='center', fontsize=8.5, color='#666666')
+    if inline_legend:
+        ax_ts_ng_prev.legend(fontsize=8.5, frameon=False, loc='upper left',
+                             labelspacing=0.15, handlelength=1.4)
+    else:
+        handles, labels = ax_ts_ng_prev.get_legend_handles_labels()
+        fig.legend(handles, labels, fontsize=9, frameon=False,
+                   loc='lower center', ncol=len(arms),
+                   bbox_to_anchor=(0.5, 0.01),
+                   handlelength=1.6, handletextpad=0.5, columnspacing=1.6)
 
     FIGS.mkdir(exist_ok=True)
     p = FIGS / out_name
@@ -181,12 +187,7 @@ def main():
     ARM_C = {'SOC': '#555555', 'POC': '#e6772d'}
     k = pd.read_csv(KAVG)
     ts = pd.read_parquet(TS)
-    build_ts_grid_figure(
-        k, ts, ARMS, ARM_C,
-        suptitle=('POC diagnostics alone do not reduce prevalence or '
-                  'incidence — trajectories continue upward under both arms'),
-        out_name='fig_slide6.png',
-    )
+    build_ts_grid_figure(k, ts, ARMS, ARM_C, out_name='fig_slide6.png')
 
 
 if __name__ == '__main__':

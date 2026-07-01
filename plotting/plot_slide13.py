@@ -168,18 +168,7 @@ def main():
     ax.spines[['top', 'right']].set_visible(False)
     ax.grid(axis='x', ls=':', color='#ccc', lw=0.5, zorder=0)
 
-    fig.suptitle('Optimistic-realistic scenario: reductions vs. SOC baseline',
-                 fontsize=13.5, y=0.975)
-    fig.text(0.5, 0.930,
-             'Best-case = POC + care-seeking moderate + PN moderate + '
-             'bundled prevention moderate.',
-             ha='center', fontsize=9.5, color='#666', style='italic')
-    fig.text(0.5, 0.02,
-             'Values = median across 5 draws from scenarios.kavg.csv. '
-             'Under-notification not directly instrumented in this run; would '
-             'require a tracer extension.',
-             ha='center', fontsize=8.5, color='#666666')
-    fig.subplots_adjust(left=0.32, right=0.94, top=0.88, bottom=0.11)
+    fig.subplots_adjust(left=0.32, right=0.94, top=0.96, bottom=0.07)
 
     FIGS.mkdir(exist_ok=True)
     p = FIGS / 'fig_slide13.png'

@@ -30,14 +30,7 @@ ARM_C = {
 def main():
     k = pd.read_csv(KAVG)
     ts = pd.read_parquet(TS)
-    build_ts_grid_figure(
-        k, ts, ARMS, ARM_C,
-        suptitle=('Layering bundled prevention onto POC + moderate '
-                  'partner notification'),
-        caption_note=('PN held at moderate; care-seeking at baseline. '
-                      'Endpoint bar order: S=SOC, P=POC+PN mod, +L/M/H=+BP low/mod/high.'),
-        out_name='fig_slide10.png',
-    )
+    build_ts_grid_figure(k, ts, ARMS, ARM_C, out_name='fig_slide10.png')
 
 
 if __name__ == '__main__':

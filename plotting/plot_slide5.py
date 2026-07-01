@@ -78,7 +78,7 @@ def main():
 
     fig = pl.figure(figsize=(11, 6.0))
     outer = GridSpec(1, 2, figure=fig, width_ratios=[6.2, 2.6],
-                     left=0.055, right=0.985, top=0.86, bottom=0.08,
+                     left=0.055, right=0.985, top=0.94, bottom=0.08,
                      wspace=0.22)
     left_gs = GridSpecFromSubplotSpec(3, 2, subplot_spec=outer[0],
                                       hspace=0.65, wspace=0.42)
@@ -126,16 +126,13 @@ def main():
     fig.text(0.678, 0.28, '→', ha='center', va='center', fontsize=26,
              color='#999')
 
-    # Legend (R1 style)
+    # Legend at the top of the right-hand PN panel (R1 style patches).
     h = [mpatches.Patch(facecolor='#888', edgecolor='none'),
          mpatches.Patch(facecolor='#888', alpha=0.28, edgecolor='none')]
-    fig.legend(h, ['warranted', 'unnecessary'], fontsize=9, frameon=False,
-               loc='upper right', bbox_to_anchor=(0.995, 1.0), ncol=2,
-               handlelength=1.0, handletextpad=0.4)
-
-    fig.suptitle('POC diagnostics improve correct-treatment rates but '
-                 'cannot eliminate over-treatment or over-notification',
-                 fontsize=12.5, y=0.965, x=0.42, ha='center')
+    ax_pn.legend(h, ['warranted', 'unnecessary'], fontsize=9, frameon=False,
+                 loc='upper right', ncol=1,
+                 handlelength=1.0, handletextpad=0.4,
+                 labelspacing=0.2)
 
     FIGS.mkdir(exist_ok=True)
     p = FIGS / 'fig_slide5.png'
