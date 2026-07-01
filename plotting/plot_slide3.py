@@ -31,7 +31,7 @@ KAVG = REPO / 'results' / 'scenarios.kavg.csv'
 SPEC = REPO / 'results' / 'specificity.csv'
 SOC_OT = REPO / 'results' / 'soc_overtreatment.csv'
 FIGS = REPO / 'figures'
-FONT = '/Users/robynstuart/gf/syph_dx_zim/assets/LibertinusSans-Regular.otf'
+FONT = str(REPO / 'assets' / 'LibertinusSans-Regular.otf')
 
 # R1 palette. SOC = gray. STI-count stack: light -> dark grays with clearer
 # separation than default so 0/1/2+ read distinctly.

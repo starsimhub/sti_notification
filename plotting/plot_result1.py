@@ -23,7 +23,7 @@ KAVG = REPO / 'results' / 'scenarios.kavg.csv'
 SPEC = REPO / 'results' / 'specificity.csv'
 VDS_CSV = REPO / 'results' / 'vds_etiology.csv'
 FIGS = REPO / 'figures'
-FONT = '/Users/robynstuart/gf/syph_dx_zim/assets/LibertinusSans-Regular.otf'
+FONT = str(REPO / 'assets' / 'LibertinusSans-Regular.otf')
 
 DARK, UDOT = '#2c3e50', '#d7dbe0'
 

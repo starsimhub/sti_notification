@@ -30,7 +30,7 @@ import matplotlib.pyplot as pl
 REPO = Path(__file__).resolve().parent.parent
 KAVG = REPO / 'results' / 'scenarios.kavg.csv'
 FIGS = REPO / 'figures'
-FONT = '/Users/robynstuart/gf/syph_dx_zim/assets/LibertinusSans-Regular.otf'
+FONT = str(REPO / 'assets' / 'LibertinusSans-Regular.otf')
 
 SOC_CELL = 'SOC'
 BEST_CELL = 'POC_c-moderate_p-moderate_b-moderate'

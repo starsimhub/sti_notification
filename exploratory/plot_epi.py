@@ -24,7 +24,7 @@ REPO = Path(__file__).resolve().parent.parent
 FIGS = REPO / 'figures'
 TS = REPO / 'results' / 'scenarios_timeseries.parquet'
 SNAP = REPO / 'results' / 'scenarios_snapshots.parquet'
-FONT = '/Users/robynstuart/gf/syph_dx_zim/assets/LibertinusSans-Regular.otf'
+FONT = str(REPO / 'assets' / 'LibertinusSans-Regular.otf')
 
 DISEASES = ['ng', 'ct', 'tv', 'syph', 'hiv']
 DNAME = {'ng': 'Gonorrhoea', 'ct': 'Chlamydia', 'tv': 'Trichomoniasis',
