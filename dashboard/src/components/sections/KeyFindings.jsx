@@ -64,6 +64,14 @@ export default function KeyFindings() {
     soc: medianOf(soc, (r) => getMetricValue(r, { disease: 'tv', metric: 'prevalence' })),
     poc: medianOf(pocCareHigh, (r) => getMetricValue(r, { disease: 'tv', metric: 'prevalence' })),
   };
+  const ctPrevCare = {
+    soc: medianOf(soc, (r) => getMetricValue(r, { disease: 'ct', metric: 'prevalence' })),
+    poc: medianOf(pocCareHigh, (r) => getMetricValue(r, { disease: 'ct', metric: 'prevalence' })),
+  };
+  const syphPrevCare = {
+    soc: medianOf(soc, (r) => getMetricValue(r, { disease: 'syph', metric: 'prevalence' })),
+    poc: medianOf(pocCareHigh, (r) => getMetricValue(r, { disease: 'syph', metric: 'prevalence' })),
+  };
 
   return (
     <section id="findings" className="py-16">
@@ -89,6 +97,8 @@ export default function KeyFindings() {
           </FindingCard>
           <FindingCard number={5} title="Adding demand generation pushes trichomoniasis, syphilis, and chlamydia toward elimination">
             <p>Trichomoniasis prevalence: {pct(tvPrevCare.soc)} (SOC) → {pct(tvPrevCare.poc)} (all four levers, high care-seeking)</p>
+            <p>Chlamydia prevalence: {pct(ctPrevCare.soc)} (SOC) → {pct(ctPrevCare.poc)} (all four levers, high care-seeking)</p>
+            <p>Syphilis prevalence: {pct(syphPrevCare.soc)} (SOC) → {pct(syphPrevCare.poc)} (all four levers, high care-seeking)</p>
           </FindingCard>
         </div>
       </div>

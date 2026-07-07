@@ -1,4 +1,4 @@
-export default function LadderLevelSelect({ label, levels, value, onChange }) {
+export default function LadderLevelSelect({ label, levels, value, onChange, labels }) {
   return (
     <div className="flex items-center gap-2">
       <span className="text-sm font-medium text-brand-gray mr-1">{label}:</span>
@@ -6,11 +6,13 @@ export default function LadderLevelSelect({ label, levels, value, onChange }) {
         <button
           key={level}
           onClick={() => onChange(level)}
-          className={`px-3 py-1 rounded-full text-sm border-2 capitalize transition-colors ${
+          className={`px-3 py-1 rounded-full text-sm border-2 transition-colors ${
+            labels?.[level] ? '' : 'capitalize'
+          } ${
             value === level ? 'bg-brand-blue border-brand-blue text-white' : 'border-brand-blue text-brand-blue'
           }`}
         >
-          {level}
+          {labels?.[level] ?? level}
         </button>
       ))}
     </div>

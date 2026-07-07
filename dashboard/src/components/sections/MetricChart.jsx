@@ -3,14 +3,8 @@ import {
 } from 'recharts';
 
 const SOC_COLOR = '#555555';
+const SOC_UNDER_COLOR = '#999999';
 const SERIES_COLORS = { median: '#0E7490', over: '#B35806', under: '#2E86C1' };
-
-function withErrorBar(row, key) {
-  const lo = row[`${key}`]?.p25 ?? row.p25;
-  const hi = row[`${key}`]?.p75 ?? row.p75;
-  const med = row[`${key}`]?.median ?? row.median;
-  return { median: med, errorRange: med == null || lo == null || hi == null ? null : [med - lo, hi - med] };
-}
 
 export default function MetricChart({ data, mode = 'single', yLabel }) {
   if (mode === 'single') {
@@ -40,7 +34,6 @@ export default function MetricChart({ data, mode = 'single', yLabel }) {
   const chartData = data.map((row) => ({
     label: row.label,
     isSoc: row.isSoc,
-    ...withErrorBar(row, 'over'),
     overMedian: row.over.median,
     overRange: row.over.median == null || row.over.p25 == null || row.over.p75 == null
       ? null : [row.over.median - row.over.p25, row.over.p75 - row.over.median],
@@ -57,10 +50,16 @@ export default function MetricChart({ data, mode = 'single', yLabel }) {
         <YAxis label={{ value: yLabel, angle: -90, position: 'insideLeft' }} />
         <Tooltip formatter={(v) => (v == null ? '—' : v.toFixed(3))} />
         <Legend />
-        <Bar dataKey="overMedian" name="Over-notification" fill={SERIES_COLORS.over} maxBarSize={40}>
+        <Bar dataKey="overMedian" name="Over-notification" maxBarSize={40}>
+          {chartData.map((row) => (
+            <Cell key={row.label} fill={row.isSoc ? SOC_COLOR : SERIES_COLORS.over} />
+          ))}
           <ErrorBar dataKey="overRange" width={4} strokeWidth={1.5} stroke="#333" />
         </Bar>
-        <Bar dataKey="underMedian" name="Under-notification" fill={SERIES_COLORS.under} maxBarSize={40}>
+        <Bar dataKey="underMedian" name="Under-notification" maxBarSize={40}>
+          {chartData.map((row) => (
+            <Cell key={row.label} fill={row.isSoc ? SOC_UNDER_COLOR : SERIES_COLORS.under} />
+          ))}
           <ErrorBar dataKey="underRange" width={4} strokeWidth={1.5} stroke="#333" />
         </Bar>
       </BarChart>

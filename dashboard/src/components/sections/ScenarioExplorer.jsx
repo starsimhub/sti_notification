@@ -54,7 +54,7 @@ export default function ScenarioExplorer() {
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6 space-y-3">
           <MetricTabs value={metric} onChange={setMetric} />
           <DiseaseSelect value={disease} onChange={setDisease} disabled={metric === 'notification'} />
-          <LadderLevelSelect label="Vary" levels={AXES} value={varyAxis} onChange={setVaryAxis} />
+          <LadderLevelSelect label="Vary" levels={AXES} labels={AXIS_LABELS} value={varyAxis} onChange={setVaryAxis} />
           {otherAxes.map((axis) => (
             <LadderLevelSelect
               key={axis}
