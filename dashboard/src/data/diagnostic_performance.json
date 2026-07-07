@@ -1,0 +1,90 @@
+[
+  {
+    "disease": "Gonorrhoea",
+    "arm": "SOC",
+    "prev": 0.109,
+    "sens": 0.7,
+    "spec": 0.5,
+    "PPV": 0.146,
+    "NPV": 0.932,
+    "FDR": 0.854,
+    "FOR": 0.068
+  },
+  {
+    "disease": "Gonorrhoea",
+    "arm": "POC",
+    "prev": 0.109,
+    "sens": 0.95,
+    "spec": 0.95,
+    "PPV": 0.699,
+    "NPV": 0.994,
+    "FDR": 0.301,
+    "FOR": 0.006
+  },
+  {
+    "disease": "Chlamydia",
+    "arm": "SOC",
+    "prev": 0.07,
+    "sens": 0.7,
+    "spec": 0.5,
+    "PPV": 0.095,
+    "NPV": 0.957,
+    "FDR": 0.905,
+    "FOR": 0.043
+  },
+  {
+    "disease": "Chlamydia",
+    "arm": "POC",
+    "prev": 0.07,
+    "sens": 0.95,
+    "spec": 0.95,
+    "PPV": 0.588,
+    "NPV": 0.996,
+    "FDR": 0.412,
+    "FOR": 0.004
+  },
+  {
+    "disease": "Trichomoniasis",
+    "arm": "SOC",
+    "prev": 0.345,
+    "sens": 0.65,
+    "spec": 0.35,
+    "PPV": 0.345,
+    "NPV": 0.655,
+    "FDR": 0.655,
+    "FOR": 0.345
+  },
+  {
+    "disease": "Trichomoniasis",
+    "arm": "POC",
+    "prev": 0.345,
+    "sens": 0.95,
+    "spec": 0.95,
+    "PPV": 0.909,
+    "NPV": 0.973,
+    "FDR": 0.091,
+    "FOR": 0.027
+  },
+  {
+    "disease": "Syphilis",
+    "arm": "SOC",
+    "prev": 0.1,
+    "sens": 0.7,
+    "spec": 0.85,
+    "PPV": 0.341,
+    "NPV": 0.962,
+    "FDR": 0.659,
+    "FOR": 0.038
+  },
+  {
+    "disease": "Syphilis",
+    "arm": "POC",
+    "prev": 0.1,
+    "sens": 0.9,
+    "spec": 0.95,
+    "PPV": 0.667,
+    "NPV": 0.988,
+    "FDR": 0.333,
+    "FOR": 0.012
+  }
+]
