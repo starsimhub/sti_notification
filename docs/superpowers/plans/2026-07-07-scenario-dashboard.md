@@ -4,7 +4,7 @@
 
 **Goal:** Build `dashboard/`, a static React app inside `sti_notification` that lets a manuscript reader interactively explore the full 65-cell scenario factorial (prevalence, new infections, overtreatment, PN over/under-notification), plus an Overview and live-computed KeyFindings section drawn from the same data.
 
-**Architecture:** Vite + React, styled with Tailwind (matching `vmb-dashboard`'s stack, the closer analogue of the two sibling dashboards — `klebsim-dashboard` uses plain CSS instead). A Python script (`scripts/export_data.py`) converts `results/scenarios.kavg.csv`, `results/slide4_diagnostic_performance.csv`, and the ladder dicts in `scenarios.py` into small JSON files under `src/data/`, committed and imported directly by React components (no runtime fetch/loading state needed — the dataset is ~325 rows, small enough to bundle). All derived rates (overtreatment, undertreatment, over/under-notification) are computed once in Python at export time, not recomputed in JS.
+**Architecture:** Vite + React, styled with Tailwind (matching `vmb-dashboard`'s stack, the closer analogue of the two sibling dashboards — `klebsim-dashboard` uses plain CSS instead). A Python script (`scripts/export_data.py`) converts `results/scenarios.kavg.csv`, `results/slide4_diagnostic_performance.csv`, and the ladder dicts in `scenarios.py` into small JSON files under `src/data/`, committed and imported directly by React components (no runtime fetch/loading state needed — the dataset is ~325 rows, small enough to bundle). All derived rates (overtreatment, over/under-notification) are computed once in Python at export time, not recomputed in JS.
 
 **Tech Stack:** React 18, Vite 5, Tailwind CSS 3, Recharts 2, Vitest (for `dataTransforms.js` unit tests). Python 3.11 / pandas for the export script (matches the repo's existing `starsim` conda env — no new Python deps).
 
@@ -15,10 +15,12 @@
 - `scripts/export_data.py` is run manually (`conda run -n starsim python dashboard/scripts/export_data.py`) — not wired into CI.
 - Ladder level labels and values must be imported from `scenarios.py`, never hardcoded in JS or in the export script.
 - Deployment (Vercel/GitHub Pages) is explicitly out of scope for this plan.
+- The disease selector covers only NG, CT, TV, syphilis — HIV is excluded from `scenarios.json`, `DiseaseSelect`, and every chart/finding. Confirmed with the user during Task 2: HIV's ART pathway isn't tracked via the `new_treated`/`new_treated_success` columns the curable STIs use (`hiv_new_treated` is 0 in all 325 rows), so the overtreatment formula produces a meaningless null for HIV. Rather than special-case HIV's formula, it's dropped entirely.
+- **Undertreatment is dropped from v1 entirely** (not just for HIV). The correct definition, per the user: among people presenting with symptoms who are truly infected, the share NOT given treatment for that infection — a false-negative rate, unrelated to new infections. No field in `scenarios.kavg.csv` measures this (`new_treated_success` counts true-positive *treatments*, cumulative over the whole window, not a "true infection, never treated" count — and for syphilis specifically, cumulative successful treatments of long-duration prevalent cases can exceed the window's new infections, which is what originally surfaced this as a defect: the naive formula `1 - new_treated_success/new_inf` produced values as low as -7.71 for syph). Computing this properly needs a new analyzer in `run_scenarios.py`'s `extract()` and a full VM rerun of the 1625-sim factorial — out of scope here. `overtreatment_rate` is unaffected: `new_treated_unnecessary/new_treated` is a same-window ratio and doesn't have this problem.
 - Deviations from the spec's literal file list, and why:
   - Data lives at `src/data/*.json` (direct ES import), not `public/data/*.json` (fetch). Same content, same export script; simpler for a bundle this small, matches `vmb-dashboard`'s pattern exactly.
   - The four chart components (`PrevalenceChart`, `NewInfectionsChart`, `OvertreatmentChart`, `NotificationChart`) are implemented as one generic `MetricChart.jsx` driven by a metric config, to avoid four near-duplicate files (DRY).
-  - `results/ppv_table.csv` and `results/specificity.csv`/`soc_overtreatment.csv` are **not** used — `results/slide4_diagnostic_performance.csv` already contains the exact SOC/POC sens/spec/PPV/NPV table Overview needs, and `scenarios.kavg.csv`'s own `_new_treated_unnecessary`/`_new_treated_success` columns give overtreatment/undertreatment consistently across the whole factorial (specificity.csv only covers one draw). Pulling in the other CSVs would add data sources the dashboard doesn't need.
+  - `results/ppv_table.csv` and `results/specificity.csv`/`soc_overtreatment.csv` are **not** used — `results/slide4_diagnostic_performance.csv` already contains the exact SOC/POC sens/spec/PPV/NPV table Overview needs, and `scenarios.kavg.csv`'s own `_new_treated_unnecessary`/`_new_treated` columns give overtreatment consistently across the whole factorial (specificity.csv only covers one draw). Pulling in the other CSVs would add data sources the dashboard doesn't need.
 
 ---
 
@@ -67,8 +69,7 @@ dashboard/
 {
   "care_level": "baseline", "pn_level": "moderate", "bp_level": "high", "poc": true, "draw": 75,
   "diseases": {
-    "hiv":  { "prev_end": 0.113, "new_inf": 976140.0, "new_treated": 0.0, "new_treated_success": 0.0, "new_treated_unnecessary": 0.0, "overtreatment_rate": null, "undertreatment_rate": null },
-    "ng":   { "prev_end": 0.0081, "new_inf": 6391542.0, "new_treated": 1885986.0, "new_treated_success": 1096374.0, "new_treated_unnecessary": 744024.0, "overtreatment_rate": 0.3946, "undertreatment_rate": 0.4187 },
+    "ng":   { "prev_end": 0.0081, "new_inf": 6391542.0, "new_treated": 1885986.0, "new_treated_success": 1096374.0, "new_treated_unnecessary": 744024.0, "overtreatment_rate": 0.3946 },
     "ct":   { "...": "same keys" },
     "tv":   { "...": "same keys" },
     "syph": { "...": "same keys" }
@@ -77,7 +78,6 @@ dashboard/
 }
 ```
 `overtreatment_rate = new_treated_unnecessary / new_treated` (null if `new_treated == 0`).
-`undertreatment_rate = 1 - new_treated_success / new_inf` (null if `new_inf == 0`).
 `over_notification_rate = notified_no_sti / new_notified` (null if `new_notified == 0`).
 `under_notification_rate = 1 - (new_notified - notified_no_sti) / (new_index_total - new_index_no_sti)` (null if that denominator is 0).
 
@@ -297,7 +297,7 @@ from scenarios import (          # noqa: E402
     CARE_LEVELS, PN_LEVELS, BP_LEVELS,
 )
 
-DISEASES = ['hiv', 'ng', 'ct', 'tv', 'syph']
+DISEASES = ['ng', 'ct', 'tv', 'syph']
 PREV_COL = {d: f'{d}_prev_end' for d in DISEASES}
 PREV_COL['syph'] = 'syph_sti_prev_end'
 
@@ -325,11 +325,6 @@ def export_scenarios():
                 'new_treated_success': new_treated_success,
                 'new_treated_unnecessary': new_treated_unnecessary,
                 'overtreatment_rate': safe_div(new_treated_unnecessary, new_treated),
-                'undertreatment_rate': (
-                    None if pd.isna(safe_div(new_treated_success, new_inf))
-                    or safe_div(new_treated_success, new_inf) is None
-                    else 1 - safe_div(new_treated_success, new_inf)
-                ),
             }
         new_notified = row['pn_new_notified']
         notified_no_sti = row['pn_new_notified_no_sti']
@@ -390,8 +385,8 @@ Expected: prints `Wrote 325 records...`, `Wrote ladders.json...`, `Wrote 8 recor
 
 - [ ] **Step 3: Spot-check the output**
 
-Run: `python3 -c "import json; d=json.load(open('dashboard/src/data/scenarios.json')); print(len(d)); print(d[0]['diseases']['hiv']); print(d[0]['diseases']['ng'])"`
-Expected: `325`, then a dict showing `overtreatment_rate: None` and `undertreatment_rate: None` for `hiv` (since `hiv_new_treated`/`hiv_new_inf` are 0 in most rows — HIV testing/treatment isn't modeled as a PN-driven pathway the way NG/CT/TV/syph are), and non-null numeric rates for `ng`.
+Run: `python3 -c "import json; d=json.load(open('dashboard/src/data/scenarios.json')); print(len(d)); print(d[0]['diseases'].keys()); print(d[0]['diseases']['ng'])"`
+Expected: `325`, then `dict_keys(['ng', 'ct', 'tv', 'syph'])` — HIV is deliberately excluded from `DISEASES` (its ART pathway isn't tracked via `new_treated`/`new_treated_success`, so `overtreatment_rate` isn't meaningful for it) — and a non-null numeric `overtreatment_rate` for `ng`.
 
 - [ ] **Step 4: Commit**
 
@@ -414,7 +409,7 @@ git commit -m "dashboard: add export_data.py, generate scenarios/ladders/diagnos
   - `quantile(sortedArr, q) -> number`
   - `medIqr(values) -> {median, p25, p75}` (values: array of numbers, nulls filtered out; returns `{median: null, p25: null, p75: null}` if empty)
   - `filterRows(scenarios, {poc, care_level, pn_level, bp_level}) -> array` (any key omitted = no filter on that key)
-  - `getMetricValue(row, {disease, metric}) -> number|null` where `metric` is one of `'prevalence' | 'new_inf' | 'overtreatment' | 'undertreatment'`
+  - `getMetricValue(row, {disease, metric}) -> number|null` where `metric` is one of `'prevalence' | 'new_inf' | 'overtreatment'`
   - `groupedSeries(scenarios, {varyAxis, disease, metric, fixed}) -> array<{label, isSoc, median, p25, p75}>` where `varyAxis` is `'care' | 'pn' | 'bp'`, `fixed` is `{[otherAxis]: level}` for the two non-varying axes, and the returned array always starts with the SOC row.
   - `notificationSeries(scenarios, {varyAxis, fixed}) -> array<{label, isSoc, over: {median,p25,p75}, under: {median,p25,p75}}>`
 
@@ -448,16 +443,16 @@ describe('medIqr', () => {
 
 const MOCK_ROWS = [
   { care_level: 'baseline', pn_level: 'baseline', bp_level: 'none', poc: false, draw: 1,
-    diseases: { ng: { prev_end: 0.10, new_inf: 100, overtreatment_rate: 0.5, undertreatment_rate: 0.4 } },
+    diseases: { ng: { prev_end: 0.10, new_inf: 100, overtreatment_rate: 0.5 } },
     notification: { over_notification_rate: 0.5, under_notification_rate: 0.3 } },
   { care_level: 'baseline', pn_level: 'baseline', bp_level: 'none', poc: false, draw: 2,
-    diseases: { ng: { prev_end: 0.12, new_inf: 110, overtreatment_rate: 0.6, undertreatment_rate: 0.5 } },
+    diseases: { ng: { prev_end: 0.12, new_inf: 110, overtreatment_rate: 0.6 } },
     notification: { over_notification_rate: 0.6, under_notification_rate: 0.4 } },
   { care_level: 'baseline', pn_level: 'low', bp_level: 'none', poc: true, draw: 1,
-    diseases: { ng: { prev_end: 0.08, new_inf: 90, overtreatment_rate: 0.3, undertreatment_rate: 0.2 } },
+    diseases: { ng: { prev_end: 0.08, new_inf: 90, overtreatment_rate: 0.3 } },
     notification: { over_notification_rate: 0.3, under_notification_rate: 0.2 } },
   { care_level: 'baseline', pn_level: 'moderate', bp_level: 'none', poc: true, draw: 1,
-    diseases: { ng: { prev_end: 0.06, new_inf: 80, overtreatment_rate: 0.2, undertreatment_rate: 0.1 } },
+    diseases: { ng: { prev_end: 0.06, new_inf: 80, overtreatment_rate: 0.2 } },
     notification: { over_notification_rate: 0.2, under_notification_rate: 0.1 } },
 ];
 
@@ -548,7 +543,6 @@ export function getMetricValue(row, { disease, metric }) {
     case 'prevalence': return d.prev_end;
     case 'new_inf': return d.new_inf;
     case 'overtreatment': return d.overtreatment_rate;
-    case 'undertreatment': return d.undertreatment_rate;
     default: throw new Error(`Unknown metric: ${metric}`);
   }
 }
@@ -608,15 +602,15 @@ git commit -m "dashboard: add dataTransforms with unit tests"
 
 **Interfaces:**
 - Produces:
-  - `DiseaseSelect({ value, onChange, disabled })` — pill group over `['hiv','ng','ct','tv','syph']` with display labels.
-  - `MetricTabs({ value, onChange })` — tab group over `['prevalence','new_inf','overtreatment','undertreatment','notification']`.
+  - `DiseaseSelect({ value, onChange, disabled })` — pill group over `['ng','ct','tv','syph']` with display labels (HIV excluded: its ART pathway isn't tracked via the `new_treated`/`new_treated_success` columns the curable STIs use, so overtreatment isn't meaningful for it).
+  - `MetricTabs({ value, onChange })` — tab group over `['prevalence','new_inf','overtreatment','notification']`.
   - `LadderLevelSelect({ label, levels, value, onChange })` — pill group over an arbitrary list of level strings; used both for the vary-axis picker (levels = `['care','pn','bp']`) and the two fixed-level pickers (levels = that axis's ladder levels).
 
 - [ ] **Step 1: Create `dashboard/src/components/controls/DiseaseSelect.jsx`**
 
 ```jsx
-const LABELS = { hiv: 'HIV', ng: 'Gonorrhoea', ct: 'Chlamydia', tv: 'Trichomoniasis', syph: 'Syphilis' };
-const DISEASES = ['hiv', 'ng', 'ct', 'tv', 'syph'];
+const LABELS = { ng: 'Gonorrhoea', ct: 'Chlamydia', tv: 'Trichomoniasis', syph: 'Syphilis' };
+const DISEASES = ['ng', 'ct', 'tv', 'syph'];
 
 export default function DiseaseSelect({ value, onChange, disabled = false }) {
   return (
@@ -647,7 +641,6 @@ const METRICS = [
   { key: 'prevalence', label: 'Prevalence' },
   { key: 'new_inf', label: 'New infections' },
   { key: 'overtreatment', label: 'Overtreatment' },
-  { key: 'undertreatment', label: 'Undertreatment' },
   { key: 'notification', label: 'PN over/under-notification' },
 ];
 
@@ -834,7 +827,6 @@ const Y_LABELS = {
   prevalence: 'End-of-horizon prevalence',
   new_inf: 'New infections (cumulative)',
   overtreatment: 'Overtreatment rate',
-  undertreatment: 'Undertreatment rate',
   notification: 'Rate',
 };
 
@@ -1333,4 +1325,5 @@ git commit -m "dashboard: assemble Overview, ScenarioExplorer, KeyFindings, Meth
 
 - **Spec coverage:** Overview (Task 7), ScenarioExplorer exposing the full 65-cell factorial (Task 6), KeyFindings computed live (Task 8), Methods (Task 9) — all four approved sections present. Data pipeline (Task 2) covers `scenarios.kavg.csv` and `slide4_diagnostic_performance.csv`; `ppv_table.csv`/`specificity.csv` deliberately dropped, documented in Global Constraints. Ladder labels imported from `scenarios.py`, never hardcoded (Task 2, Step 1). Deployment and CI wiring explicitly out of scope, matching the spec.
 - **Undertreatment/under-notification formulas**, flagged as open in the spec, are pinned down concretely in Task 2 and re-used consistently in `dataTransforms.js` (Task 3) and `KeyFindings.jsx` (Task 8) — no remaining ambiguity.
-- **Type/name consistency check:** `care_level`/`pn_level`/`bp_level` (Task 2's export) match `AXIS_TO_FIELD` in both `dataTransforms.js` (Task 3) and `ScenarioExplorer.jsx` (Task 6). `getMetricValue`'s metric keys (`prevalence`/`new_inf`/`overtreatment`/`undertreatment`) match `MetricTabs`' keys (Task 4) and `Y_LABELS` (Task 6). `groupedSeries`/`notificationSeries` signatures defined in Task 3 match their call sites in Task 6 exactly (same argument names: `varyAxis`, `disease`, `metric`, `fixed`, `levels`).
+- **Type/name consistency check:** `care_level`/`pn_level`/`bp_level` (Task 2's export) match `AXIS_TO_FIELD` in both `dataTransforms.js` (Task 3) and `ScenarioExplorer.jsx` (Task 6). `getMetricValue`'s metric keys (`prevalence`/`new_inf`/`overtreatment`) match `MetricTabs`' keys (Task 4) and `Y_LABELS` (Task 6). `groupedSeries`/`notificationSeries` signatures defined in Task 3 match their call sites in Task 6 exactly (same argument names: `varyAxis`, `disease`, `metric`, `fixed`, `levels`).
+- **Undertreatment removed:** confirmed no remaining references to `undertreatment_rate`/`undertreatment` anywhere in Tasks 2-9 after the mid-build scope cut (see Global Constraints).
