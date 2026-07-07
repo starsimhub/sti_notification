@@ -43,11 +43,6 @@ def export_scenarios():
                 'new_treated_success': new_treated_success,
                 'new_treated_unnecessary': new_treated_unnecessary,
                 'overtreatment_rate': safe_div(new_treated_unnecessary, new_treated),
-                'undertreatment_rate': (
-                    None if pd.isna(safe_div(new_treated_success, new_inf))
-                    or safe_div(new_treated_success, new_inf) is None
-                    else 1 - safe_div(new_treated_success, new_inf)
-                ),
             }
         new_notified = row['pn_new_notified']
         notified_no_sti = row['pn_new_notified_no_sti']
