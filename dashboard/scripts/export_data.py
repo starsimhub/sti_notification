@@ -15,7 +15,7 @@ from scenarios import (          # noqa: E402
     CARE_LEVELS, PN_LEVELS, BP_LEVELS,
 )
 
-DISEASES = ['hiv', 'ng', 'ct', 'tv', 'syph']
+DISEASES = ['ng', 'ct', 'tv', 'syph']
 PREV_COL = {d: f'{d}_prev_end' for d in DISEASES}
 PREV_COL['syph'] = 'syph_sti_prev_end'
 
