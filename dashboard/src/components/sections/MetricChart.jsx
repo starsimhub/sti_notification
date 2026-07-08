@@ -1,10 +1,19 @@
 import {
-  Bar, BarChart, CartesianGrid, Cell, ErrorBar, ResponsiveContainer, Tooltip, XAxis, YAxis, Legend,
+  Bar, BarChart, CartesianGrid, Cell, ErrorBar, Legend, Line, LineChart,
+  ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from 'recharts';
 
 const SOC_COLOR = '#555555';
 const SOC_UNDER_COLOR = '#999999';
 const SERIES_COLORS = { median: '#0E7490', over: '#B35806', under: '#2E86C1' };
+const PALETTE = [
+  '#0E7490', '#B35806', '#2E86C1', '#6A9F58', '#A6449B',
+  '#C2871C', '#D6604D', '#4F6D7A', '#8C6D31', '#7570B3',
+];
+
+function paletteColor(index) {
+  return PALETTE[index % PALETTE.length];
+}
 
 export default function MetricChart({ data, mode = 'single', yLabel }) {
   if (mode === 'single') {
@@ -27,6 +36,43 @@ export default function MetricChart({ data, mode = 'single', yLabel }) {
             <ErrorBar dataKey="errorRange" width={4} strokeWidth={1.5} stroke="#333" />
           </Bar>
         </BarChart>
+      </ResponsiveContainer>
+    );
+  }
+
+  if (mode === 'timeseries') {
+    const years = Array.from(
+      new Set(data.flatMap((row) => row.points.map((p) => p.year)))
+    ).sort((a, b) => a - b);
+    const chartData = years.map((year) => {
+      const point = { year };
+      data.forEach((row, i) => {
+        const found = row.points.find((p) => p.year === year);
+        point[`series_${i}`] = found ? found.value : null;
+      });
+      return point;
+    });
+    return (
+      <ResponsiveContainer width="100%" height={260}>
+        <LineChart data={chartData} margin={{ top: 16, right: 16, left: 48, bottom: 8 }}>
+          <CartesianGrid strokeDasharray="3 3" vertical={false} />
+          <XAxis dataKey="year" tick={{ fontSize: 12 }} />
+          <YAxis label={{ value: yLabel, angle: -90, position: 'insideLeft' }} />
+          <Tooltip formatter={(v) => (v == null ? '—' : v.toFixed(3))} />
+          <Legend />
+          {data.map((row, i) => (
+            <Line
+              key={row.label}
+              type="monotone"
+              dataKey={`series_${i}`}
+              name={row.label}
+              stroke={row.isSoc ? SOC_COLOR : paletteColor(i)}
+              strokeWidth={row.isSoc ? 2.5 : 1.75}
+              dot={false}
+              connectNulls
+            />
+          ))}
+        </LineChart>
       </ResponsiveContainer>
     );
   }
