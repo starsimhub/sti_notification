@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import calibFig5 from '../../assets/figures/calib_fig5_sti_timeseries.png';
+import calibFig1 from '../../assets/figures/calib_fig1_syph_timeseries.png';
 
 const ITEMS = [
   {
@@ -10,12 +12,16 @@ const ITEMS = [
   },
   {
     title: 'Calibration',
-    body: `500-draw Latin hypercube sample over 17 open parameters (disease betas, HIV–syphilis
-      coupling, network structure, syphilis natural history), K=5 seed-averaged per draw,
-      scored by continuous weighted goodness-of-fit against Zimbabwe HIV/STI prevalence data
-      and ZIMPHIA age-by-sex syphilis tables. The top-30 draws by fit form the posterior
-      ensemble used throughout this dashboard — results always reflect that ensemble's spread,
-      not a single point estimate.`,
+    body: `2000-draw Latin hypercube sample over 19 open parameters (disease betas,
+      HIV–syphilis coupling, network structure, syphilis natural history), single-seed
+      filtered on sustainability and target pass count, then re-run at 3 seeds per surviving
+      draw for robustness. The resulting 169-draw posterior ensemble (507 sims total) is used
+      throughout this dashboard — results always reflect that ensemble's spread, not a single
+      point estimate.`,
+    figures: [
+      { src: calibFig5, alt: 'NG/CT/TV prevalence calibration fit against surveillance data' },
+      { src: calibFig1, alt: 'Syphilis prevalence calibration fit with ZIMPHIA validation points' },
+    ],
   },
   {
     title: 'Scenario design',
@@ -27,14 +33,25 @@ const ITEMS = [
   },
 ];
 
-function AccordionItem({ title, body, open, onToggle }) {
+function AccordionItem({ title, body, figures, open, onToggle }) {
   return (
     <div className="border-b border-gray-200">
       <button onClick={onToggle} className="w-full text-left py-3 flex justify-between items-center">
         <span className="font-medium text-brand-blue">{title}</span>
         <span className="text-brand-gray">{open ? '−' : '+'}</span>
       </button>
-      {open && <p className="pb-4 text-sm text-brand-gray">{body}</p>}
+      {open && (
+        <div className="pb-4">
+          <p className="text-sm text-brand-gray">{body}</p>
+          {figures && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+              {figures.map((fig) => (
+                <img key={fig.src} src={fig.src} alt={fig.alt} className="w-full border border-gray-200 rounded-lg" />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -50,6 +67,7 @@ export default function Methods() {
             key={item.title}
             title={item.title}
             body={item.body}
+            figures={item.figures}
             open={openIndex === i}
             onToggle={() => setOpenIndex(openIndex === i ? -1 : i)}
           />
