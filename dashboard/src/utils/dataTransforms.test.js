@@ -1,5 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { quantile, medIqr, filterRows, getMetricValue, groupedSeries, notificationSeries } from './dataTransforms.js';
+import {
+  quantile, medIqr, filterRows, getMetricValue,
+  crossProductCombos, crossProductBarSeries, crossProductNotificationSeries, timeSeriesForCombos,
+} from './dataTransforms.js';
 
 describe('quantile', () => {
   it('returns the median for q=0.5 on an odd-length array', () => {
@@ -53,30 +56,52 @@ describe('getMetricValue', () => {
   });
 });
 
-describe('groupedSeries', () => {
-  it('prepends a SOC entry, then one entry per level of the varying axis', () => {
-    const result = groupedSeries(MOCK_ROWS, {
-      varyAxis: 'pn', disease: 'ng', metric: 'prevalence',
-      fixed: { care_level: 'baseline', bp_level: 'none' },
-      levels: ['baseline', 'low', 'moderate', 'high'],
-    });
-    expect(result[0]).toMatchObject({ label: 'SOC', isSoc: true, median: 0.11 });
-    expect(result.find(r => r.label === 'low')).toMatchObject({ median: 0.08 });
-    expect(result.find(r => r.label === 'moderate')).toMatchObject({ median: 0.06 });
-    // 'high' has no matching rows in the mock data -> median null, not thrown
-    expect(result.find(r => r.label === 'high')).toMatchObject({ median: null });
+describe('crossProductCombos', () => {
+  it('returns the cartesian product of the three selected-level arrays', () => {
+    const combos = crossProductCombos({ care: ['baseline'], pn: ['baseline', 'low'], bp: ['none'] });
+    expect(combos).toHaveLength(2);
+    expect(combos[0]).toMatchObject({ care_level: 'baseline', pn_level: 'baseline', bp_level: 'none' });
+    expect(combos[1]).toMatchObject({ care_level: 'baseline', pn_level: 'low', bp_level: 'none' });
+  });
+  it('gives each combo a distinct, stable label', () => {
+    const combos = crossProductCombos({ care: ['baseline'], pn: ['low'], bp: ['none'] });
+    expect(combos[0].label).toBe('baseline / low / none');
   });
 });
 
-describe('notificationSeries', () => {
-  it('returns SOC plus one entry per level, each with over and under sub-series', () => {
-    const result = notificationSeries(MOCK_ROWS, {
-      varyAxis: 'pn',
-      fixed: { care_level: 'baseline', bp_level: 'none' },
-      levels: ['baseline', 'low', 'moderate', 'high'],
-    });
-    expect(result[0].label).toBe('SOC');
+describe('crossProductBarSeries', () => {
+  it('prepends SOC, then one entry per combo', () => {
+    const combos = crossProductCombos({ care: ['baseline'], pn: ['low', 'moderate'], bp: ['none'] });
+    const result = crossProductBarSeries(MOCK_ROWS, { combos, disease: 'ng', metric: 'prevalence' });
+    expect(result[0]).toMatchObject({ label: 'SOC', isSoc: true, median: 0.11 });
+    expect(result.find((r) => r.label === combos[0].label)).toMatchObject({ median: 0.08 });
+    expect(result.find((r) => r.label === combos[1].label)).toMatchObject({ median: 0.06 });
+  });
+});
+
+describe('crossProductNotificationSeries', () => {
+  it('prepends SOC with over/under sub-series, then one entry per combo', () => {
+    const combos = crossProductCombos({ care: ['baseline'], pn: ['low'], bp: ['none'] });
+    const result = crossProductNotificationSeries(MOCK_ROWS, { combos });
+    expect(result[0]).toMatchObject({ label: 'SOC', isSoc: true });
     expect(result[0].over.median).toBeCloseTo(0.55, 5);
-    expect(result.find(r => r.label === 'low').under.median).toBe(0.2);
+    expect(result[1].under.median).toBe(0.2);
+  });
+});
+
+const MOCK_TIMESERIES = [
+  { care_level: 'baseline', pn_level: 'baseline', bp_level: 'none', poc: false, disease: 'ng', metric: 'prevalence', year: 2027, value: 0.10 },
+  { care_level: 'baseline', pn_level: 'baseline', bp_level: 'none', poc: false, disease: 'ng', metric: 'prevalence', year: 2028, value: 0.11 },
+  { care_level: 'baseline', pn_level: 'low', bp_level: 'none', poc: true, disease: 'ng', metric: 'prevalence', year: 2027, value: 0.08 },
+  { care_level: 'baseline', pn_level: 'low', bp_level: 'none', poc: true, disease: 'ng', metric: 'prevalence', year: 2028, value: 0.06 },
+];
+
+describe('timeSeriesForCombos', () => {
+  it('returns SOC plus one entry per combo, each with year-sorted points', () => {
+    const combos = crossProductCombos({ care: ['baseline'], pn: ['low'], bp: ['none'] });
+    const result = timeSeriesForCombos(MOCK_TIMESERIES, { combos, disease: 'ng', metric: 'prevalence' });
+    expect(result[0]).toMatchObject({ label: 'SOC', isSoc: true });
+    expect(result[0].points).toEqual([{ year: 2027, value: 0.10 }, { year: 2028, value: 0.11 }]);
+    expect(result[1].points).toEqual([{ year: 2027, value: 0.08 }, { year: 2028, value: 0.06 }]);
   });
 });

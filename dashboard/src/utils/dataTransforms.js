@@ -36,33 +36,79 @@ export function getMetricValue(row, { disease, metric }) {
   }
 }
 
-const AXIS_TO_FIELD = { care: 'care_level', pn: 'pn_level', bp: 'bp_level' };
+export function crossProductCombos(selectedLevels) {
+  const combos = [];
+  for (const care of selectedLevels.care) {
+    for (const pn of selectedLevels.pn) {
+      for (const bp of selectedLevels.bp) {
+        combos.push({
+          care_level: care,
+          pn_level: pn,
+          bp_level: bp,
+          label: `${care} / ${pn} / ${bp}`,
+        });
+      }
+    }
+  }
+  return combos;
+}
 
-export function groupedSeries(scenarios, { varyAxis, disease, metric, fixed, levels }) {
-  const varyField = AXIS_TO_FIELD[varyAxis];
+export function crossProductBarSeries(scenarios, { combos, disease, metric }) {
   const socRows = filterRows(scenarios, { poc: false });
   const soc = medIqr(socRows.map((r) => getMetricValue(r, { disease, metric })));
-  const entries = levels.map((level) => {
-    const rows = filterRows(scenarios, { poc: true, [varyField]: level, ...fixed });
+  const entries = combos.map((combo) => {
+    const rows = filterRows(scenarios, {
+      poc: true,
+      care_level: combo.care_level,
+      pn_level: combo.pn_level,
+      bp_level: combo.bp_level,
+    });
     const stats = medIqr(rows.map((r) => getMetricValue(r, { disease, metric })));
-    return { label: level, isSoc: false, ...stats };
+    return { label: combo.label, isSoc: false, ...stats };
   });
   return [{ label: 'SOC', isSoc: true, ...soc }, ...entries];
 }
 
-export function notificationSeries(scenarios, { varyAxis, fixed, levels }) {
-  const varyField = AXIS_TO_FIELD[varyAxis];
+export function crossProductNotificationSeries(scenarios, { combos }) {
   const socRows = filterRows(scenarios, { poc: false });
   const socOver = medIqr(socRows.map((r) => r.notification.over_notification_rate));
   const socUnder = medIqr(socRows.map((r) => r.notification.under_notification_rate));
-  const entries = levels.map((level) => {
-    const rows = filterRows(scenarios, { poc: true, [varyField]: level, ...fixed });
+  const entries = combos.map((combo) => {
+    const rows = filterRows(scenarios, {
+      poc: true,
+      care_level: combo.care_level,
+      pn_level: combo.pn_level,
+      bp_level: combo.bp_level,
+    });
     return {
-      label: level,
+      label: combo.label,
       isSoc: false,
       over: medIqr(rows.map((r) => r.notification.over_notification_rate)),
       under: medIqr(rows.map((r) => r.notification.under_notification_rate)),
     };
   });
   return [{ label: 'SOC', isSoc: true, over: socOver, under: socUnder }, ...entries];
+}
+
+export function timeSeriesForCombos(timeseries, { combos, disease, metric }) {
+  const byYear = (a, b) => a.year - b.year;
+  const socPoints = timeseries
+    .filter((r) => r.poc === false && r.disease === disease && r.metric === metric)
+    .sort(byYear)
+    .map((r) => ({ year: r.year, value: r.value }));
+  const entries = combos.map((combo) => {
+    const points = timeseries
+      .filter((r) =>
+        r.poc === true &&
+        r.disease === disease &&
+        r.metric === metric &&
+        r.care_level === combo.care_level &&
+        r.pn_level === combo.pn_level &&
+        r.bp_level === combo.bp_level
+      )
+      .sort(byYear)
+      .map((r) => ({ year: r.year, value: r.value }));
+    return { label: combo.label, isSoc: false, points };
+  });
+  return [{ label: 'SOC', isSoc: true, points: socPoints }, ...entries];
 }
