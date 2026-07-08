@@ -19,6 +19,12 @@ DISEASES = ['ng', 'ct', 'tv', 'syph']
 PREV_COL = {d: f'{d}_prev_end' for d in DISEASES}
 PREV_COL['syph'] = 'syph_sti_prev_end'
 
+TS_DISEASES = ['ng', 'ct', 'tv', 'syph']
+TS_RESULT_NAME = {d: 'prevalence' for d in TS_DISEASES}
+TS_RESULT_NAME['syph'] = 'sexually_transmissible_prevalence'
+TS_YEAR_START = 2027
+TS_YEAR_END = 2040
+
 
 def safe_div(numer, denom):
     if denom == 0 or pd.isna(denom):
@@ -71,6 +77,32 @@ def export_scenarios():
     print(f'Wrote {len(records)} records to {dest}')
 
 
+def export_timeseries():
+    df = pd.read_parquet(REPO_ROOT / 'results' / 'scenarios_timeseries.parquet')
+    df = df[(df['year'] >= TS_YEAR_START) & (df['year'] <= TS_YEAR_END)]
+
+    records = []
+    for d in TS_DISEASES:
+        prev_rows = df[(df['disease'] == d) & (df['result_name'] == TS_RESULT_NAME[d])]
+        inf_rows = df[(df['disease'] == d) & (df['result_name'] == 'new_infections')]
+        for metric, rows in (('prevalence', prev_rows), ('new_inf', inf_rows)):
+            grouped = rows.groupby(['care', 'pn', 'bp', 'poc', 'year'])['value'].median().reset_index()
+            for _, row in grouped.iterrows():
+                records.append({
+                    'care_level': row['care'],
+                    'pn_level': row['pn'],
+                    'bp_level': row['bp'],
+                    'poc': bool(row['poc']),
+                    'disease': d,
+                    'metric': metric,
+                    'year': int(row['year']),
+                    'value': row['value'],
+                })
+    dest = DATA_DIR / 'timeseries.json'
+    dest.write_text(json.dumps(records, indent=2, allow_nan=False))
+    print(f'Wrote {len(records)} records to {dest}')
+
+
 def export_ladders():
     ladders = {
         'care': {'levels': CARE_LEVELS, 'values': CARE_SEEKING},
@@ -94,3 +126,4 @@ if __name__ == '__main__':
     export_scenarios()
     export_ladders()
     export_diagnostic_performance()
+    export_timeseries()
