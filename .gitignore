@@ -38,6 +38,7 @@ results/large_*
 
 # Local-only docs (e.g. revision notes)
 revision_plan.md
+CLAUDE.md
 
 # History matching raw outputs — too large for git (checkpoints ~170MB,
 # emulator pickles, per-wave diagnostic PNGs). Small summary artifacts
