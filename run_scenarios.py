@@ -55,7 +55,8 @@ from interventions import (ANC_PROBS_REALISTIC, CondomCounseling,     # noqa
                            CareSeekScaler, PNIntensitySwitch)
 from scenarios import CARE_SEEKING, PN_INTENSITY, BUNDLED_PREVENTION  # noqa
 
-OUT = REPO / 'results'
+OUT = REPO / 'results'          # small, committable aggregates (kavg CSV)
+RAW_OUT = REPO / 'raw_results'  # fat VM-only outputs (jsonl, full TS/snap parquets)
 INTV_YEAR = 2027
 END_YEAR = 2040
 N_AGENTS = 10_000
@@ -310,13 +311,14 @@ def main():
     n_seeds = int(os.environ.get('N_SEEDS', 1))
     n_workers = int(os.environ.get('N_WORKERS', 60))
     OUT.mkdir(parents=True, exist_ok=True)
+    RAW_OUT.mkdir(parents=True, exist_ok=True)
     if not DRAWS_CSV.exists():
         raise SystemExit(f'draws not found: {DRAWS_CSV} (set DRAWS env var)')
     draws = pd.read_csv(DRAWS_CSV)
     cells = build_cells()
-    outfile = OUT / 'scenarios.jsonl'
-    ts_parquet = OUT / 'scenarios_timeseries.parquet'
-    snap_parquet = OUT / 'scenarios_snapshots.parquet'
+    outfile = RAW_OUT / 'scenarios.jsonl'
+    ts_parquet = RAW_OUT / 'scenarios_timeseries.parquet'
+    snap_parquet = RAW_OUT / 'scenarios_snapshots.parquet'
 
     if smoke:
         # Validation run: 5 cells x 5 draws x K=5 seeds = 125 sims.
@@ -332,9 +334,9 @@ def main():
         cells = [c for c in cells if c['label'] in keep]
         draws = draws.head(5)
         n_seeds = 5
-        outfile = OUT / 'scenarios_smoke.jsonl'
-        ts_parquet = OUT / 'scenarios_smoke_timeseries.parquet'
-        snap_parquet = OUT / 'scenarios_smoke_snapshots.parquet'
+        outfile = RAW_OUT / 'scenarios_smoke.jsonl'
+        ts_parquet = RAW_OUT / 'scenarios_smoke_timeseries.parquet'
+        snap_parquet = RAW_OUT / 'scenarios_smoke_snapshots.parquet'
     else:
         n_draws_env = os.environ.get('N_DRAWS')
         if n_draws_env:
@@ -391,7 +393,8 @@ def main():
         scalar_cols = [c for c in raw_ok.columns
                        if c not in meta_cols + ['seed', 'sub_idx', 'status']]
         scalars_avg = raw_ok.groupby(meta_cols, dropna=False)[scalar_cols].mean().reset_index()
-        scalars_csv = outfile.with_suffix('.kavg.csv')
+        # kavg is small enough to commit; route to OUT (results/) not RAW_OUT.
+        scalars_csv = OUT / f'{outfile.stem}.kavg.csv'
         scalars_avg.to_csv(scalars_csv, index=False)
         print(f'  K-avg scalars -> {scalars_csv.name}: {len(scalars_avg)} rows')
 
