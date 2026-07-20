@@ -705,7 +705,16 @@ def make_testing(poc=None, stop=2040, fsw_outreach=False,
         pars=syndromic_pars,
     )
 
-    intvs = [syndromic_vds, syndromic_uds, ng_tx, ct_tx, metronidazole]
+    # Detection/diagnosis modules must precede the treatment modules in the
+    # returned list: Starsim runs interventions in list order, once per
+    # step, so a treatment module only sees eligibility set *before* it
+    # runs this same step. syndromic_vds/uds already precede ng_tx/ct_tx/
+    # metronidazole below; panel and fsw_intv (if enabled) must too, or
+    # their positives set this step aren't picked up by ng_tx/ct_tx/
+    # metronidazole until the *next* step -- a one-timestep treatment lag
+    # that doesn't exist under syndromic management, and is large enough to
+    # materially shift NG's endemic equilibrium under POC.
+    detection = [syndromic_vds, syndromic_uds]
     if poc:
         # POC etiological panel: single eligibility filter for both sexes,
         # high-sensitivity molecular test per pathogen, no presumptive
@@ -725,7 +734,7 @@ def make_testing(poc=None, stop=2040, fsw_outreach=False,
             negative_treatments=[],
             pars=dict(sens=POC_SENS, spec=POC_SPEC),
         )
-        intvs.append(panel)
+        detection.append(panel)
 
     if fsw_outreach:
         # Direct FSW outreach: per-step bernoulli over active FSW.
@@ -746,7 +755,7 @@ def make_testing(poc=None, stop=2040, fsw_outreach=False,
             negative_treatments=[],
             pars=dict(sens=POC_SENS, spec=POC_SPEC),
         )
-        intvs.append(fsw_intv)
+        detection.append(fsw_intv)
 
     # PN intervention is built separately by make_pn() and appended at
     # the top level (make_interventions). That keeps the asymmetry
@@ -754,7 +763,7 @@ def make_testing(poc=None, stop=2040, fsw_outreach=False,
     # make_syph_testing builds syph testing + treatment, and make_pn
     # builds the single PN intervention shared across all diseases.
 
-    return intvs
+    return detection + treatments
 
 
 class CondomCounseling(ss.Intervention):
