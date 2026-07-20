@@ -69,3 +69,7 @@ docs/*.pptx
 
 # Local figure archive (kept off the tree)
 figures/_archive/
+
+# Fat factorial outputs from run_scenarios.py — see docs/superpowers/specs/2026-07-20-plot-data-extract-design.md
+raw_results/
+!raw_results/.gitkeep
