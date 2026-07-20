@@ -62,6 +62,14 @@ Steps from model parameters (symptomatic, care-seeking 0.49, syndromic routing, 
 
 Syndromic management can't distinguish between STIs, so treatment is symptom-based rather than infection-specific. POC diagnostics improve both sensitivity and specificity, but at the prevalences seen among women presenting with vaginal discharge syndrome, even a highly performant test leaves a meaningful share of false positives — POC narrows the overtreatment gap without closing it.
 
+<img class="dash-fig" src="figures/fig1_algos.png" alt="Syndromic management vs POC diagnostic algorithm for vaginal discharge syndrome">
+
+::: fig-note
+The two algorithms this dashboard compares as "SOC" and "POC". (A) Syndromic management: a risk assessment and exam route women toward a spread of treatment outcomes that only loosely track true infection status — whether or not she has a cervical infection, some women are over-treated and some are missed. (B) A POC diagnostic for NG/CT/TV replaces the risk assessment with a test result, so treatment tracks the identified infection directly; presumptive BV treatment is unchanged. Reused from the companion VDS diagnostics analysis (`stisim_vddx_zim`).
+:::
+
+But diagnostic accuracy only helps people who reach care. Roughly a third of symptomatic women in sub-Saharan Africa never seek treatment at all, and even treated index cases often don't lead to their partners being notified and treated in turn — the gap this dashboard's demand-generation scenarios (care-seeking, partner notification, bundled prevention) are designed to close.
+
 **Diagnostic performance, SOC vs POC**
 
 ```{python}
