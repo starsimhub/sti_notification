@@ -26,8 +26,7 @@ DEST = Path(__file__).resolve().parents[1] / 'data' / 'timeseries.csv'
 DISEASES = ['ng', 'ct', 'tv', 'syph']
 # Which parquet result_name gives each disease's "prevalence" trajectory.
 PREV_RESULT = {d: 'prevalence' for d in DISEASES}
-PREV_RESULT['syph'] = 'sexually_transmissible_prevalence'
-YEAR_START, YEAR_END = 2027, 2040
+YEAR_START, YEAR_END = 2025, 2040
 
 
 def main():
