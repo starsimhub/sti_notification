@@ -12,7 +12,7 @@ Cells:
   POC_c{C}_p{P}_b{B}           POC dx, 5 x 5 x 5 = 125 cells
                                (c=baseline,p=baseline,b=none is "POC plain")
 Total 126 distinct cells x N_DRAWS x N_SEEDS sims. One JSON row per
-(cell, draw, seed) -> results/scenarios.jsonl.
+(cell, draw, seed) -> raw_results/scenarios.jsonl.
 
 Run (repo root, `starsim` conda env, multi-core box):
     conda run -n starsim env N_SEEDS=1 N_WORKERS=60 python run_scenarios.py

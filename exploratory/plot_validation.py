@@ -1,7 +1,7 @@
 """Validation-run inspection figure.
 
 5 cells (SOC + POC + POC+CS + POC+PN + POC+BP) x 5 draws x K=5 seeds.
-Reads results/scenarios_smoke_timeseries.parquet and
+Reads raw_results/scenarios_smoke_timeseries.parquet and
 results/scenarios_smoke.kavg.csv. Writes figures/fig_validation_overview.png.
 
 Layout (5 rows x 5 cols, ~14 in x 14 in):

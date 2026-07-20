@@ -1,4 +1,4 @@
-"""Layering figures from the scenario factorial (results/scenarios_timeseries.parquet).
+"""Layering figures from the scenario factorial (raw_results/scenarios_timeseries.parquet).
 
 Multi-disease small multiples (NG/CT/TV/syph), prevalence at 2040, median over the
 pilot draws, with SOC and POC-plain references:

@@ -66,8 +66,16 @@ def slim_timeseries():
     slim_cells = set(slim.cell.unique())
     missing = raw_cells - slim_cells
     assert not missing, f'lost cells during filter: {missing}'
-    assert set(slim.cell.unique()) <= PLOT_CELLS, 'extra cells leaked through'
-    assert set(slim.result_name.unique()) <= PLOT_RESULTS, 'extra result_names leaked'
+    assert set(slim.cell.unique()) <= PLOT_CELLS, (
+        f'extra cells: {set(slim.cell.unique()) - PLOT_CELLS}'
+    )
+    assert set(slim.result_name.unique()) <= PLOT_RESULTS, (
+        f'extra result_names: {set(slim.result_name.unique()) - PLOT_RESULTS}'
+    )
+    assert len(slim) > 0, (
+        f'no rows matched the plot whitelist. Raw cells (sample): '
+        f'{sorted(ts.cell.unique())[:10]}. Check PLOT_CELLS is up to date.'
+    )
     slim.to_parquet(dst, index=False, compression='zstd')
     print(f'timeseries: {len(ts):>7d} rows ({src.stat().st_size/1024:>6.0f} KB) '
           f'-> {len(slim):>7d} rows ({dst.stat().st_size/1024:>6.0f} KB)')
@@ -85,6 +93,11 @@ def slim_snapshots():
     slim = sn[(sn.cell == 'SOC') & (sn.year == SNAP_YEAR)].reset_index(drop=True)
     assert (slim.cell == 'SOC').all(), 'non-SOC cells leaked'
     assert (slim.year == SNAP_YEAR).all(), 'non-SNAP_YEAR rows leaked'
+    assert len(slim) > 0, (
+        f'no snapshot rows matched cell=SOC and year={SNAP_YEAR}. '
+        f'Raw snapshot years: {sorted(sn.year.unique())}; cells (sample): '
+        f'{sorted(sn.cell.unique())[:5]}.'
+    )
     slim.to_parquet(dst, index=False, compression='zstd')
     print(f'snapshots:  {len(sn):>7d} rows ({src.stat().st_size/1024:>6.0f} KB) '
           f'-> {len(slim):>7d} rows ({dst.stat().st_size/1024:>6.0f} KB)')
