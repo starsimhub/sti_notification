@@ -36,13 +36,8 @@ DISEASES = [('ng', 'Gonorrhoea'), ('ct', 'Chlamydia'),
 YEARS = 2040 - 2027
 INTV = 2027
 
-# Syphilis prevalence uses the WHO "early infectious syphilis" slice
-# (primary + secondary + early latent) rather than raw prevalence, since
-# most syphilis infections settle into non-infectious late latency.
 PREV_RESULT_NAME = {d: 'prevalence' for d, _ in DISEASES}
-PREV_RESULT_NAME['syph'] = 'sexually_transmissible_prevalence'
 PREV_COL = {d: f'{d}_prev_end' for d, _ in DISEASES}
-PREV_COL['syph'] = 'syph_sti_prev_end'
 
 
 def med_iqr(vals):

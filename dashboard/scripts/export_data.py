@@ -17,11 +17,9 @@ from scenarios import (          # noqa: E402
 
 DISEASES = ['ng', 'ct', 'tv', 'syph']
 PREV_COL = {d: f'{d}_prev_end' for d in DISEASES}
-PREV_COL['syph'] = 'syph_sti_prev_end'
 
 TS_DISEASES = ['ng', 'ct', 'tv', 'syph']
 TS_RESULT_NAME = {d: 'prevalence' for d in TS_DISEASES}
-TS_RESULT_NAME['syph'] = 'sexually_transmissible_prevalence'
 TS_YEAR_START = 2025
 TS_YEAR_END = 2040
 
