@@ -18,7 +18,7 @@ import matplotlib.pyplot as pl
 
 REPO = Path(__file__).resolve().parent.parent
 FIGS = REPO / 'figures'
-TS = REPO / 'results' / 'scenarios_timeseries.parquet'
+TS = REPO / 'raw_results' / 'scenarios_timeseries.parquet'
 FONT = '/Users/robynstuart/gf/syph_dx_zim/assets/LibertinusSans-Regular.otf'
 
 LEVELS = ['baseline', 'low', 'moderate', 'high']

@@ -22,7 +22,7 @@ import sciris as sc
 import matplotlib.pyplot as pl
 
 REPO = Path(__file__).resolve().parent.parent
-TS = REPO / 'results' / 'scenarios_smoke_timeseries.parquet'
+TS = REPO / 'raw_results' / 'scenarios_smoke_timeseries.parquet'
 KAVG = REPO / 'results' / 'scenarios_smoke.kavg.csv'
 FIG_DIR = REPO / 'figures'
 FONT = '/Users/robynstuart/gf/syph_dx_zim/assets/LibertinusSans-Regular.otf'
