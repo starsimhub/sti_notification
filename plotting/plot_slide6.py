@@ -36,6 +36,14 @@ DISEASES = [('ng', 'Gonorrhoea'), ('ct', 'Chlamydia'),
 YEARS = 2040 - 2027
 INTV = 2027
 
+# Syphilis prevalence uses the WHO "early infectious syphilis" slice
+# (primary + secondary + early latent) rather than raw prevalence, since
+# most syphilis infections settle into non-infectious late latency.
+PREV_RESULT_NAME = {d: 'prevalence' for d, _ in DISEASES}
+PREV_RESULT_NAME['syph'] = 'sexually_transmissible_prevalence'
+PREV_COL = {d: f'{d}_prev_end' for d, _ in DISEASES}
+PREV_COL['syph'] = 'syph_sti_prev_end'
+
 
 def med_iqr(vals):
     return np.median(vals), np.quantile(vals, 0.25), np.quantile(vals, 0.75)
@@ -143,8 +151,8 @@ def build_ts_grid_figure(k, ts, arms, arm_c, out_name='fig.png'):
                                           width_ratios=[3.4, 1.2], wspace=0.35)
         ax_ts = fig.add_subplot(inner_p[0])
         ax_bar = fig.add_subplot(inner_p[1])
-        draw_ts_panel(ax_ts, ts_sub, d, 'prevalence', arms, arm_c)
-        draw_endpoint_bar(ax_bar, k, d, f'{d}_prev_end', arms, arm_c,
+        draw_ts_panel(ax_ts, ts_sub, d, PREV_RESULT_NAME[d], arms, arm_c)
+        draw_endpoint_bar(ax_bar, k, d, PREV_COL[d], arms, arm_c,
                           is_scaled_millions=False)
         ax_ts.set_title(dname, fontsize=12.5, pad=6)
         ax_bar.set_title('2040', fontsize=9, pad=3, color='#666')
