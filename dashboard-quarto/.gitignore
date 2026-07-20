@@ -1,6 +1,0 @@
-/.quarto/
-/_site/
-/__pycache__/
-*.py[cod]
-
-**/*.quarto_ipynb

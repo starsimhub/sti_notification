@@ -5,7 +5,6 @@ transforms) and exposes tidy long frames + median/IQR aggregation helpers.
 Replaces dashboard/scripts/export_data.py + dashboard/src/utils/dataTransforms.js.
 """
 
-import json
 from pathlib import Path
 
 import numpy as np
@@ -64,18 +63,13 @@ def load_scenarios_long():
 def load_timeseries():
     """Prevalence + new-infection trajectories per (arm, disease, year).
 
-    Sourced from ``data/timeseries.json`` — the median trajectories whose
-    end-of-horizon values match the scalar table ``scenarios.kavg.csv``
-    (e.g. ng 2040 prevalence 0.0176 == ng_prev_end). NOTE: the committed
-    ``results/scenarios_timeseries.parquet`` is from a *different* run (draws
-    14/16/47, 126 cells) than the scalar table (draws 75/78/236/263/343, 65
-    cells), so it does not match the bars and is deliberately not used here.
-    Regenerate that parquet from the current run to switch back to it.
+    Read from the committed ``data/timeseries.csv``, produced by
+    ``scripts/export_timeseries.py``. Its end-of-horizon values match the scalar
+    table ``scenarios.kavg.csv`` (e.g. ng 2040 prevalence 0.0176 == ng_prev_end).
+    See ``README.md`` for why this pre-aggregated file exists rather than reading
+    ``results/scenarios_timeseries.parquet`` directly.
     """
-    recs = json.loads((HERE / 'data' / 'timeseries.json').read_text())
-    df = pd.DataFrame(recs).rename(
-        columns={'care_level': 'care', 'pn_level': 'pn', 'bp_level': 'bp'})
-    return df[['care', 'pn', 'bp', 'poc', 'disease', 'metric', 'year', 'value']]
+    return pd.read_csv(HERE / 'data' / 'timeseries.csv')
 
 
 def load_diagnostic_performance():

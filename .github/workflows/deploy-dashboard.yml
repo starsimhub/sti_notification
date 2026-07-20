@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - 'dashboard/**'
+      - 'results/scenarios.kavg.csv'
+      - 'results/slide4_diagnostic_performance.csv'
       - '.github/workflows/deploy-dashboard.yml'
   workflow_dispatch:
 
@@ -22,16 +24,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: quarto-dev/quarto-actions/setup@v2
+      - uses: actions/setup-python@v5
         with:
-          node-version: 20
-      - run: npm ci
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
         working-directory: dashboard
-      - run: npm run build
+      - run: quarto render
         working-directory: dashboard
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: dashboard/dist
+          path: dashboard/_site
 
   deploy:
     needs: build
