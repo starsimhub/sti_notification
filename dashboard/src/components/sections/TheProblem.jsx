@@ -2,6 +2,7 @@ import diagnosticPerformance from '../../data/diagnostic_performance.json';
 import figSlide2 from '../../assets/figures/fig_slide2.png';
 import figSlide3 from '../../assets/figures/fig_slide3.png';
 import figSlide4 from '../../assets/figures/fig_slide4.png';
+import fig1Algos from '../../assets/figures/fig1_algos.png';
 
 const DISEASE_ORDER = ['Gonorrhoea', 'Chlamydia', 'Trichomoniasis', 'Syphilis'];
 
@@ -43,6 +44,30 @@ export default function TheProblem() {
           sensitivity and specificity, but at the prevalences seen among women presenting
           with vaginal discharge syndrome, even a highly performant test leaves a meaningful
           share of false positives — POC narrows the overtreatment gap without closing it.
+        </p>
+
+        <img
+          src={fig1Algos}
+          alt="Syndromic management vs POC diagnostic algorithm for vaginal discharge syndrome"
+          className="w-full border border-gray-200 rounded-lg mb-2"
+        />
+        <p className="text-xs text-brand-gray mb-8">
+          The two algorithms this dashboard compares as &quot;SOC&quot; and &quot;POC&quot;.
+          (A) Syndromic management: a risk assessment and exam route women toward a spread of
+          treatment outcomes that only loosely track true infection status — whether or not
+          she has a cervical infection, some women are over-treated and some are missed.
+          (B) A POC diagnostic for NG/CT/TV replaces the risk assessment with a test result,
+          so treatment tracks the identified infection directly; presumptive BV treatment is
+          unchanged. Reused from the companion VDS diagnostics analysis (
+          <code>stisim_vddx_zim</code>).
+        </p>
+
+        <p className="text-brand-gray mb-8">
+          But diagnostic accuracy only helps people who reach care. Roughly a third of
+          symptomatic women in sub-Saharan Africa never seek treatment at all, and even
+          treated index cases often don&apos;t lead to their partners being notified and
+          treated in turn — the gap this dashboard&apos;s demand-generation scenarios
+          (care-seeking, partner notification, bundled prevention) are designed to close.
         </p>
 
         <h2 className="text-lg font-semibold text-brand-blue mb-3">
