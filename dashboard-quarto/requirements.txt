@@ -1,0 +1,4 @@
+# Runtime deps for `quarto render` of the dashboard (CI + local).
+pandas
+plotly
+jupyter

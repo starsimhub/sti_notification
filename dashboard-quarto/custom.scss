@@ -1,0 +1,70 @@
+/*-- scss:defaults --*/
+// Brand palette (ported from the React dashboard's tailwind config)
+$brand-teal:  #0E7490;
+$brand-blue:  #1B4F72;
+$brand-gray:  #6B7280;
+$brand-gray-light: #F3F4F6;
+
+$primary: $brand-teal;
+$body-color: #1f2937;
+$link-color: $brand-teal;
+$font-size-root: 16px;
+$h1-font-size: 2rem;
+$h2-font-size: 1.5rem;
+$h3-font-size: 1.05rem;
+
+/*-- scss:rules --*/
+h1, h2 { color: $brand-blue; font-weight: 700; }
+h3 { color: $brand-blue; font-weight: 600; }
+
+// Alternate section shading to echo the React "gray band" sections.
+.band {
+  background: $brand-gray-light;
+  padding: 2rem 1.5rem;
+  border-radius: 12px;
+  margin: 1.25rem 0 2rem;
+}
+
+.caption, .fig-note { color: $brand-gray; font-size: 0.8rem; }
+
+// Compact, bordered data tables like the React version.
+table.dash {
+  width: 100%;
+  font-size: 0.9rem;
+  border-collapse: collapse;
+  border: 1px solid #e5e7eb;
+  th { background: $brand-gray-light; text-align: left; padding: 0.4rem 0.6rem; }
+  td { border-top: 1px solid #f0f0f0; padding: 0.4rem 0.6rem; }
+  td.num, th.num { text-align: right; }
+}
+
+// Observable input group: align labels in a tidy column.
+.ojs-in-a-box form { margin: 0.15rem 0; }
+
+// Static figures: full-width, bordered, no caption (matches the React <img>).
+img.dash-fig {
+  width: 100%;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+
+// Tab-style metric selector in the explorer (ported from MetricTabs.jsx).
+.metric-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+.metric-tabs button {
+  border: none;
+  background: transparent;
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  color: $brand-gray;
+  cursor: pointer;
+}
+.metric-tabs button.active { background: $brand-teal; color: #fff; }
+.metric-tabs button:hover:not(.active) { background: $brand-gray-light; }

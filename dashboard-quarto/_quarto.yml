@@ -1,0 +1,40 @@
+project:
+  type: website
+  output-dir: _site
+
+website:
+  title: "STI Notification — Scenario Dashboard"
+  navbar:
+    background: light
+    pinned: true
+    left:
+      - text: "Introduction"
+        href: "index.html#title-block-header"
+      - text: "How POC helps"
+        href: "index.html#results-poc"
+      - text: "Hypothesis"
+        href: "index.html#hypothesis"
+      - text: "Combined"
+        href: "index.html#results-combined"
+      - text: "Explorer"
+        href: "index.html#explorer"
+      - text: "Methods"
+        href: "index.html#methods"
+  page-footer:
+    left: "sti_notification project — Institute for Disease Modeling. Rendered from committed results tables with a single `quarto render` (no build step)."
+
+format:
+  html:
+    theme: [cosmo, custom.scss]
+    toc: true
+    toc-location: left
+    fig-responsive: true
+    grid:
+      body-width: 900px
+
+execute:
+  echo: false
+  warning: false
+  freeze: false
+
+jupyter: python3
