@@ -62,17 +62,37 @@ END_YEAR = 2040
 N_AGENTS = 10_000
 
 # Annualised time series we want per (cell, draw, seed).
+# Include enough that re-processing (process_results.py) can pick up new metrics
+# without re-running the factorial. Keep out of scope: cross-sectional counts
+# (n_infected etc.) which have no plotting story.
 TS_RESULTS = {
-    'hiv':  ['prevalence', 'prevalence_f', 'prevalence_m', 'prevalence_15_49', 'new_infections'],
-    'ng':   ['prevalence', 'prevalence_f', 'prevalence_m', 'new_infections'],
-    'ct':   ['prevalence', 'prevalence_f', 'prevalence_m', 'new_infections'],
-    'tv':   ['prevalence', 'prevalence_f', 'prevalence_m', 'new_infections'],
+    'hiv':  ['prevalence', 'prevalence_f', 'prevalence_m', 'prevalence_15_49',
+             'new_infections',
+             'new_diagnoses', 'new_treated'],
+    'ng':   ['prevalence', 'prevalence_f', 'prevalence_m', 'new_infections',
+             'new_diagnoses', 'new_treated', 'new_treated_success',
+             'new_treated_unnecessary'],
+    'ct':   ['prevalence', 'prevalence_f', 'prevalence_m', 'new_infections',
+             'new_diagnoses', 'new_treated', 'new_treated_success',
+             'new_treated_unnecessary'],
+    'tv':   ['prevalence', 'prevalence_f', 'prevalence_m', 'new_infections',
+             'new_diagnoses', 'new_treated', 'new_treated_success',
+             'new_treated_unnecessary'],
     'syph': ['prevalence', 'prevalence_f', 'prevalence_m', 'new_infections',
+             'new_diagnoses', 'new_treated', 'new_treated_success',
+             'new_treated_unnecessary',
              'sexually_transmissible_prevalence',
              'sexually_transmissible_prevalence_f',
              'sexually_transmissible_prevalence_m',
              'symptomatic_prevalence', 'primary_prevalence',
              'trep_prevalence_15_64', 'nontrep_prevalence_15_64'],
+}
+
+# Intervention-level TS. Keyed by intervention name lookup on sim.interventions.
+INTV_TS_RESULTS = {
+    'pn': ['new_notified', 'new_notified_current', 'new_notified_previous',
+           'new_notified_no_sti', 'new_attending', 'new_attended_no_sti',
+           'new_index_total', 'new_index_no_sti'],
 }
 # Age x sex prevalence bases for snapshot years. Auto-discovers
 # {base}_{f|m}_{age1}_{age2} variants from the disease's result keys.
@@ -229,11 +249,12 @@ def _annualize(result):
 
 
 def extract_timeseries(sim, cell, draw, sub_idx, seed):
-    """Annualised TS rows for STI prevalences + incidence + key syph variants."""
+    """Annualised TS rows for disease-level + intervention-level metrics."""
     rows = []
     base = dict(cell=cell['label'], care=cell['care'], pn=cell['pn'],
                 bp=cell['bp'], poc=bool(cell['poc']),
                 draw=int(draw), sub_idx=int(sub_idx), seed=int(seed))
+    # Disease-level TS.
     for disease_name, result_names in TS_RESULTS.items():
         dres = sim.results.get(disease_name)
         if dres is None:
@@ -247,6 +268,21 @@ def extract_timeseries(sim, cell, draw, sub_idx, seed):
             for y, v in zip(years, values):
                 rows.append({**base,
                              'disease': disease_name, 'result_name': rname,
+                             'year': int(y), 'value': float(v)})
+    # Intervention-level TS.
+    for intv_name, result_names in INTV_TS_RESULTS.items():
+        intv = sim.interventions.get(intv_name)
+        if intv is None or not hasattr(intv, 'results'):
+            continue
+        for rname in result_names:
+            if rname not in intv.results:
+                continue
+            years, values = _annualize(intv.results[rname])
+            if years is None:
+                continue
+            for y, v in zip(years, values):
+                rows.append({**base,
+                             'disease': intv_name, 'result_name': rname,
                              'year': int(y), 'value': float(v)})
     return rows
 
