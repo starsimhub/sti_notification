@@ -46,7 +46,7 @@ def preset_compare(presets):
     """Bar + line grids for prevalence and new infections (as PresetTimeseriesCompare)."""
     for metric, bar_label, ts_label in [
         ("prevalence", "End-of-horizon prevalence", "Prevalence"),
-        ("new_inf", "New infections (cumulative)", "New infections"),
+        ("new_infections", "New infections (cumulative)", "New infections"),
     ]:
         charts.bar_grid(LONG, presets, metric, bar_label).show()
         charts.ts_grid(TS, presets, metric, ts_label).show()
@@ -159,7 +159,7 @@ Check any combination of care-seeking, partner-notification, and bundled-prevent
 
 ```{python}
 # | label: ojs-data
-_metrics = ["prevalence", "new_inf", "overtreatment"]
+_metrics = ["prevalence", "new_infections", "overtreatment"]
 _sc = LONG[(LONG["metric"].isin(_metrics)) & (LONG["disease"].isin([d for d, _ in prep.DISEASES]))].copy()
 _sc["disease_label"] = _sc["disease"].map(prep.DISEASE_LABEL)
 _sc = _sc[["care", "pn", "bp", "poc", "draw", "disease_label", "metric", "value"]].dropna(subset=["value"])
@@ -179,7 +179,7 @@ ojs_define(ts_raw=_ts)
 ```{ojs}
 //| label: ojs-inputs
 viewof metric = {
-  const opts = [["prevalence", "Prevalence"], ["new_inf", "New infections"],
+  const opts = [["prevalence", "Prevalence"], ["new_infections", "New infections"],
                 ["overtreatment", "Overtreatment"], ["notification", "PN over/under-notification"]];
   const root = html`<div class="metric-tabs">`;
   const btns = opts.map(([val, label]) => {
@@ -209,8 +209,8 @@ scenarios = transpose(scenario_raw)
 notif = transpose(notif_raw)
 timeseries = transpose(ts_raw)
 diseaseOrder = ["Gonorrhoea", "Chlamydia", "Trichomoniasis", "Syphilis"]
-metricLabels = ({prevalence: "End-of-horizon prevalence", new_inf: "New infections (cumulative)", overtreatment: "Overtreatment rate"})
-tsLabels = ({prevalence: "Prevalence", new_inf: "New infections"})
+metricLabels = ({prevalence: "End-of-horizon prevalence", new_infections: "New infections (cumulative)", overtreatment: "Overtreatment rate"})
+tsLabels = ({prevalence: "Prevalence", new_infections: "New infections"})
 palette = ["#0E7490", "#B35806", "#2E86C1", "#6A9F58", "#A6449B", "#C2871C", "#D6604D", "#4F6D7A"]
 
 // Cross-product of checked levels. Labels drop any axis with a single level
@@ -262,7 +262,7 @@ diseaseAgg = {
 }
 
 tsAgg = {
-  if (metric !== "prevalence" && metric !== "new_inf") return [];
+  if (metric !== "prevalence" && metric !== "new_infections") return [];
   const rows = timeseries.filter(d => d.metric === metric);
   const out = [];
   for (const dl of diseaseOrder) {
