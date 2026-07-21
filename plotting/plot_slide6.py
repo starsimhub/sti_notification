@@ -45,14 +45,21 @@ def med_iqr(vals):
 
 
 def ts_slice(ts, cell, disease, result_name):
-    """Return (years, per-draw values) for a single (cell, disease, metric)."""
-    d = ts[(ts.cell == cell) & (ts.disease == disease)
-           & (ts.result_name == result_name)]
+    """Return (years, median, p_lo, p_hi) for a single (cell, disease, metric).
+
+    Reads the aggregated parquet directly — no per-draw pivot needed.
+    """
+    d = (ts[(ts.cell == cell) & (ts.disease == disease)
+            & (ts.result_name == result_name)]
+         .sort_values('year'))
     if len(d) == 0:
-        return np.array([]), np.array([])
-    piv = d.pivot_table(index='year', columns='draw', values='value',
-                        aggfunc='first')
-    return piv.index.to_numpy(), piv.to_numpy()  # (n_years, n_draws)
+        empty = np.array([])
+        return empty, empty, empty, empty
+    years = d['year'].to_numpy()
+    med = d['median'].to_numpy()
+    lo = d['p_lo'].to_numpy() if 'p_lo' in d.columns else med
+    hi = d['p_hi'].to_numpy() if 'p_hi' in d.columns else med
+    return years, med, lo, hi
 
 
 def draw_ts_panel(ax, ts, disease, result_name, arms, arm_c, scale=1.0, fs=10,
@@ -66,21 +73,20 @@ def draw_ts_panel(ax, ts, disease, result_name, arms, arm_c, scale=1.0, fs=10,
     """
     ymax = 0
     for arm_label, cell in arms.items():
-        years, vals = ts_slice(ts, cell, disease, result_name)
+        years, med, lo, hi = ts_slice(ts, cell, disease, result_name)
         if len(years) == 0:
             continue
-        v = vals * scale
-        med = np.median(v, axis=1)
-        q1 = np.quantile(v, 0.25, axis=1)
-        q3 = np.quantile(v, 0.75, axis=1)
+        med = med * scale
+        lo = lo * scale
+        hi = hi * scale
         mask = (years >= 2015) & (years <= end_year)
         cc = arm_c[arm_label]
         if band:
-            ax.fill_between(years[mask], q1[mask], q3[mask], color=cc,
-                            alpha=0.18, zorder=2, linewidth=0)
+            ax.fill_between(years[mask], lo[mask], hi[mask], color=cc,
+                            alpha=0.18, linewidth=0)
         ax.plot(years[mask], med[mask], color=cc, lw=1.6, zorder=3,
                 label=arm_label)
-        ymax = max(ymax, q3[mask].max() if band else med[mask].max())
+        ymax = max(ymax, hi[mask].max() if band else med[mask].max())
     ax.axvline(INTV, color='#999', lw=0.8, ls='--', zorder=1)
     ax.set_xlim(2015, 2040)
     ax.set_ylim(0, ymax * 1.10 if ymax > 0 else 1)
