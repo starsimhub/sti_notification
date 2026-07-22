@@ -19,7 +19,9 @@ conda run -n starsim python plotting/plot_slide6.py
 | 9 | `plot_slide9.py` | `fig_slide9.png` | same as slide 6 |
 | 10 | `plot_slide10.py` | `fig_slide10.png` | same as slide 6 |
 | 11 | `plot_slide11.py` | `fig_slide11.png` | same as slide 6 |
-| 12 | `plot_slide12.py` | `fig_slide12.png` (4-panel heatmap: % reduction in cum. NG+CT+TV+syph infections vs SOC, care × PN, one panel per BP level) | `scenarios_timeseries.parquet` |
+| 12 | `plot_slide12.py` | `fig_slide12.png` (4-panel heatmap: % reduction vs SOC in median cumulative NG+CT+TV+syph infections, 2027–2040; care × PN axes, one panel per BP level). Also exports `draw_heatmap_grid` + `cell_median_pct_reduction` helpers used by slides 13/14. | `scenarios.kavg.csv` |
+| 13 | `plot_slide13.py` | `fig_slide13.png` (same layout, metric: % reduction in cumulative unnecessary NG+CT+TV+syph treatments). | `scenarios.kavg.csv` |
+| 14 | `plot_slide14.py` | `fig_slide14.png` (same layout, metric: % reduction in the *rate* of female PN indexes without STI = `no_sti_f / total_f`). | `scenarios.kavg.csv` |
 
 Slide 1's cascade figure (`fig_cascades_4panel_soc.png`) is produced by
 `../exploratory/plot_cascade.py`. Slide 2 is text only. Slide 4's

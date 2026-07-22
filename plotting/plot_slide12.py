@@ -2,9 +2,13 @@
 
 Panels: BP = none / low / moderate / high.
 Each panel: care-seeking (rows, baseline at bottom) x PN intensity (cols) heatmap.
-Cells: (SOC_total - cell_total) / SOC_total * 100, where the totals sum
-median cumulative new_infections across 4 curable STIs (NG + CT + TV + syph)
-over the intervention window 2027-2040.
+Cells: (SOC_median - cell_median) / SOC_median * 100, where each cell's total
+is the sum of window-cumulative new_infections across 4 curable STIs
+(NG + CT + TV + syph) and the median is across draws.
+
+Also exports ``draw_heatmap_grid`` — the shared 4-panel drawing helper — for
+use by slides 13 (overtreatment) and 14 (unnecessary F->M PN), which read the
+same K-avg CSV and only differ in the per-arm scalar they compute.
 
     conda run -n starsim python plot_slide12.py
 """
@@ -18,52 +22,59 @@ import pandas as pd
 import sciris as sc
 
 REPO = Path(__file__).resolve().parents[1]
-TS = REPO / 'results' / 'scenarios_timeseries.parquet'
-OUT_PNG = REPO / 'figures' / 'fig_slide12.png'
+KAVG = REPO / 'results' / 'scenarios.kavg.csv'
 FONT = str(REPO / 'assets' / 'LibertinusSans-Regular.otf')
 
 DISEASES = ('ng', 'ct', 'tv', 'syph')
 CARE_LEVELS = ('baseline', 'low', 'moderate', 'high')
 PN_LEVELS = ('baseline', 'low', 'moderate', 'high')
 BP_PANELS = ('none', 'low', 'moderate', 'high')
-WINDOW = (2027, 2040)
 
 
-def cumulative_by_arm(df):
-    """Sum median new_infections across 2027-2040 and across the 4 diseases,
-    keyed by (cell, care, pn, bp, poc). Returns a DataFrame with one row per arm."""
-    w = df[(df.result_name == 'new_infections')
-           & (df.disease.isin(DISEASES))
-           & (df.year >= WINDOW[0]) & (df.year <= WINDOW[1])]
-    return (w.groupby(['cell', 'care', 'pn', 'bp', 'poc'], dropna=False)['median']
-             .sum().reset_index(name='cum_inf'))
+def cell_median_pct_reduction(kavg, per_draw_metric):
+    """Given kavg (per (cell, draw) scalars) and a callable that returns the
+    per-draw metric for a row, compute median across draws per cell then the
+    percent reduction of each POC arm vs SOC.
+
+    Returns a DataFrame with columns [care, pn, bp, pct_reduction].
+    """
+    df = kavg.copy()
+    df['metric'] = per_draw_metric(df)
+    cell_med = df.groupby(['cell', 'care', 'pn', 'bp'], dropna=False)['metric'].median()
+    soc_med = float(cell_med.loc['SOC'].iloc[0])
+    poc = (cell_med.reset_index()
+                    .query('cell != "SOC"')
+                    .assign(pct_reduction=lambda d: 100.0 * (soc_med - d['metric']) / soc_med))
+    return poc[['care', 'pn', 'bp', 'pct_reduction']]
 
 
-def main():
+def draw_heatmap_grid(arm_pct, cbar_label, out_png):
+    """4-panel heatmap: care x PN (rows x cols), one panel per BP level.
+
+    arm_pct: DataFrame with columns [care, pn, bp, pct_reduction], one row per
+    POC arm (typically 64 rows: 4 x 4 x 4 factorial).
+    cbar_label: multi-line label for the shared colorbar.
+    out_png: destination Path for the figure PNG.
+    """
     sc.fonts(add=FONT)
     sc.options(font='Libertinus Sans', fontsize=11)
 
-    df = pd.read_parquet(TS)
-    arm = cumulative_by_arm(df)
-    soc_total = float(arm.loc[arm.cell == 'SOC', 'cum_inf'].iloc[0])
-    poc = arm[arm.poc == True].copy()
-    poc['pct_reduction'] = 100.0 * (soc_total - poc['cum_inf']) / soc_total
-
     fig, axes = pl.subplots(1, 4, figsize=(12, 5),
                             gridspec_kw=dict(wspace=0.15))
-    # Shared color scale across panels so panel-to-panel comparisons work.
-    vmin = float(poc['pct_reduction'].min())
-    vmax = float(poc['pct_reduction'].max())
-    # Symmetric-ish around 0 if any negatives, else just [0, vmax].
+
+    vmin = float(arm_pct['pct_reduction'].min())
+    vmax = float(arm_pct['pct_reduction'].max())
+    # Diverging cmap centered on 0 if any negatives; otherwise sequential.
     if vmin < 0:
         m = max(abs(vmin), abs(vmax))
         vmin, vmax, cmap = -m, m, 'RdBu_r'
     else:
         cmap = 'viridis'
+    cmap_obj = pl.get_cmap(cmap)
 
     grids = []
     for bp in BP_PANELS:
-        sub = poc[poc.bp == bp]
+        sub = arm_pct[arm_pct.bp == bp]
         g = (sub.pivot_table(index='care', columns='pn', values='pct_reduction')
                 .reindex(index=CARE_LEVELS, columns=PN_LEVELS))
         grids.append(g)
@@ -82,10 +93,9 @@ def main():
             ax.set_yticklabels([])
         ax.set_xlabel('Partner notification')
         ax.set_title(f'Bundled prevention: {bp}', fontsize=11)
-        # Cell annotations. Text colour picked from the underlying rgba's luminance
-        # so it stays readable across the whole colormap (viridis is dark at low
-        # values, bright yellow at high — a single fixed colour won't work).
-        cmap_obj = pl.get_cmap(cmap)
+        # Cell text: pick colour from the underlying rgba's luminance so it
+        # stays readable across the full colormap (viridis is dark at low
+        # values, bright yellow at high).
         for i in range(g.shape[0]):
             for j in range(g.shape[1]):
                 v = g.iat[i, j]
@@ -101,12 +111,24 @@ def main():
 
     cbar = fig.colorbar(im, ax=axes, orientation='vertical', shrink=0.85,
                         pad=0.02, fraction=0.03)
-    cbar.set_label('Reduction vs SOC (%)\ncum. NG+CT+TV+syph infections 2027–2040',
-                   fontsize=9)
+    cbar.set_label(cbar_label, fontsize=9)
 
-    OUT_PNG.parent.mkdir(exist_ok=True)
-    fig.savefig(OUT_PNG, dpi=200, bbox_inches='tight')
-    print(f'wrote {OUT_PNG}')
+    out_png.parent.mkdir(exist_ok=True)
+    fig.savefig(out_png, dpi=200, bbox_inches='tight')
+    print(f'wrote {out_png}')
+
+
+def main():
+    kavg = pd.read_csv(KAVG)
+    arm_pct = cell_median_pct_reduction(
+        kavg,
+        lambda df: df[[f'{d}_new_inf' for d in DISEASES]].sum(axis=1),
+    )
+    draw_heatmap_grid(
+        arm_pct,
+        cbar_label='Reduction vs SOC (%)\ncum. NG+CT+TV+syph infections 2027–2040',
+        out_png=REPO / 'figures' / 'fig_slide12.png',
+    )
 
 
 if __name__ == '__main__':

@@ -41,7 +41,7 @@ For the full pipeline (factorial + aggregation + figures), see
 | `run_scenarios.py` | **Scenario driver**: SOC + POC 3-factor full factorial over the calibrated ensemble. Writes fat outputs to `raw_results/` and the K=5-averaged scalar CSV to `results/`. |
 | `process_results.py` | Aggregates `raw_results/*.parquet` (per-draw) into `results/*.parquet` (median + p25 + p75 across draws). Configurable at the top: `result_names`, `diseases`, `years`, `quantiles`. Re-processing does not require a factorial rerun. |
 | `experiments/` | **Calibrations only** (dated, sequential): `01_2026-06-15_…` through `06_2026-06-24_kseed_calibration/` (active baseline) |
-| `plotting/` | Deck plotting scripts (`plot_slide3.py` … `plot_slide12.py` + shared helpers; superseded scripts in `plotting/archive/`). See [plotting/README.md](plotting/README.md) |
+| `plotting/` | Deck plotting scripts (`plot_slide3.py` … `plot_slide14.py` + shared helpers; superseded scripts in `plotting/archive/`). See [plotting/README.md](plotting/README.md) |
 | `exploratory/` | Superseded / one-off plot + analysis scripts (plus the supplementary `plot_epi.py` + `plot_pn_story.py`). See [exploratory/README.md](exploratory/README.md) |
 | `dashboard/` | Static Quarto site presenting the scenario results. See [dashboard/README.md](dashboard/README.md) |
 | `figures/` | Deck slide PNGs at the top level; `figures/archive/` = superseded figures; `figures/supplementary/` = supplementary materials. See [figures/README.md](figures/README.md) |
