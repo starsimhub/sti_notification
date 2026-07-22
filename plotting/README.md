@@ -19,8 +19,7 @@ conda run -n starsim python plotting/plot_slide6.py
 | 9 | `plot_slide9.py` | `fig_slide9.png` | same as slide 6 |
 | 10 | `plot_slide10.py` | `fig_slide10.png` | same as slide 6 |
 | 11 | `plot_slide11.py` | `fig_slide11.png` | same as slide 6 |
-| 12 | `plot_slide12.py` | `fig_slide12.png` | `scenarios.kavg.csv` |
-| 13 | `plot_slide13.py` | `fig_slide13.png` | `scenarios.kavg.csv` |
+| 12 | `plot_slide12.py` | `fig_slide12.png` (4-panel heatmap: % reduction in cum. NG+CT+TV+syph infections vs SOC, care × PN, one panel per BP level) | `scenarios_timeseries.parquet` |
 
 Slide 1's cascade figure (`fig_cascades_4panel_soc.png`) is produced by
 `../exploratory/plot_cascade.py`. Slide 2 is text only. Slide 4's

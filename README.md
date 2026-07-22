@@ -41,7 +41,7 @@ conda run -n starsim env N_DRAWS=5 N_SEEDS=5 N_WORKERS=80 python run_scenarios.p
 | `scenarios.py` | The three scenario ladders: `CARE_SEEKING`, `PN_INTENSITY`, `BUNDLED_PREVENTION` |
 | `run_scenarios.py` | **Scenario driver**: SOC + POC 3-factor full factorial over the calibrated ensemble |
 | `experiments/` | **Calibrations only** (dated, sequential): `01_2026-06-15_…` through `06_2026-06-24_kseed_calibration/` (active baseline) |
-| `plotting/` | Deck plotting scripts (`plot_slide3.py` … `plot_slide13.py` + shared helpers). See [plotting/README.md](plotting/README.md) |
+| `plotting/` | Deck plotting scripts (`plot_slide3.py` … `plot_slide12.py` + shared helpers; superseded scripts in `plotting/archive/`). See [plotting/README.md](plotting/README.md) |
 | `exploratory/` | Superseded / one-off plot + analysis scripts. See [exploratory/README.md](exploratory/README.md) |
 | `figures/` | Deck slide PNGs at the top level; `figures/archive/` = superseded exploratory figures; `figures/supplementary/` = supplementary materials |
 | `results/` | Scenario run outputs. `scenarios.kavg.csv` (K=5-averaged scalars) + `specificity.csv` + `soc_overtreatment.csv` committed; per-sim `scenarios.jsonl` + time-series / snapshot parquets are VM-only — see [CLAUDE.md](CLAUDE.md) §"VM-only data files" |
