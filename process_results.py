@@ -27,7 +27,7 @@ OUT = REPO / 'results'
 DEFAULT_RESULT_NAMES = ('prevalence', 'new_infections',
                         'prevalence_f', 'prevalence_m')
 DEFAULT_DISEASES = ('ng', 'ct', 'tv', 'syph', 'hiv')
-DEFAULT_YEARS = (2015, 2040)
+DEFAULT_YEARS = (1990, 2040)
 DEFAULT_QUANTILES = (0.25, 0.75)   # None → median only
 
 # Snapshot config — fig_epi_overview only wants SOC at 2027.
