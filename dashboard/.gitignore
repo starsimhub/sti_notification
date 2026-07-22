@@ -4,3 +4,6 @@
 *.py[cod]
 
 **/*.quarto_ipynb
+
+# Stale CSV — dashboard now reads results/scenarios_timeseries.parquet
+data/timeseries.csv
