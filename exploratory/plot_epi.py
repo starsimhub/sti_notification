@@ -57,10 +57,6 @@ def set_font(size=9):
     sc.options(font='Libertinus Sans', fontsize=size)
 
 
-def med_range(g):
-    """median, min, max over draws for a grouped value series."""
-    return g.median(), g.min(), g.max()
-
 
 # ---------------------------------------------------------------- data overlays
 def ts_data(d):
@@ -85,21 +81,21 @@ def ts_data(d):
 # ---------------------------------------------------------------- figure
 def main():
     set_font(9)
-    ts = pd.read_parquet(TS).query("cell == 'SOC'")
+    ts = pd.read_parquet(TS).query("cell == 'SOC'").sort_values('year')
     sn = pd.read_parquet(SNAP).query("cell == 'SOC' and year == @SNAP_YEAR")
-    ndraws = ts.draw.nunique()
 
     fig, axes = pl.subplots(2, 5, figsize=(12.15, 5))
 
-    # --- top row: prevalence TS by sex (median + range) + data ---
+    # --- top row: prevalence TS by sex (median + ribbon) + data ---
     for ax, d in zip(axes[0], DISEASES):
         for sex, col in [('f', F_COLOR), ('m', M_COLOR)]:
             s = ts[(ts.disease == d) & (ts.result_name == f'prevalence_{sex}')]
-            g = s.groupby('year').value
-            med, lo, hi = med_range(g)
-            yr = med.index.values
-            ax.fill_between(yr, lo.values * 100, hi.values * 100, color=col, alpha=0.15, lw=0)
-            ax.plot(yr, med.values * 100, color=col, lw=1.5,
+            yr = s['year'].to_numpy()
+            med = s['median'].to_numpy()
+            lo = s['p_lo'].to_numpy() if 'p_lo' in s.columns else med
+            hi = s['p_hi'].to_numpy() if 'p_hi' in s.columns else med
+            ax.fill_between(yr, lo * 100, hi * 100, color=col, alpha=0.15, lw=0)
+            ax.plot(yr, med * 100, color=col, lw=1.5,
                     label='female' if sex == 'f' else 'male')
         for yrs, vals, c, lab in ts_data(d):
             ax.scatter(yrs, vals, s=13, color=c, marker='D', zorder=5,
@@ -112,7 +108,7 @@ def main():
             ax.set_ylabel('prevalence (%)', fontsize=8.5)
     axes[0, 4].legend(fontsize=6.3, frameon=False, loc='upper right')
 
-    # --- bottom row: prevalence by age + sex (bars, median + range) + data ---
+    # --- bottom row: prevalence by age + sex (bars, median + whiskers) + data ---
     x = np.arange(len(AGES)); w = 0.38
     for ax, d in zip(axes[1], DISEASES):
         base = AGE_BASE[d]
@@ -120,10 +116,13 @@ def main():
         for sex, off, col in [('f', -w / 2, F_COLOR), ('m', w / 2, M_COLOR)]:
             med, lo, hi = [], [], []
             for ab in AGES:
-                g = ad[(ad.sex == sex) & (ad.age_bin == ab)].value
-                med.append(g.median() * 100 if len(g) else np.nan)
-                lo.append(g.min() * 100 if len(g) else np.nan)
-                hi.append(g.max() * 100 if len(g) else np.nan)
+                row = ad[(ad.sex == sex) & (ad.age_bin == ab)]
+                if len(row):
+                    med.append(row['median'].iloc[0] * 100)
+                    lo.append(row['p_lo'].iloc[0] * 100 if 'p_lo' in row.columns else med[-1])
+                    hi.append(row['p_hi'].iloc[0] * 100 if 'p_hi' in row.columns else med[-1])
+                else:
+                    med.append(np.nan); lo.append(np.nan); hi.append(np.nan)
             med = np.array(med)
             yerr = np.vstack([med - np.array(lo), np.array(hi) - med])
             ax.bar(x + off, med, w, color=col, alpha=0.85)

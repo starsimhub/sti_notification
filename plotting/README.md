@@ -19,8 +19,7 @@ conda run -n starsim python plotting/plot_slide6.py
 | 9 | `plot_slide9.py` | `fig_slide9.png` | same as slide 6 |
 | 10 | `plot_slide10.py` | `fig_slide10.png` | same as slide 6 |
 | 11 | `plot_slide11.py` | `fig_slide11.png` | same as slide 6 |
-| 12 | `plot_slide12.py` | `fig_slide12.png` | `scenarios.kavg.csv` |
-| 13 | `plot_slide13.py` | `fig_slide13.png` | `scenarios.kavg.csv` |
+| 12 | `plot_slide12.py` | `fig_slide12.png` (4-panel heatmap: % reduction in cum. NG+CT+TV+syph infections vs SOC, care × PN, one panel per BP level) | `scenarios_timeseries.parquet` |
 
 Slide 1's cascade figure (`fig_cascades_4panel_soc.png`) is produced by
 `../exploratory/plot_cascade.py`. Slide 2 is text only. Slide 4's
@@ -39,18 +38,23 @@ commit / conversation history, not a rendered figure).
 
 ## Data prerequisites
 
+All committable and present on any clone:
+
 - `results/scenarios.kavg.csv` — K=5-averaged scalars per (cell, draw).
-  Committed. Produced by `run_scenarios.py`.
+  Produced by `run_scenarios.py`.
+- `results/scenarios_timeseries.parquet` — cross-draw aggregate
+  `(median, p_lo, p_hi)` per `(cell, disease, result_name, year)`.
+  Produced by `process_results.py`. Powers the ribbons on slides 6/9/10/11.
+- `results/scenarios_snapshots.parquet` — age × sex snapshot at 2027
+  for SOC only. Same aggregation, feeds `exploratory/plot_epi.py`.
 - `results/specificity.csv` — person-level SOC vs POC-plain treatment
-  and PN over-rates (5 seeds). Produced by
-  `diagnostics/specificity_tracer.py`.
+  and PN over-rates. Produced by `diagnostics/specificity_tracer.py`.
 - `results/soc_overtreatment.csv` — per-VDS-woman contingency of
   (n_drugs, n_actual_STIs). Produced by the same tracer.
 - `results/vds_etiology.csv` — VDS coinfection composition for the
   upset. Produced by `diagnostics/vds_etiology.py`.
-- `results/scenarios_timeseries.parquet` — annual per-disease time
-  series. VM-only (see [../CLAUDE.md](../CLAUDE.md) §"VM-only data
-  files").
 
-If a plot needs a parquet that isn't in `results/` locally, either
-`scp` it from the VM or regenerate on the VM via `run_scenarios.py`.
+If `results/` gets out of date, see the top-level [Regenerating results
+and figures](../README.md#regenerating-results-and-figures) section for
+the full three-stage pipeline (`run_scenarios.py` → `process_results.py`
+→ plot scripts).

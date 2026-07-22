@@ -61,15 +61,14 @@ def load_scenarios_long():
 
 
 def load_timeseries():
-    """Prevalence + new-infection trajectories per (arm, disease, year).
+    """Aggregated prevalence + new-infection trajectories per (arm, disease, year).
 
-    Read from the committed ``data/timeseries.csv``, produced by
-    ``scripts/export_timeseries.py``. Its end-of-horizon values match the scalar
-    table ``scenarios.kavg.csv`` (e.g. ng 2040 prevalence 0.0176 == ng_prev_end).
-    See ``README.md`` for why this pre-aggregated file exists rather than reading
-    ``results/scenarios_timeseries.parquet`` directly.
+    Reads ``results/scenarios_timeseries.parquet`` (produced by
+    ``process_results.py``) — the single source of truth shared with the slide
+    plots. Columns: cell, care, pn, bp, poc, disease, result_name, year,
+    median, p_lo, p_hi.
     """
-    return pd.read_csv(HERE / 'data' / 'timeseries.csv')
+    return pd.read_parquet(RESULTS / 'scenarios_timeseries.parquet')
 
 
 def load_diagnostic_performance():
@@ -126,15 +125,24 @@ def preset_notification(long, presets):
 
 
 def preset_ts(ts, presets, disease, metric):
-    """Long frame [label, is_soc, year, value] for line charts."""
+    """Long frame [label, is_soc, year, median, p_lo, p_hi] for line + ribbon charts.
+
+    ``metric`` corresponds to the parquet's ``result_name`` column
+    (e.g. 'prevalence', 'new_infections').
+    """
     out = []
     for p in presets:
         poc = p['key'] != 'soc'
-        m = ((ts['disease'] == disease) & (ts['metric'] == metric)
+        m = ((ts['disease'] == disease) & (ts['result_name'] == metric)
              & _arm_mask(ts, poc, p.get('care', 'baseline'),
                          p.get('pn', 'baseline'), p.get('bp', 'none')))
         sub = ts[m].sort_values('year')
         for _, r in sub.iterrows():
-            out.append({'label': p['label'], 'is_soc': not poc,
-                        'year': int(r['year']), 'value': r['value']})
+            out.append({
+                'label': p['label'], 'is_soc': not poc,
+                'year': int(r['year']),
+                'median': float(r['median']),
+                'p_lo': float(r['p_lo']) if 'p_lo' in sub.columns else float(r['median']),
+                'p_hi': float(r['p_hi']) if 'p_hi' in sub.columns else float(r['median']),
+            })
     return pd.DataFrame(out)

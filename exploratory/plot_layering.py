@@ -1,4 +1,4 @@
-"""Layering figures from the scenario factorial (results/scenarios_timeseries.parquet).
+"""Layering figures from the scenario factorial (raw_results/scenarios_timeseries.parquet).
 
 Multi-disease small multiples (NG/CT/TV/syph), prevalence at 2040, median over the
 pilot draws, with SOC and POC-plain references:
@@ -18,7 +18,7 @@ import matplotlib.pyplot as pl
 
 REPO = Path(__file__).resolve().parent.parent
 FIGS = REPO / 'figures'
-TS = REPO / 'results' / 'scenarios_timeseries.parquet'
+TS = REPO / 'raw_results' / 'scenarios_timeseries.parquet'
 FONT = '/Users/robynstuart/gf/syph_dx_zim/assets/LibertinusSans-Regular.otf'
 
 LEVELS = ['baseline', 'low', 'moderate', 'high']
