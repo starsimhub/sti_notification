@@ -166,8 +166,12 @@ _sc = _sc[["care", "pn", "bp", "poc", "draw", "disease_label", "metric", "value"
 
 _nt = LONG[LONG["disease"] == "pn"][["care", "pn", "bp", "poc", "draw", "metric", "value"]].dropna(subset=["value"])
 
+# Rename aggregated parquet columns to the schema the OJS explorer expects.
+# The Scenario Explorer's TS chart shows median lines only — no ribbon here
+# (that lives in the Plotly narrative charts).
 _ts = TS.copy()
 _ts["disease_label"] = _ts["disease"].map(prep.DISEASE_LABEL)
+_ts = _ts.rename(columns={"result_name": "metric", "median": "value"})
 _ts = _ts[["care", "pn", "bp", "poc", "year", "value", "metric", "disease_label"]]
 
 ojs_define(scenario_raw=_sc)

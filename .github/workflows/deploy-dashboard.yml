@@ -7,6 +7,8 @@ on:
       - 'dashboard/**'
       - 'results/scenarios.kavg.csv'
       - 'results/slide4_diagnostic_performance.csv'
+      - 'results/scenarios_timeseries.parquet'
+      - 'results/scenarios_snapshots.parquet'
       - '.github/workflows/deploy-dashboard.yml'
   workflow_dispatch:
 

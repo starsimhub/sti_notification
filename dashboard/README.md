@@ -29,7 +29,7 @@ Requires Quarto ≥ 1.4 and the packages in `requirements.txt`.
 Everything the dashboard shows is derived from two committed tables:
 
 - **Scalars / bars / overtreatment / notification** — `results/scenarios.kavg.csv` (65 cells, K=5-averaged, draws 75/78/236/263/343), read directly by `prep.py`.
-- **Timeseries (prevalence + new infections)** — `results/scenarios_timeseries.parquet`, produced by `process_results.py` (which aggregates per-sim raw outputs from `raw_results/` into committable tables). Read directly by `prep.py`.
+- **Timeseries (prevalence + new infections)** — `results/scenarios_timeseries.parquet`, produced by `process_results.py` (which aggregates per-sim raw outputs from `raw_results/` into committable tables). Read directly by `prep.py`. **Ribbons at N_DRAWS=1 are degenerate:** the committed `results/scenarios_timeseries.parquet` from a single-draw calibration run has `p_lo == median == p_hi` for every row; the Plotly ribbon collapses to a zero-width strip. Real ribbons emerge on the next N_DRAWS≥2 factorial rerun on the VM.
 
 The pipeline is: `run_scenarios.py` → `raw_results/*.parquet` (VM-only, per-sim) → `process_results.py` → `results/*.parquet` (committable, aggregated) → `dashboard/prep.py` reads directly.
 
