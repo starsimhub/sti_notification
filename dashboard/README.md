@@ -4,13 +4,11 @@ A static, serverless Quarto website presenting the STI-notification scenario res
 
 ## Structure
 
-- **`prep.py`** — loads the scalar scenario table `results/scenarios.kavg.csv` and the timeseries `data/timeseries.csv`, and does the median/IQR + cross-product aggregation.
+- **`prep.py`** — loads the scalar scenario table `results/scenarios.kavg.csv` and the timeseries `results/scenarios_timeseries.parquet`, and does the median/IQR + cross-product aggregation.
 - **`charts.py`** — Plotly builders for the narrative charts.
 - **`index.qmd`** — the six sections. Narrative charts are **Plotly**; the interactive scenario explorer is **ObservableJS + Observable Plot** (reactive, client-side, no server).
 - **`custom.scss`** — brand palette + table styling.
 - **`figures/`** — the static PNGs (cascade, overtreatment, VDS etiology, calibration fits), embedded as plain images.
-- **`data/timeseries.csv`** — pre-aggregated prevalence + new-infection trajectories (see below).
-- **`scripts/export_timeseries.py`** — regenerates `data/timeseries.csv` from the scenario run.
 
 ## Local render
 
@@ -31,15 +29,9 @@ Requires Quarto ≥ 1.4 and the packages in `requirements.txt`.
 Everything the dashboard shows is derived from two committed tables:
 
 - **Scalars / bars / overtreatment / notification** — `results/scenarios.kavg.csv` (65 cells, K=5-averaged, draws 75/78/236/263/343), read directly by `prep.py`.
-- **Timeseries (prevalence + new infections)** — `data/timeseries.csv`, a compact table produced by `scripts/export_timeseries.py`. This is the only pre-aggregated input; every other quantity is read straight from the scalar table.
+- **Timeseries (prevalence + new infections)** — `results/scenarios_timeseries.parquet`, produced by `process_results.py` (which aggregates per-sim raw outputs from `raw_results/` into committable tables). Read directly by `prep.py`.
 
-To refresh the timeseries after a new run:
-
-```bash
-python scripts/export_timeseries.py   # needs pandas + pyarrow; reads results/scenarios_timeseries.parquet
-```
-
-⚠️ **The old `results/scenarios_timeseries.parquet` was removed** because it was from a *different run* than the committed scalar table (draws 14/16/47, 126 cells, versus 75/78/236/263/343, 65 cells) — its trajectories did not match the bars (e.g. NG 2040 prevalence 0.049 vs 0.0176; CT inverted, 0.0098 vs 0.1089). `data/timeseries.csv`'s end-of-horizon values match the scalar table exactly. `scripts/export_timeseries.py` expects a freshly regenerated parquet from the current run before it is run again.
+The pipeline is: `run_scenarios.py` → `raw_results/*.parquet` (VM-only, per-sim) → `process_results.py` → `results/*.parquet` (committable, aggregated) → `dashboard/prep.py` reads directly.
 
 ## Chart engines
 
