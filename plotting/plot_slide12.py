@@ -48,13 +48,17 @@ def cell_median_pct_reduction(kavg, per_draw_metric):
     return poc[['care', 'pn', 'bp', 'pct_reduction']]
 
 
-def draw_heatmap_grid(arm_pct, cbar_label, out_png):
+def draw_heatmap_grid(arm_pct, cbar_label, out_png, censor_negative=False):
     """4-panel heatmap: care x PN (rows x cols), one panel per BP level.
 
     arm_pct: DataFrame with columns [care, pn, bp, pct_reduction], one row per
     POC arm (typically 64 rows: 4 x 4 x 4 factorial).
     cbar_label: multi-line label for the shared colorbar.
     out_png: destination Path for the figure PNG.
+    censor_negative: when True, values < 0 are drawn in grey and labelled
+    "No change" (the colorbar is clamped to [0, vmax] with a sequential cmap).
+    Use for metrics where a negative "reduction" is small model noise and would
+    otherwise dominate the diverging colour scale.
     """
     sc.fonts(add=FONT)
     sc.options(font='Libertinus Sans', fontsize=11)
@@ -64,13 +68,16 @@ def draw_heatmap_grid(arm_pct, cbar_label, out_png):
 
     vmin = float(arm_pct['pct_reduction'].min())
     vmax = float(arm_pct['pct_reduction'].max())
-    # Diverging cmap centered on 0 if any negatives; otherwise sequential.
-    if vmin < 0:
+    if censor_negative:
+        vmin, cmap = 0.0, 'viridis'
+    elif vmin < 0:
+        # Diverging cmap centered on 0 if any negatives.
         m = max(abs(vmin), abs(vmax))
         vmin, vmax, cmap = -m, m, 'RdBu_r'
     else:
         cmap = 'viridis'
-    cmap_obj = pl.get_cmap(cmap)
+    cmap_obj = pl.get_cmap(cmap).copy()
+    cmap_obj.set_bad(color='#cccccc')
 
     grids = []
     for bp in BP_PANELS:
@@ -82,7 +89,10 @@ def draw_heatmap_grid(arm_pct, cbar_label, out_png):
     for i_ax, (ax, bp, g) in enumerate(zip(axes, BP_PANELS, grids)):
         # origin='lower' puts row 0 (baseline care) at the bottom so care-seeking
         # increases as the eye moves upward.
-        im = ax.imshow(g.to_numpy(), cmap=cmap, vmin=vmin, vmax=vmax,
+        arr = g.to_numpy()
+        # When censoring, mask negatives so they render with the "bad" colour.
+        plot_arr = np.ma.masked_where(arr < 0, arr) if censor_negative else arr
+        im = ax.imshow(plot_arr, cmap=cmap_obj, vmin=vmin, vmax=vmax,
                        aspect='auto', origin='lower')
         ax.set_xticks(range(len(PN_LEVELS)))
         ax.set_xticklabels(PN_LEVELS)
@@ -95,11 +105,15 @@ def draw_heatmap_grid(arm_pct, cbar_label, out_png):
         ax.set_title(f'Bundled prevention: {bp}', fontsize=11)
         # Cell text: pick colour from the underlying rgba's luminance so it
         # stays readable across the full colormap (viridis is dark at low
-        # values, bright yellow at high).
+        # values, bright yellow at high). Censored (grey) cells get "No change".
         for i in range(g.shape[0]):
             for j in range(g.shape[1]):
                 v = g.iat[i, j]
                 if np.isnan(v):
+                    continue
+                if censor_negative and v < 0:
+                    ax.text(j, i, 'No change', ha='center', va='center',
+                            fontsize=8, color='#555555')
                     continue
                 norm = (v - vmin) / (vmax - vmin) if vmax > vmin else 0.5
                 r, gr, b, _ = cmap_obj(norm)

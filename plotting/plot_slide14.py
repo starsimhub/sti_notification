@@ -32,6 +32,10 @@ def main():
         arm_pct,
         cbar_label='Reduction vs SOC (%)\nrate of female PN indexes without STI\n(no_sti_f / total_f), 2027–2040',
         out_png=REPO / 'figures' / 'fig_slide14.png',
+        # Small negative reductions are model noise (single-digit %); censor
+        # them to grey "No change" so the sequential cmap covers just the
+        # policy-meaningful positive range.
+        censor_negative=True,
     )
 
 
