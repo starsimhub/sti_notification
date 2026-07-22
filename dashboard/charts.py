@@ -22,6 +22,13 @@ _LAYOUT = dict(template="simple_white", margin=dict(l=55, r=15, t=40, b=45),
                font=dict(size=12), legend=dict(title_text=""))
 
 
+def _rgba(hex_color, alpha):
+    """Convert '#RRGGBB' + alpha (0-1) to plotly 'rgba(r,g,b,a)' string."""
+    h = hex_color.lstrip('#')
+    r, g, b = int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16)
+    return f'rgba({r},{g},{b},{alpha})'
+
+
 def _err(df, med="median", p25="p25", p75="p75"):
     """Asymmetric IQR error-bar spec from a median/p25/p75 column trio."""
     return dict(type="data", visible=True, thickness=1.2, width=3, color="#333",
@@ -59,7 +66,18 @@ def ts_grid(ts, presets, metric, y_label):
         for label, sub in df.groupby("label", sort=False):
             is_soc = bool(sub["is_soc"].iloc[0])
             color = color_map.get(label, PALETTE[0])
-            fig.add_scatter(x=sub["year"], y=sub["value"], name=label, legendgroup=label,
+            # Ribbon: upper bound (invisible), then lower bound with fill.
+            fig.add_scatter(x=sub["year"], y=sub["p_hi"], name=label, legendgroup=label,
+                            showlegend=False, mode="lines",
+                            line=dict(color=color, width=0),
+                            hoverinfo="skip", row=r, col=c)
+            fig.add_scatter(x=sub["year"], y=sub["p_lo"], name=label, legendgroup=label,
+                            showlegend=False, mode="lines",
+                            line=dict(color=color, width=0),
+                            fill="tonexty", fillcolor=_rgba(color, 0.18),
+                            hoverinfo="skip", row=r, col=c)
+            # Median line (on top).
+            fig.add_scatter(x=sub["year"], y=sub["median"], name=label, legendgroup=label,
                             showlegend=(i == 0), mode="lines",
                             line=dict(color=color, width=2.6 if is_soc else 1.8, shape="spline"),
                             row=r, col=c, hovertemplate=f"{label}<br>%{{x}}: %{{y:.3f}}<extra></extra>")
