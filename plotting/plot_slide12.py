@@ -15,10 +15,12 @@ from pathlib import Path
 import matplotlib.pyplot as pl
 import numpy as np
 import pandas as pd
+import sciris as sc
 
 REPO = Path(__file__).resolve().parents[1]
 TS = REPO / 'results' / 'scenarios_timeseries.parquet'
 OUT_PNG = REPO / 'figures' / 'fig_slide12.png'
+FONT = str(REPO / 'assets' / 'LibertinusSans-Regular.otf')
 
 DISEASES = ('ng', 'ct', 'tv', 'syph')
 CARE_LEVELS = ('baseline', 'low', 'moderate', 'high')
@@ -38,14 +40,17 @@ def cumulative_by_arm(df):
 
 
 def main():
+    sc.fonts(add=FONT)
+    sc.options(font='Libertinus Sans', fontsize=11)
+
     df = pd.read_parquet(TS)
     arm = cumulative_by_arm(df)
     soc_total = float(arm.loc[arm.cell == 'SOC', 'cum_inf'].iloc[0])
     poc = arm[arm.poc == True].copy()
     poc['pct_reduction'] = 100.0 * (soc_total - poc['cum_inf']) / soc_total
 
-    fig, axes = pl.subplots(1, 4, figsize=(14.5, 3.9),
-                            gridspec_kw=dict(wspace=0.28))
+    fig, axes = pl.subplots(1, 4, figsize=(12, 5),
+                            gridspec_kw=dict(wspace=0.15))
     # Shared color scale across panels so panel-to-panel comparisons work.
     vmin = float(poc['pct_reduction'].min())
     vmax = float(poc['pct_reduction'].max())
@@ -63,7 +68,7 @@ def main():
                 .reindex(index=CARE_LEVELS, columns=PN_LEVELS))
         grids.append(g)
 
-    for ax, bp, g in zip(axes, BP_PANELS, grids):
+    for i_ax, (ax, bp, g) in enumerate(zip(axes, BP_PANELS, grids)):
         # origin='lower' puts row 0 (baseline care) at the bottom so care-seeking
         # increases as the eye moves upward.
         im = ax.imshow(g.to_numpy(), cmap=cmap, vmin=vmin, vmax=vmax,
@@ -71,18 +76,25 @@ def main():
         ax.set_xticks(range(len(PN_LEVELS)))
         ax.set_xticklabels(PN_LEVELS)
         ax.set_yticks(range(len(CARE_LEVELS)))
-        ax.set_yticklabels(CARE_LEVELS)
+        if i_ax == 0:
+            ax.set_yticklabels(CARE_LEVELS)
+        else:
+            ax.set_yticklabels([])
         ax.set_xlabel('Partner notification')
         ax.set_title(f'Bundled prevention: {bp}', fontsize=11)
-        # Cell annotations.
+        # Cell annotations. Text colour picked from the underlying rgba's luminance
+        # so it stays readable across the whole colormap (viridis is dark at low
+        # values, bright yellow at high — a single fixed colour won't work).
+        cmap_obj = pl.get_cmap(cmap)
         for i in range(g.shape[0]):
             for j in range(g.shape[1]):
                 v = g.iat[i, j]
                 if np.isnan(v):
                     continue
-                # Text colour: dark on light cells, light on dark cells.
-                mid = 0.5 * (vmin + vmax)
-                textc = 'white' if abs(v - mid) > 0.5 * (vmax - vmin) * 0.6 else 'black'
+                norm = (v - vmin) / (vmax - vmin) if vmax > vmin else 0.5
+                r, gr, b, _ = cmap_obj(norm)
+                lum = 0.299 * r + 0.587 * gr + 0.114 * b
+                textc = 'black' if lum > 0.55 else 'white'
                 ax.text(j, i, f'{v:.0f}%', ha='center', va='center',
                         fontsize=9, color=textc)
     axes[0].set_ylabel('Care-seeking')
