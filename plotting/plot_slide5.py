@@ -34,19 +34,22 @@ SPEC = REPO / 'results' / 'specificity.csv'
 FIGS = REPO / 'figures'
 
 
-def pn_cascade_panel(ax, s, fs=11):
+def pn_cascade_panel(ax, k, fs=11):
     """Female index -> male-partner notifications: warranted + over stacked.
 
     Notification rate is STI-agnostic in pn.py, so we split total notifs
-    (pn_notified_m) by the person-level female-index over fraction
-    (f_tx_over / f_tx) from specificity.csv.
+    (pn_new_notified_m) by the per-draw female-index no-STI fraction
+    (pn_new_index_no_sti_f / pn_new_index_total_f) — the same false-alarm
+    rate the slide-14 heatmap plots. Read from kavg (all draws) rather
+    than the person-level tracer so both figures share one definition.
     """
     arms = ['SOC', 'POC']
     totals, overs = {}, {}
     for a in arms:
-        d = s[s.arm == a]
-        notif = d.pn_notified_m.to_numpy(float) * SCALE / 1e6 / YEARS
-        ofrac = d.f_tx_over.to_numpy(float) / d.f_tx.to_numpy(float)
+        d = k[k.cell == ARMS[a]]
+        notif = d.pn_new_notified_m.to_numpy(float) / 1e6 / YEARS
+        ofrac = (d.pn_new_index_no_sti_f.to_numpy(float)
+                 / d.pn_new_index_total_f.to_numpy(float))
         totals[a] = notif
         overs[a] = notif * ofrac
     tmax = max(np.median(totals[a]) for a in arms)
@@ -120,7 +123,7 @@ def main():
 
     # ---- Right: female index -> male-partner PN cascade ----
     ax_pn = fig.add_subplot(outer[1])
-    pn_cascade_panel(ax_pn, s)
+    pn_cascade_panel(ax_pn, k)
 
     # Cascade arrow linking the treatment grid to the PN panel
     fig.text(0.678, 0.28, '→', ha='center', va='center', fontsize=26,
