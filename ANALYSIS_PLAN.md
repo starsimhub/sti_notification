@@ -2,7 +2,8 @@
 
 **Project**: Health impact of demand-generation strategies (general outreach + partner notification) on STI **undertreatment**, complementing the prior `syph_dx_zim` overtreatment work.
 
-**Diseases (7)**: HIV, syphilis, GUD (placeholder), NG, CT, TV, BV.
+**Diseases modeled (7)**: HIV, syphilis, GUD (placeholder), NG, CT, TV, BV.
+**Endpoints reported for**: syph, NG, CT, TV. HIV and BV stay in the model as co-infection / VDS drivers but are not scenario outcomes.
 **Settings**: Zimbabwe (active); Kenya + South Africa deferred.
 **Deliverable**: ~July 2026.
 
@@ -10,10 +11,10 @@
 
 ## Research questions
 
-1. How much do partner-notification (PN) coverage levels change health outcomes (APO/ABO, DALYs, infections averted)?
-2. How much does increased general care-seeking (outreach) change the same outcomes?
-3. What are the **threshold** levels of PN reach and outreach needed for meaningful impact?
-4. Does better diagnostic accuracy reduce **unnecessary** partner notification (and thus PN-associated harms, e.g. GBV risk)?
+1. How much does partner-notification (PN) coverage change **incidence** and **prevalence** of curable STIs (syph, NG, CT, TV)?
+2. How much does increased symptomatic care-seeking (outreach) shift the same endpoints, and how much does it move **undertreatment** and **test yield**?
+3. What are the **threshold** levels of PN reach and care-seeking needed for meaningful impact on incidence and prevalence?
+4. Does POC (etiological) diagnostics reduce **overtreatment** and **unnecessary partner notification**, and improve **test yield**, relative to syndromic SOC?
 
 ## Scope decisions (settled)
 
@@ -22,7 +23,7 @@
 | Repo | `sti_notification` on `main` (scenario factorial merged 2026-06-26 via PR #7) |
 | Geographies | Zimbabwe only for July deliverable; KE + ZA deferred |
 | Diseases | All 7 from day 1 (HIV + syph + GUDP + NG/CT/TV + BV) |
-| Health endpoints | APO + ABO + DALYs (primary); HIV infections, onward syph transmission, GUD-mediated HIV (secondary) |
+| Endpoints | Incidence, prevalence, overtreatment, undertreatment, test yield, unnecessary PN — per disease (syph / NG / CT / TV). |
 | PN mechanism | Edge-stratified `PartnerNotification` from `pn.py`; notify-vs-attend split by edge type and partner sex |
 | Care-seeking lever | Scalar `care_seek_mult` on NG/CT/TV `p_symp_care` (`make_sim(care_seek_mult=…)`); syph held at baseline |
 | Bundled prevention | `CondomCounseling` (interventions.py): coverage of the diagnosed enrolled in a `rel_sus`-reduction window for ng/ct/tv |
@@ -87,33 +88,21 @@ Each ladder has 4 rungs (baseline/low/moderate/high). Diagnostic accuracy (SOC v
 Each cell propagated through the top-30 exp 06 ensemble (first full run used 5 draws × K=5 seeds; the headline run will use more draws). The factorial surfaces both main effects (each lever's dose-response) and interactions. First full run (5 draws × K=5): 1625 sims, ~2.5h wall on 80 workers.
 
 ### Endpoints
-| Endpoint | Source | Notes |
+Six endpoints, each reported per disease (syph, NG, CT, TV) as scenario contrasts across the POC × CARE_SEEKING × PN_INTENSITY × BUNDLED_PREVENTION factorial plus SOC.
+
+| Endpoint | Definition | Source |
 |----|----|----|
-| HIV new infections | `hiv.results.new_infections` | Stratify by sex |
-| Syph symptomatic prevalence | `syph.results.symptomatic_prevalence` | Primary + secondary stages |
-| Syph onward transmission averted | Counterfactual diff | Recorded at module level |
-| Adverse pregnancy outcomes | `FetalHealth` connector (wired) | Syph + HIV |
-| Adverse birth outcomes | Same | Stillbirth, preterm, LBW |
-| DALYs | Post-hoc on incident cases + deaths + APOs | Standard weights |
-| Treatments delivered | per-treatment `new_treated` | Already tracked |
-| Unnecessary treatments | per-treatment `new_treated_unnecessary` | Already tracked; key metric for dx arm |
-| Notifications sent / partners attending | `pn.results.new_notified`, `new_attending` | Already tracked on `PartnerNotification` |
-| Unnecessary notifications | Notifications to true-negative partners | New metric needed for the dx arm |
+| Incidence | Annual new infections | per-disease `new_infections` (subsumes "onward syph transmission averted": the same quantity for syph) |
+| Prevalence | Point-in-time infected fraction | per-disease `prevalence` (+ `symptomatic_prevalence` for syph) |
+| Overtreatment | Treatments delivered to true-negative individuals | per-treatment `new_treated_unnecessary` (already tracked) |
+| Undertreatment | Infected individuals who did not receive care in the year | prevalence − treated positives; per-disease |
+| Test yield | True positives per test administered on the offered panel | `tests_administered` + `new_treated` (POC vs SOC contrast) |
+| Unnecessary PN | Notifications triggered by a true-negative index case (restricted to NG / CT / syph — BV-only tx not counted as waste) | sex-stratified PN funnel in `pn.py` (`new_index_total_{f,m}`, `new_index_no_sti_{f,m}`) |
 
 ## Manuscript framing (locked in from the calibration)
 
-- **HIV calibrates cleanly** — ensemble median 11.4% whole-pop 2010–20 in the UNAIDS band. HIV is the headline.
-- **Syph absolute prev overshoots ZIMPHIA** (medians trep 25.9%, nontrep 12.9% vs targets 2.7%, 0.8%) — this is a model structural ceiling, documented honestly. Syph results are **relative-effect contrasts** under PN scenarios, not absolute calibration.
-- **Relative-effect endpoints** (primary/secondary syph share, HIV+/HIV− trep ratio, FSW prev) land in their bands.
-
-## Next concrete steps (ordered)
-
-1. ~~**Review the `CARE_SEEKING` levels** in `scenarios.py`.~~ Done; ladders collapsed to 4 rungs (baseline/low/moderate/high).
-2. ~~**Recalibrate (BV-aware).**~~ Done — exp 06 (`experiments/06_2026-06-24_kseed_calibration/`) is the active baseline. `run_scenarios.py` defaults to its `draws_used.csv`.
-3. ~~**Run the factorial.**~~ First full run landed 2026-06-26 (5 draws × K=5 seeds, 1625 sims). Outputs in `results/`. Headline run with more draws is the next step.
-4. **Unnecessary-notification metric.** Partial — sex-stratified PN funnel (`new_index_total_{f,m}`, `new_index_no_sti_{f,m}`, etc.) lands in `pn.py`'s results. Surfaced in `plot_validation_pn.py` (sex-split cascade) and `plot_validation_yield.py` (yield-per-notification). False-alarm at the index level is restricted to NG/CT/syph (metronidazole excluded since BV-only treatment isn't unambiguously wasteful).
-5. **DALY post-processing.** Apply standard weights to incident cases, deaths, and APO/ABO outputs.
-6. **Endpoint reporting.** Layering main-effect / cumulative figures (`plot_layering*.py`) and epi overview (`plot_epi.py`) re-rendered against the full run. Next: dx contrast headlines (POC vs SOC: treatment precision, unnecessary PN) with ensemble envelopes.
+- **Endpoints read as scenario contrasts** — POC vs SOC and lever dose-response — with the top-N ensemble × K=5 supplying the propagation envelope. Absolute levels come along for the ride, but the story is the deltas across the factorial.
+- **Syph, NG, CT, TV** ensemble means sit on or near their calibration targets in the current baseline (exp 06 top ensemble); envelope width across the ensemble is the honest uncertainty band.
 
 ## Recalibration triggers
 
