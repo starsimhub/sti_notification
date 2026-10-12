@@ -3,9 +3,9 @@ Zimbabwe (model) and South Africa (illustrative). For R. Peters, WHO STI dept.
 
 Per 100 VDS presenters, decomposes male-partner notifications into warranted
 (index actually has NG/CT/TV) vs unnecessary (false positive on panel, or
-BV/other with no STI). The POC bar reflects a 4-test panel (NG + CT + TV +
-non-trep syph RDT) at per-pathogen sens/spec from this project's dx table.
-A truly STI-negative woman still triggers PN with probability 1 - 0.95^4 ~ 18%.
+BV/other with no STI). The POC bar reflects the 3-test VDS panel (NG + CT + TV)
+at per-pathogen sens/spec from this project's dx table. A truly STI-negative
+woman still triggers PN with probability 1 - 0.95^3 ~ 14%.
 
     conda run -n starsim python plotting/plot_pn_averted_vds.py
 """
@@ -24,7 +24,7 @@ FONT = str(REPO / 'assets' / 'LibertinusSans-Regular.otf')
 
 ARM_C = {'SOC': '#555555', 'POC': '#e6772d'}
 
-POC_SPEC = 0.95  # per pathogen, applied across 4 tests (NG + CT + TV + syph RPR)
+POC_SPEC = 0.95  # per pathogen, applied across 3 VDS tests (NG + CT + TV)
 POC_SENS = 0.95  # average detection for a truly STI+ VDS presenter
 
 # Peters (WHO STI dept, pers. comm.); consistent with SA VDS aetiology
@@ -38,7 +38,7 @@ def read_zim_etiology():
     return 1 - no_sti, no_sti    # is the only bucket with no NG/CT/TV
 
 
-def compound_fp(spec=POC_SPEC, n=4):
+def compound_fp(spec=POC_SPEC, n=3):
     return 1 - spec ** n
 
 
