@@ -26,6 +26,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 import starsim as ss  # noqa: E402
+import stisim as sti  # noqa: E402
 
 from model import make_sim                              # noqa: E402
 from priors import calib_pars                           # noqa: E402
@@ -119,9 +120,9 @@ def set_pars_local(sim, pars: dict):
                                 ss.years(float(value)), ss.years(float(value)))
                         elif par_name == 'rel_trans_latent_half_life':
                             mod.pars[par_name] = ss.years(float(value))
-                        elif par_name == 'dur_asymp2clear':  # mean in months, both sexes; keep per-sex SD
-                            mod.pars[par_name] = [[ss.months(float(value)), sd]
-                                                  for _, sd in mod.pars[par_name]]
+                        elif par_name == 'dur_asymp2clear':  # mean in months, both sexes; the per-sex SDs of sti.Gonorrhea (F 2, M 3 months)
+                            mod.pars[par_name] = sti.lognorm_by_sex([ss.months(float(value)), ss.months(2)],
+                                                                    [ss.months(float(value)), ss.months(3)])
                         elif par_name == 'p_symp_primary_f':
                             mod.pars['p_symp_primary'][0] = float(value)
                         elif par_name == 'p_symp_primary_m':
