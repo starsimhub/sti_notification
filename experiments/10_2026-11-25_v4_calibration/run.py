@@ -9,7 +9,9 @@ mortality deduplication and migration. This experiment moves to the Starsim 4 pr
 * HIV: deaths become a target, with whole-population prevalence and new infections, each as the mean over 2000-09
   and 2010-21 (data/zimbabwe_hiv_calib.csv; nothing before 2000 is scored), plus the 15-49 band kept from exp 07.
 * NG and TV IHME prevalence are compared with the model's prevalence among all adults (both sexes), as in
-  stisim_vddx_zim; CT stays women 25-30.
+  stisim_vddx_zim. CT has no IHME prevalence target: the file's ct_prevalence_f_25_30 is a constant 0.12 in every
+  year, and it cannot be met together with STICH's young women, since the model's CT rises with age (exp 11).
+  CT prevalence is fitted to STICH alone.
 * Young women: NG, CT, TV prevalence in women 18-24 from the STICH outcome survey (control arm, Oct 2021-Mar 2022;
   Dziva Chikwari 2025, Lancet Glob Health, table 3). The model's age groups are 15-20 and 20-25, weighted 2/7 and 5/7
   to approximate 18-24. Bands are the binomial 95% CI widened by a design effect of 2.
@@ -103,7 +105,6 @@ TARGETS = {
     'hiv_deaths_2000s':      (_band(_hiv_mean('hiv_new_deaths', 2000, 2009), 0.25),     ('hiv', 'new_deaths', (2000, 2009), 'annual_sum')),
     'hiv_deaths_2010s':      (_band(_hiv_mean('hiv_new_deaths', 2010, 2021), 0.25),     ('hiv', 'new_deaths', (2010, 2021), 'annual_sum')),
     'ng_prev':               ((0.010, 0.025),                            ('ng', 'prevalence', WIN, 'mean')),
-    'ct_prev_f_25_30':       ((0.09, 0.15),                              ('ct', 'prevalence_f_25_30', WIN, 'mean')),
     'tv_prev':               ((0.07, 0.14),                              ('tv', 'prevalence', WIN, 'mean')),
     'ng_prev_f_18_24_stich': (_binom_band(57, 1686),                     ('ng', YOUNG, STICH_WIN, 'weighted')),
     'ct_prev_f_18_24_stich': (_binom_band(281, 1746),                    ('ct', YOUNG, STICH_WIN, 'weighted')),
@@ -112,7 +113,7 @@ TARGETS = {
     'ct_new_inf_per_yr':     ((200_000, 450_000),                        ('ct', 'new_infections', WIN, 'annual_sum')),
     'tv_new_inf_per_yr':     ((700_000, 1_600_000),                      ('tv', 'new_infections', WIN, 'annual_sum')),
 }
-WEIGHTS = {'ng_prev': 2.0, 'ct_prev_f_25_30': 2.0, 'tv_prev': 2.0,
+WEIGHTS = {'ng_prev': 2.0, 'tv_prev': 2.0,
            'ng_prev_f_18_24_stich': 2.0, 'ct_prev_f_18_24_stich': 2.0, 'tv_prev_f_18_24_stich': 2.0,
            'hiv_inf_2000s': 0.5, 'hiv_inf_2010s': 0.5,
            'ng_new_inf_per_yr': 0.5, 'ct_new_inf_per_yr': 0.5, 'tv_new_inf_per_yr': 0.5}
