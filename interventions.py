@@ -85,7 +85,7 @@ class POCPN(PartnerNotification):
     def notify_attendees(self, uids):
         if not len(uids):
             return
-        if self.sim.now < self._intv_year:
+        if self.sim.now.years < self._intv_year:
             ppl = self.sim.people
             vds = self.sim.interventions.get(self._syndromic_vds_name)
             uds = self.sim.interventions.get(self._syndromic_uds_name)
@@ -254,34 +254,30 @@ def make_testing(poc=None, stop=2040, poc_sens=None, poc_spec=None,
 
     # Symptomatic care-seekers, baseline (pre-POC) — used by both
     # syndromic_vds/uds and the POC panel.
-    def _raw_seeking_care_vds(sim):
+    def _care_seekers(sim, names, sex):
+        """ Who sought care for any of these diseases in the last disease step (its seek_care event), of one sex """
         dis = sim.diseases
-        female = sim.people.female
-        ng_care = dis.ng.symptomatic & (dis.ng.ti_seeks_care == dis.ng.ti) & female
-        tv_care = dis.tv.symptomatic & (dis.tv.ti_seeks_care == dis.tv.ti) & female
-        ct_care = dis.ct.symptomatic & (dis.ct.ti_seeks_care == dis.ct.ti) & female
-        # Symptomatic BV also presents as vaginal discharge. This relies on
-        # SimpleBV (which has its own symptomatic + ti_seeks_care states);
-        # BV is female-only, so it enters VDS but not the UDS path.
-        bv_care = dis.bv.symptomatic & (dis.bv.ti_seeks_care == dis.bv.ti) & female
-        return (ng_care | ct_care | tv_care | bv_care).uids
+        uids = ss.uids()
+        for name in names:
+            uids = uids | dis[name].seek_care.uids
+        return uids[sim.people[sex][uids]]
+
+    def _raw_seeking_care_vds(sim):
+        # Symptomatic BV also presents as vaginal discharge (SimpleBV's own
+        # seek_care event); BV is female-only, so it enters VDS but not UDS.
+        return _care_seekers(sim, ('ng', 'ct', 'tv', 'bv'), 'female')
 
     def _raw_seeking_care_uds(sim):
-        dis = sim.diseases
-        male = sim.people.male
-        ng_care = dis.ng.symptomatic & (dis.ng.ti_seeks_care == dis.ng.ti) & male
-        tv_care = dis.tv.symptomatic & (dis.tv.ti_seeks_care == dis.tv.ti) & male
-        ct_care = dis.ct.symptomatic & (dis.ct.ti_seeks_care == dis.ct.ti) & male
-        return (ng_care | ct_care | tv_care).uids
+        return _care_seekers(sim, ('ng', 'ct', 'tv'), 'male')
 
     if poc:
         def seeking_care_vds(sim):
-            if sim.now >= intv_year:
+            if sim.now.years >= intv_year:
                 return ss.uids()
             return _raw_seeking_care_vds(sim)
 
         def seeking_care_uds(sim):
-            if sim.now >= intv_year:
+            if sim.now.years >= intv_year:
                 return ss.uids()
             return _raw_seeking_care_uds(sim)
 
@@ -456,7 +452,7 @@ class CondomCounseling(ss.Intervention):
 
     def step(self):
         sim = self.sim
-        if sim.now < self.start:
+        if sim.now.years < self.start:
             return
         ti = self.ti
 
@@ -498,58 +494,32 @@ class CondomCounseling(ss.Intervention):
         return
 
 
-class CareSeekScaler(ss.Intervention):
-    """Defer the symptomatic care-seeking multiplier to intv_year.
+def CareSeekScaler(mult=1.0, start=2027, diseases=('ng', 'ct', 'tv', 'bv')):
+    """Scale symptomatic care-seeking from ``start``: one ``ss.modify`` per disease.
 
-    Without this, scaling `p_symp_care` at sim construction rewrites
-    history back to 1985 and pre-2027 trajectories diverge across cells.
+    Returns a list, to add to the sim's interventions. Scaling at sim construction
+    instead would rewrite history back to 1985, so pre-2027 trajectories would differ
+    across cells.
 
-    On the first step at or after `start`, each listed disease's
-    `pars.p_symp_care` is multiplied (sex-stratified, clipped to 1.0).
+    From ``start``, each disease's ``p_symp_care`` is set to its base value
+    (``model.P_SYMP_CARE``) times ``mult`` (a scalar, or ``(mult_f, mult_m)``), clipped
+    to 1. ``p_symp_care`` is the probability of the ``seek_care`` branch, read when
+    symptoms start, so it applies to symptoms that start after ``start``.
 
-    BV is included by default (exp 07 onward): a demand-generation campaign
-    raises care-seeking for vaginal discharge irrespective of its cause, so
-    symptomatic BV presentations rise alongside NG/CT/TV ones. This matters
-    for the PPV of the POC test among presenters. If SimpleBV's
-    `p_symp_care` is a scalar rather than an [F, M] pair, the female
-    multiplier is applied.
-
-    Note: `p_symp_care` is read at infection time (`set_care_seeking`), so
-    only infections acquired after `start` use the scaled probability.
+    BV is included by default (exp 07 onward): a demand-generation campaign raises
+    care-seeking for vaginal discharge irrespective of its cause, so symptomatic BV
+    presentations rise alongside NG/CT/TV ones. This matters for the PPV of the POC
+    test among presenters. BV is female-only, so only the female multiplier applies.
     """
-
-    def __init__(self, mult=1.0, start=2027,
-                 diseases=('ng', 'ct', 'tv', 'bv'),
-                 name='care_seek_scaler', *args, **kwargs):
-        super().__init__(name=name)
-        self.update_pars(*args, **kwargs)
-        if hasattr(mult, '__len__'):
-            self.mult_f = float(mult[0])
-            self.mult_m = float(mult[1])
-        else:
-            self.mult_f = self.mult_m = float(mult)
-        self.start = start
-        self.diseases = list(diseases)
-        self._fired = False
-        return
-
-    def step(self):
-        if self._fired or self.sim.now < self.start:
-            return
-        for d_name in self.diseases:
-            disease = self.sim.diseases.get(d_name)
-            if disease is None or 'p_symp_care' not in disease.pars:
-                continue
-            curr = disease.pars.p_symp_care
-            if isinstance(curr, ss.Dist):   # e.g. SimpleBV: ss.bernoulli(p=0.3)
-                curr.set(p=min(1.0, float(curr.pars.p) * self.mult_f))
-            elif hasattr(curr, '__len__'):
-                disease.pars.p_symp_care = [min(1.0, float(curr[0]) * self.mult_f),
-                                            min(1.0, float(curr[1]) * self.mult_m)]
-            else:
-                disease.pars.p_symp_care = min(1.0, float(curr) * self.mult_f)
-        self._fired = True
-        return
+    from model import P_SYMP_CARE
+    mult_f, mult_m = (float(mult[0]), float(mult[1])) if hasattr(mult, '__len__') else (float(mult),)*2
+    mods = []
+    for d in diseases:
+        base_f, base_m = P_SYMP_CARE[d]
+        new_f, new_m = min(1.0, base_f*mult_f), min(1.0, base_m*mult_m)
+        value = new_f if d == 'bv' else sti.by_sex(new_f, new_m)
+        mods.append(ss.modify(f'{d}.pars.p_symp_care', set=value, start=start, name=f'care_seek_scaler_{d}'))
+    return mods
 
 
 class PNIntensitySwitch(ss.Intervention):
@@ -593,7 +563,7 @@ class PNIntensitySwitch(ss.Intervention):
         return None
 
     def step(self):
-        if self._fired or self.sim.now < self.start:
+        if self._fired or self.sim.now.years < self.start:
             return
         pn = self._find_intv(self.pn_name)
         if pn is None or not hasattr(pn, 'pars'):

@@ -26,6 +26,10 @@ DATA_DIR = 'data'
 
 DISCHARGING = ('ng', 'ct', 'tv')
 
+# Probability that someone with symptoms seeks care, (female, male); BV is female-only.
+# CareSeekScaler (interventions.py) scales these from the intervention year.
+P_SYMP_CARE = dict(ng=(0.49, 0.83), ct=(0.49, 0.83), tv=(0.49, 0.27), bv=(0.3, 0.3))
+
 
 def make_discharging_stis(care_seek_mult=1.0):
     """
@@ -42,16 +46,16 @@ def make_discharging_stis(care_seek_mult=1.0):
         mult_f = mult_m = float(care_seek_mult)
 
     def scaled(care_pair):
-        return [min(1.0, care_pair[0] * mult_f),
-                min(1.0, care_pair[1] * mult_m)]
+        return sti.by_sex(min(1.0, care_pair[0] * mult_f),
+                          min(1.0, care_pair[1] * mult_m))
 
-    ng = sti.Gonorrhea(eff_condom=0.7, beta_m2f=0.12, p_symp=[0.13, 0.65],
-                       p_symp_care=scaled([0.49, 0.83]))
-    ct = sti.Chlamydia(eff_condom=0.8, beta_m2f=0.15, p_symp=[0.30, 0.54],
-                       p_symp_care=scaled([0.49, 0.83]))
-    tv = sti.Trichomoniasis(eff_condom=0.8, beta_m2f=0.14, p_symp=[0.6, 0.5],
-                            p_symp_care=scaled([0.49, 0.27]))
-    bv = sti.SimpleBV()
+    ng = sti.Gonorrhea(eff_condom=0.7, beta_m2f=0.12, p_symp=sti.by_sex(0.13, 0.65),
+                       p_symp_care=scaled(P_SYMP_CARE['ng']))
+    ct = sti.Chlamydia(eff_condom=0.8, beta_m2f=0.15, p_symp=sti.by_sex(0.30, 0.54),
+                       p_symp_care=scaled(P_SYMP_CARE['ct']))
+    tv = sti.Trichomoniasis(eff_condom=0.8, beta_m2f=0.14, p_symp=sti.by_sex(0.6, 0.5),
+                            p_symp_care=scaled(P_SYMP_CARE['tv']))
+    bv = sti.SimpleBV(p_symp_care=P_SYMP_CARE['bv'][0])
     return ng, ct, tv, bv
 
 
@@ -78,13 +82,13 @@ def make_networks(dur_recall=ss.years(0.25)):
         concurrency_dist=ss.nbinom(n=2, p=0.5),
         f1_conc=0.15, m1_conc=0.20,
         f2_conc=1.0, m2_conc=4.4,
-        recall_prior=True,
+        memory=dur_recall,  # Remember partners for dur_recall after a partnership ends (for partner notification)
         condom_data=pd.read_csv(f'{DATA_DIR}/condom_use.csv'),
         fsw_shares=ss.bernoulli(p=0.10),
         client_shares=ss.bernoulli(p=0.20),
         sw_seeking_rate=ss.permonth(20),
     )
-    return [sexual, sti.PriorPartners(dur_recall=dur_recall), ss.PrenatalNet()]
+    return [sexual, ss.PrenatalNet()]
 
 
 def make_interventions(poc=None, pn_pars=None, stop=2040,

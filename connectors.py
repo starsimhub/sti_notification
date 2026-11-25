@@ -170,7 +170,7 @@ class sti_fetal(ss.Connector):
                 continue
             # Transmission runs after connectors, so this step sees the previous step's infections;
             # new pregnancies are handled at conception
-            newly_infected = (disease.ti_infected == ti - 1) & (preg.ti_P < ti)
+            newly_infected = disease.ti_exposed.isclose(ti - 1) & (preg.ti_P < ti)  # Infection is entry to the latent state
             affected = pregnant_uids[newly_infected[pregnant_uids]]
             if len(affected):
                 self._apply_infection(affected, dname)

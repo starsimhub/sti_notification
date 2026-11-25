@@ -149,7 +149,7 @@ def build_sim(cell, seed, sim_pars):
     extra_intvs = []
     csm = CARE_SEEKING[cell['care']]
     if csm != 1.0:
-        extra_intvs.append(CareSeekScaler(mult=csm, start=INTV_YEAR))
+        extra_intvs += CareSeekScaler(mult=csm, start=INTV_YEAR)
     if cell['pn'] != 'baseline':
         pn_int = PN_INTENSITY[cell['pn']]
         extra_intvs.append(PNIntensitySwitch(

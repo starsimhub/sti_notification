@@ -14,8 +14,8 @@ Differences from the simpler ``sti.PartnerNotification`` (rc1.5.7):
 
 The previous-partner channel is left scalar-only here (``pn_rates`` returns
 zeros when ``self.current_partner_edges`` is empty, e.g. on the prior
-channel). Networks without an ``edge_type`` column (like ``PriorPartners``)
-get ``edge_type=-1`` and pn_rates emits probability 0 for those edges.
+channel). Edges without an ``edge_type`` column (the network's remembered ended
+partnerships, ``history``) get ``edge_type=-1`` and pn_rates emits probability 0 for those edges.
 """
 
 from collections import defaultdict
@@ -31,7 +31,7 @@ class PartnerNotification(ss.Intervention):
     """Notify and follow up sexual partners of index cases.
 
     Two channels: current-partner (via the active sexual network) and
-    prior-partner (via a :class:`stisim.PriorPartners` recall network).
+    prior-partner (the partnerships the current network remembers, with its ``memory=``).
     Each contact is offered notification with probability ``p_notify_<scope>``;
     notified contacts attend follow-up with probability ``p_attends_<scope>``.
     Attendees are scheduled for the supplied ``test`` intervention on the
@@ -54,8 +54,7 @@ class PartnerNotification(ss.Intervention):
             p_attends_current=ss.bernoulli(p=0.5),
             p_notify_previous=ss.bernoulli(p=0.05),
             p_attends_previous=ss.bernoulli(p=0.01),
-            current_network='structuredsexual',
-            previous_network='priorpartners',
+            current_network='structuredsexual',  # Prior partners are those it remembers (its memory=)
         )
         self.update_pars(pars=pars, **kwargs)
         self.eligibility = eligibility
@@ -65,7 +64,6 @@ class PartnerNotification(ss.Intervention):
             ss.FloatArr('ti_notified'),
         )
         self._cur_nw = None
-        self._prev_nw = None
         self._use_previous = False
         self.current_partner_edges = defaultdict(list)
         # Opt-in dyad-level event log for chain tracing. Default None (off).
@@ -84,13 +82,12 @@ class PartnerNotification(ss.Intervention):
                 f"PartnerNotification requires network '{self.pars.current_network}' in the sim."
             )
         self._use_previous = self.pars.p_notify_previous.pars.p > 0
-        if self._use_previous:
-            self._prev_nw = sim.networks.get(self.pars.previous_network)
-            if self._prev_nw is None:
-                raise ValueError(
-                    f"PartnerNotification with p_notify_previous>0 requires network "
-                    f"'{self.pars.previous_network}' in the sim. Set p_notify_previous=0 to disable."
-                )
+        if self._use_previous and self._cur_nw.pars.get('memory') is None:
+            raise ValueError(
+                f"PartnerNotification with p_notify_previous>0 requires network "
+                f"'{self.pars.current_network}' to have memory=, e.g. memory=ss.years(1). "
+                f"Set p_notify_previous=0 to disable."
+            )
         return
 
     def init_results(self):
@@ -173,7 +170,7 @@ class PartnerNotification(ss.Intervention):
         One entry per edge where exactly one endpoint is in ``index_uids``.
         Edges connecting two index cases drop out — index cases aren't
         notified about themselves. ``edge_types`` is filled with ``-1`` if
-        ``nw.edges`` has no ``edge_type`` column (e.g. PriorPartners);
+        ``nw`` has no ``edge_type`` column (e.g. the network's ``history``);
         ``pn_rates`` callables map unrecognized edge_type ints to
         probability 0, gracefully disabling edge-type stratification.
         """
@@ -182,7 +179,7 @@ class PartnerNotification(ss.Intervention):
         # XOR: keep edges where exactly one endpoint is an index.
         has_one_index = p1_is_index ^ p2_is_index
         partner_uids = np.where(p1_is_index, nw.p2, nw.p1)[has_one_index]
-        if 'edge_type' in nw.edges:
+        if hasattr(nw, 'edges') and 'edge_type' in nw.edges:
             edge_types = nw.edges.edge_type[has_one_index]
         else:
             edge_types = np.full(len(partner_uids), -1, dtype=int)
@@ -208,9 +205,12 @@ class PartnerNotification(ss.Intervention):
         # Prior-partner channel (skip partners already notified as current).
         # Edge-type stratification is not currently supported here — pn_rates
         # helpers see an empty current_partner_edges and return zeros.
-        if self._use_previous:
-            prev_uids, _ = self.find_partners(self._prev_nw, index_uids)
-            prev_partners = ss.uids(np.unique(prev_uids)) - cur_partners
+        history = self._cur_nw.history  # The partnerships that ended within the network's memory=
+        if self._use_previous and history is not None:
+            prev_uids, _ = self.find_partners(history, index_uids)
+            prev_uids = np.unique(prev_uids)
+            prev_uids = prev_uids[self.sim.people.alive[ss.uids(prev_uids)]]  # Partnerships ended by death are remembered too
+            prev_partners = ss.uids(prev_uids) - cur_partners
             prev_notified = self.pars.p_notify_previous.filter(prev_partners)
             prev_attending = self.pars.p_attends_previous.filter(prev_notified)
         else:

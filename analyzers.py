@@ -135,7 +135,7 @@ class CareTimingAnalyzer(ss.Analyzer):
         name: analyzer name (default 'care_timing').
 
     Reads:
-        sim.diseases[d].ti_infected per step.
+        sim.diseases[d].new_infected() per step.
         sim.interventions[tx].outcomes[d].successful per step.
 
     Writes (per disease, per window):
@@ -169,7 +169,7 @@ class CareTimingAnalyzer(ss.Analyzer):
         for d in self.disease_names:
             for w in self.windows_months:
                 results += [
-                    ss.Result(f'{d}_inf_treated_within_{w}mo', dtype=int,
+                    ss.Result(f'{d}_inf_treated_within_{w}mo', dtype=int, kind='flow',
                               label=(f'{d} infections treated within '
                                      f'{w}mo of acquisition'),
                               auto_plot=False),
@@ -189,7 +189,7 @@ class CareTimingAnalyzer(ss.Analyzer):
             if disease is None:
                 continue
             ti_arr = getattr(self, f'{d}_ti_last_inf')
-            new_inf = (disease.ti_infected == ti).uids
+            new_inf = disease.new_infected().uids  # Analyzers run after the diseases' step, so this step's infections
             if len(new_inf):
                 ti_arr[new_inf] = ti
 
@@ -250,10 +250,10 @@ class VDSEtiology(ss.Analyzer):
     def init_results(self):
         super().init_results()
         defs = [ss.Result('n_women', dtype=int, scale=False, label='Adult women'),
-                ss.Result('n_vds', dtype=int, scale=False, label='Women with vaginal discharge')]
-        defs += [ss.Result(f'marg_{p}', dtype=int, scale=False, label=f'VDS with {p.upper()}')
+                ss.Result('n_vds', dtype=int, kind='stock', scale=False, label='Women with vaginal discharge')]
+        defs += [ss.Result(f'marg_{p}', dtype=int, kind='stock', scale=False, label=f'VDS with {p.upper()}')
                  for p in self.MARGINALS]
-        defs += [ss.Result(c, dtype=int, scale=False, label=c) for c in self.COMBOS]
+        defs += [ss.Result(c, dtype=int, kind='stock', scale=False, label=c) for c in self.COMBOS]
         self.define_results(*defs)
         return
 
@@ -302,8 +302,8 @@ class PresenterEtiology(ss.Intervention):
     the *start* of the intervention list, before detection and treatment
     modules clear infections. Two presenter channels are recorded:
 
-      * ``care``: symptomatic care-seekers this step (any of NG/CT/TV/BV
-        symptomatic with ``ti_seeks_care == ti``), i.e. the VDS/UDS stream.
+      * ``care``: symptomatic care-seekers (the ``seek_care`` events of
+        NG/CT/TV/BV from the last disease step), i.e. the VDS/UDS stream.
       * ``pn``: partners who attended via PN on the previous step
         (``pn.ti_notified == ti - 1``). They are routed to testing inside
         PN's step and treated on the following step, so at this point they
@@ -330,7 +330,7 @@ class PresenterEtiology(ss.Intervention):
         for ch in self.CHANNELS:
             for sx in self.SEXES:
                 for k in ('n',) + self.PATHOGENS + ('ngct', 'any'):
-                    defs.append(ss.Result(f'{k}_{ch}_{sx}', dtype=int, scale=False,
+                    defs.append(ss.Result(f'{k}_{ch}_{sx}', dtype=int, kind='flow', scale=False,
                                           auto_plot=False))
         self.define_results(*defs)
         return
@@ -355,15 +355,12 @@ class PresenterEtiology(ss.Intervention):
         sim = self.sim
         ti = self.ti
         dis = sim.diseases
-        care = None
+        seekers = ss.uids()
         for p in ('ng', 'ct', 'tv', 'bv'):
             d = dis.get(p)
-            if d is None:
-                continue
-            m = d.symptomatic & (d.ti_seeks_care == ti)
-            care = m if care is None else (care | m)
-        if care is not None:
-            self._record(care, 'care')
+            if d is not None:
+                seekers = seekers | d.seek_care.uids  # The care seekers that syndromic_vds/uds and the POC panel see
+        self._record(sim.people.uid.isin(seekers), 'care')
         pn = sim.interventions.get(self.pn_name)
         if pn is not None and ti > 0:
             self._record(pn.ti_notified == (ti - 1), 'pn')
