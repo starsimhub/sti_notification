@@ -1,0 +1,51 @@
+exp 10 — v4 calibration | N_DRAWS=500 K=1 N_AGENTS=10000 STOP=2026 | 10 priors: ['hiv.beta_m2f', 'hiv.rel_init_prev', 'ng.beta_m2f', 'ct.beta_m2f', 'tv.beta_m2f', 'structuredsexual.prop_f0', 'structuredsexual.m2_conc', 'structuredsexual.dur_sw', 'ng.dur_asymp2clear', 'hiv.rel_death']
+  500 sims on 150 workers
+    [20/500] 68s
+    [40/500] 72s
+    [60/500] 73s
+    [80/500] 74s
+    [100/500] 75s
+    [120/500] 77s
+    [140/500] 79s
+    [160/500] 124s
+    [180/500] 141s
+    [200/500] 144s
+    [220/500] 146s
+    [240/500] 148s
+    [260/500] 150s
+    [280/500] 152s
+    [300/500] 156s
+    [320/500] 203s
+    [340/500] 216s
+    [360/500] 218s
+    [380/500] 220s
+    [400/500] 222s
+    [420/500] 224s
+    [440/500] 225s
+    [460/500] 240s
+    [480/500] 253s
+    [500/500] 258s
+  500/500 sims ok
+  acceptable draws: 0/500; keeping 0
+ draw_idx  retention_rank  acceptable  min_seeds_sustained      mae
+        0             478       False                    1 4.095033
+        1              66       False                    1 1.006832
+        2             490       False                    1 4.447046
+        3             493       False                    1 4.513957
+        4             125       False                    1 1.391646
+        5             369       False                    1 2.795691
+        6             348       False                    1 2.644511
+        7             423       False                    1 3.188275
+        8             249       False                    1 2.017391
+        9             408       False                    1 3.092927
+       10             283       False                    1 2.187608
+       11             392       False                    1 2.977832
+       12             304       False                    0 2.289993
+       13             110       False                    0 1.311502
+       14             143       False                    1 1.493963
+
+  Validation (median over draws | data):
+    promise_any_sti_pregnant       0.462 | 0.270
+    promise_symp_share_pregnant    0.204 | 0.100
+    stich_any_sti_f_18_24          0.338 | 0.250
+WALL 259.85 s
