@@ -1,0 +1,37 @@
+Warning, could not install some fonts:
+[Errno 2] No such file or directory: '/home/robyn/miniconda/envs/stinotif/lib/python3.11/site-packages/starsim/assets'
+exp 07 — syphilis-free calibration | N_DRAWS=500 K=5 N_AGENTS=10000 STOP=2030 | 9 priors: ['hiv.beta_m2f', 'hiv.rel_init_prev', 'ng.beta_m2f', 'ct.beta_m2f', 'tv.beta_m2f', 'structuredsexual.prop_f0', 'structuredsexual.m2_conc', 'structuredsexual.dur_sw', 'ng.dur_asymp2clear']
+  2500 sims on 150 workers
+    [20/2500] 515s
+    [40/2500] 551s
+    [60/2500] 563s
+    [80/2500] 573s
+    [100/2500] 584s
+    [120/2500] 593s
+    [140/2500] 606s
+    [160/2500] 1062s
+    [180/2500] 1109s
+    [200/2500] 1126s
+    [220/2500] 1144s
+    [240/2500] 1160s
+    [260/2500] 1180s
+    [280/2500] 1195s
+    [300/2500] 1219s
+    [320/2500] 1681s
+    [340/2500] 1700s
+    [360/2500] 1723s
+    [380/2500] 1736s
+    [400/2500] 1757s
+    [420/2500] 1788s
+    [440/2500] 1805s
+    [460/2500] 2219s
+/home/robyn/miniconda/envs/stinotif/lib/python3.11/site-packages/stisim/diseases/hiv.py:658: RuntimeWarning: invalid value encountered in cast
+  self.ti_zero[uids] = ti + dur_post_art.astype(int)
+    [480/2500] 2263s
+    [500/2500] 2282s
+    [520/2500] 2303s
+    [540/2500] 2327s
+    [560/2500] 2368s
+    [580/2500] 2388s
+    [600/2500] 2457s
+# stopped at 600/2500 on 2026-11-25: superseded by deaths dedup + migration (see 09)

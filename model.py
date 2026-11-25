@@ -147,10 +147,13 @@ def make_sim(seed=1, n_agents=5e3, start=1985, stop=2030,
 
     # The Zimbabwe demographics CSV encodes age-cohort values in thousands,
     # so override total_pop to the actual 1985 population (~8.7M).
+    # data/zimbabwe_deaths.csv has AIDS deaths removed (stisim.data.dedup_deaths,
+    # anchors 1985 and 2025), since the HIV module kills agents itself; the UN WPP
+    # all-cause original is data/zimbabwe_deaths_all_cause.csv.
     simpars = dict(
         rand_seed=seed, n_agents=n_agents,
         start=start, stop=stop,
-        use_migration=False, verbose=verbose,
+        use_migration=True, verbose=verbose,
         total_pop=8.7e6,
     )
     sim = sti.Sim(

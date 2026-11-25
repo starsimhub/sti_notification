@@ -126,7 +126,7 @@ VALIDATION = {
 }
 
 TS_RESULT_NAMES = ['prevalence', 'prevalence_f', 'prevalence_m',
-                   'prevalence_15_49', 'prevalence_f_25_30', 'new_infections']
+                   'prevalence_15_49', 'prevalence_f_25_30', 'new_infections', 'new_deaths']
 
 
 def _years(res):
