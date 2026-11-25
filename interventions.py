@@ -398,17 +398,12 @@ class CondomCounseling(ss.Intervention):
     USPSTF meta-analysis (pooled OR 0.66; Henderson 2020).
 
     When an agent is treated for an STI, with probability ``coverage`` they are
-    enrolled in a protection window of ``dur``: during it their re-acquisition
-    susceptibility (``rel_sus``) for the protected diseases is multiplied by
-    ``(1 - eff)``. Acquisition only; onward transmission is left untouched.
-
-    The multiplier is applied multiplicatively each step, matching how the
-    disease risk factors and coinfection connectors (hiv_sti, bv) compose on
-    ``rel_sus``. Each disease's ``step_state`` resets ``rel_sus[:] = 1`` and
-    connectors re-apply their cofactors before interventions run, so
-    multiplying the currently-protected set here both composes with those
-    cofactors and self-expires when an agent leaves the protected set — no
-    reset bookkeeping needed beyond ``ti_protect_end``.
+    enrolled in a protection window of ``dur`` (``ti_protect_end``). This class
+    only does the enrolment. The protection itself, ``rel_sus`` multiplied by
+    ``(1 - eff)`` while enrolled, is an ``ss.modify`` per disease (see
+    ``condom_counseling()``, which builds both). A modifier applies on top of
+    each person's own ``rel_sus`` without overwriting it, so it ends with the
+    window. Acquisition only; onward transmission is left untouched.
 
     Protected diseases: NG / CT / TV.
     """
@@ -462,18 +457,6 @@ class CondomCounseling(ss.Intervention):
             if len(enroll):
                 self.ti_protect_end[enroll] = ti + self._window_steps
 
-        protected = (self.ti_protect_end > ti).uids
-        if not len(protected):
-            return
-        # Multiply, don't overwrite: step_state has reset rel_sus[:]=1 and
-        # connectors have re-applied their cofactors this step, so this
-        # composes with them and self-expires when agents leave `protected`.
-        factor = 1.0 - float(self.pars.eff)
-        for d in self.diseases:
-            dis = sim.diseases.get(d)
-            if dis is None:
-                continue
-            dis.rel_sus[protected] *= factor
         return
 
     def init_results(self):
@@ -492,6 +475,19 @@ class CondomCounseling(ss.Intervention):
         self.results['n_protected'][ti] = int((self.ti_protect_end > ti).sum())
         self.results['new_enrolled'][ti] = int((self.ti_protect_end == ti + self._window_steps).sum())
         return
+
+
+def condom_counseling(coverage=0.5, eff=0.30, dur=ss.months(6), diseases=('ng', 'ct', 'tv'),
+                      start=2027, name='condom_counseling'):
+    """Condom counselling for the newly treated: the enrolment (``CondomCounseling``) and its protection.
+
+    Returns a list, to add to the sim's interventions: the enrolment, and one ``ss.modify``
+    per disease that multiplies ``rel_sus`` by ``(1 - eff)`` for the people enrolled now.
+    """
+    enrol = CondomCounseling(coverage=coverage, eff=eff, dur=dur, diseases=diseases, start=start, name=name)
+    protected = lambda sim: sim.interventions[name].ti_protect_end > sim.ti
+    mods = [ss.modify(f'{d}.rel_sus', multiply=1 - eff, who=protected, start=start, name=f'{name}_{d}') for d in diseases]
+    return [enrol] + mods
 
 
 def CareSeekScaler(mult=1.0, start=2027, diseases=('ng', 'ct', 'tv', 'bv')):

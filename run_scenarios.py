@@ -53,7 +53,7 @@ os.chdir(REPO)
 
 from _pipeline import row_to_sim_pars, set_pars_local                 # noqa
 from model import make_sim                                            # noqa
-from interventions import CondomCounseling, CareSeekScaler, PNIntensitySwitch  # noqa
+from interventions import condom_counseling, CareSeekScaler, PNIntensitySwitch  # noqa
 from scenarios import (CARE_SEEKING, PN_INTENSITY, CONDOM_COUNSELLING,  # noqa
                        BASE_SPEC, SPEC_SWEEP, SPEC_SWEEP_CELLS)
 
@@ -158,9 +158,9 @@ def build_sim(cell, seed, sim_pars):
             start=INTV_YEAR))
     if cell['bp'] != 'none':
         bp = CONDOM_COUNSELLING[cell['bp']]
-        extra_intvs.append(CondomCounseling(coverage=bp['coverage'], eff=bp['eff'],
+        extra_intvs += condom_counseling(coverage=bp['coverage'], eff=bp['eff'],
                                             dur=ss.months(bp['dur_months']),
-                                            start=INTV_YEAR))
+                                            start=INTV_YEAR)
     if extra_intvs:
         sim.pars['interventions'] = list(sim.pars['interventions']) + extra_intvs
     return sim
