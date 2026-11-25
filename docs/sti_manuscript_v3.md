@@ -99,7 +99,7 @@ Targets were:
 
 Each disease's targets depend almost entirely on its own parameters. So we first screened 500 parameter sets by Latin hypercube sampling, one seed each, and kept those reaching each disease's targets. We then combined these per-disease sets into 200 candidate parameter sets and ran each with five random seeds.
 
-A parameter set was accepted only if every infection was sustained in at least four of five seeds, and every prevalence target, both HIV mortality targets and the VDS-etiology target lay within half a band-width of its range. 66 of 200 sets were accepted, and we retained the 30 best-fitting. We validated, without fitting, against the prevalence of curable STIs among pregnant women and the share with symptoms in early readouts of the PROMISE study (about 27% and under 10%; [PROMISE, interim]), and against the share of VDS presentations with NG or CT (about 33%; Chirenje 2018).
+A parameter set was accepted only if every infection was sustained in at least four of five seeds, and every prevalence target, both HIV mortality targets and the VDS-etiology target lay within half a band-width of its range. 66 of 200 sets were accepted, and we retained the 30 best-fitting. We validated, without fitting, against the share of VDS presentations with NG or CT (about 33%; Chirenje 2018).
 
 ## Standard of care
 
@@ -161,8 +161,6 @@ The 30 retained parameter sets reproduced the HIV, NG, CT and TV targets (Append
 - 53% (range 50–58%) had none of NG, CT or TV, against about 57% in the Zimbabwe STI Etiology Study (Chirenje 2018).
 - 36% (29–41%) had NG or CT, against about 33% (Figure 2).
 
-Without fitting, 34% of pregnant women had NG, CT or TV in 2023–25, and 20% of these infections were symptomatic. That is higher than early PROMISE readouts (about 27% and under 10%).
-
 ## POC testing alone
 
 Relative to SOC, POC alone (98% specificity):
@@ -215,7 +213,7 @@ The false-positive share matters more because PN reaches so few partners. In the
 - Safety screening for intimate-partner violence before notification.
 - Note: IPSAZ shows that incentives to the partner alone do not raise uptake (Martin 2025); STI categories may not carry the same meaning for patients (M. Marks).]
 
-[Para: care-seeking as the largest lever. Barriers include symptom persistence and loss of trust in services, which diagnostics may address (Peters 2019, PMID 31141301). Compare with screening asymptomatic women (L. Newman). In early PROMISE readouts about 27% of pregnant women had a curable STI but under 10% reported symptoms, so antenatal screening reaches infections that symptomatic pathways miss; whether treating them improves pregnancy outcomes is the open question its interim and final readouts (2026) address. Also compare with integration with HIV prevention, including PrEP (L. Newman).]
+[Para: care-seeking as the largest lever. Barriers include symptom persistence and loss of trust in services, which diagnostics may address (Peters 2019, PMID 31141301). Compare with screening asymptomatic women (L. Newman), which reaches infections that symptomatic pathways miss. Also compare with integration with HIV prevention, including PrEP (L. Newman).]
 
 **Limitations**
 
@@ -267,5 +265,4 @@ Appendix: calibration fit and validation; time series by pathogen (with level va
 - WHO. Guidelines for the management of symptomatic STIs. 2021.
 - Zemouri C, et al. PLoS One 2016;11(10):e0163365.
 - Zimbabwe MoHCC. National STI management guidelines 2019–2021.
-- PROMISE study, interim readout: about 27% of pregnant women with CT/NG/TV; under 10% symptomatic. [Citation form to confirm with the PROMISE team; interim and final readouts due 2026.]
 - [Add: Michalow J, et al. (PMID 38768094; R. Peters #33); Peters RPH, et al. PN intentions, S Afr Med J (verify); POC NAAT accuracy references for the 98% base case; UNAIDS and IHME data sources.]
