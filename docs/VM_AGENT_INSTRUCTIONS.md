@@ -19,7 +19,7 @@ Changes made on this branch (24 Nov 2026), **none of which has been executed yet
 - **`run_scenarios.py`**:
   - 83 cells: SOC, 64 POC cells at 98% specificity, and 18 specificity-sweep cells.
   - New `spec` column.
-  - Defaults to exp 07 draws and `N_AGENTS=20000`.
+  - Defaults to exp 07 draws and `N_AGENTS=10000`.
 - **`experiments/07_2026-11-24_no_syph_calibration/run.py`**: the new calibration.
 - **`analysis/fp_harms.py`**: tables and figures for the reframed paper.
 - **`process_results.py`**: syphilis dropped; `spec` added to the grouping.
@@ -31,11 +31,14 @@ cd ~/sti_notification            # adjust to the VM checkout path
 git fetch origin
 git checkout reframe/no-syph-fp-harms
 git pull --ff-only
-conda activate starsim
+conda activate stinotif
+export PYTHONPATH=$PWD
 python -c "import stisim, starsim; print(stisim.__version__, starsim.__version__)"
 ```
 
 **Expected:** stisim 1.5.7 and starsim 3.3.2. If the versions differ, 🛑 stop and report. Do not upgrade.
+
+`stinotif` is a clone of the `stilen` env with stisim installed from branch `v1.5.7-ngseed`: v1.5.7 plus the fix for seed gonorrhoea infections inheriting a NaN `rel_treat`. Without that fix, NG treatment never cures anyone.
 
 Use `nproc` to choose `N_WORKERS`: leave about 4 cores free.
 
@@ -112,12 +115,12 @@ SMOKE=1 N_WORKERS=30 python run_scenarios.py
 - 125/125 ok.
 - `results/scenarios_smoke.kavg.csv` has a `spec` column, `pres_*` columns and no `syph_*` columns.
 
-🛑 **Report to Robyn:** smoke results and timing per sim at 20k agents. Use the timing to estimate the full runtimes in sections 3 and 4.
+🛑 **Report to Robyn:** smoke results and timing per sim at 10k agents. Use the timing to estimate the full runtimes in sections 3 and 4.
 
 ## 3. Exp 07 calibration
 
 ### 3a. Timing check
-Estimate the runtime as 500 draws × 5 seeds × (time per sim at 20k agents to 2030) ÷ N_WORKERS. If it is over about 12 h, 🛑 ask Robyn whether to drop to `N_AGENTS=15000` or 300 draws.
+Estimate the runtime as 500 draws × 5 seeds × (time per sim at 10k agents to 2030) ÷ N_WORKERS. If it is over about 12 h, 🛑 ask Robyn whether to drop to 300 draws.
 
 ### 3b. Full run
 ```bash

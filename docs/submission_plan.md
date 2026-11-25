@@ -21,7 +21,7 @@ Reporting: use the ODD protocol for the agent-based model description (Appendix)
    conda run -n starsim env N_DRAWS=4 K_SEEDS=2 N_AGENTS=5000 STOP=2026 N_WORKERS=8 \
        python experiments/07_2026-11-24_no_syph_calibration/run.py
    ```
-2. **Run the exp 07 calibration** (500 draws × K=5, 20k agents, STOP=2030):
+2. **Run the exp 07 calibration** (500 draws × K=5, 10k agents, STOP=2030):
    ```bash
    conda run -n starsim env N_DRAWS=500 N_WORKERS=120 \
        python experiments/07_2026-11-24_no_syph_calibration/run.py
@@ -34,7 +34,7 @@ Reporting: use the ODD protocol for the agent-based model description (Appendix)
    conda run -n starsim python process_results.py
    conda run -n starsim python analysis/fp_harms.py
    ```
-   At 20k agents and 83 cells, expect about 2–3× the previous 4 h per 10 draws. Consider N_DRAWS=20 if compute is tight.
+   At 10k agents and 83 cells, expect roughly the previous 4 h per 10 draws. Consider N_DRAWS=20 if compute is tight.
 4. **Fill in the [XX] values** in `docs/sti_manuscript_v2.md` from `results/fp_cells.csv`, `fp_spec_sweep.csv` and `shapley.csv`.
 5. **Rebuild Figures 2–4 without syphilis.** Figures 5–6 come from `analysis/fp_harms.py`. Fix Figure 1 per L. Newman #12 and R. Peters #9.
 6. **References**: resolve placeholders, add POC NAAT accuracy citations for the 98% base case, and renumber.
@@ -45,7 +45,7 @@ Reporting: use the ODD protocol for the agent-based model description (Appendix)
 - **STI calibration targets.** `data/zimbabwe_sti_data.csv` looks like projections (it runs to 2040). Confirm its source and denominators: ng/tv `prevalence_f` vs overall; ct uses `prevalence_f_25_30`. Exp 07 fits 2015–25 rather than exp 06's 2035–40.
 - **BV care-seeking.** I added BV to the care-seeking lever, on the grounds that campaigns raise care-seeking for discharge whatever its cause. This makes the false-positive effect stronger. Keep it, or run both?
 - **Confirmatory testing arm.** It is not implemented. Worth adding if reviewers ask, or as a discussion point only?
-- **Agent count.** Raised to 20k (from 10k) to reduce NG fade-out. This is the main compute cost driver.
+- **Agent count.** 10k agents, for compute. 20k would reduce NG fade-out at about 2× the cost.
 
 ## 4. Response to co-author comments on v1
 
