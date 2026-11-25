@@ -11,6 +11,7 @@ syphilis-inclusive version is on `main` at commit 8b1f264.
 import warnings
 
 import starsim as ss
+import starsim.library as ssl
 import sciris as sc
 import pandas as pd
 import stisim as sti
@@ -83,7 +84,7 @@ def make_networks(dur_recall=ss.years(0.25)):
         client_shares=ss.bernoulli(p=0.20),
         sw_seeking_rate=ss.permonth(20),
     )
-    return [sexual, sti.PriorPartners(dur_recall=dur_recall), ss.MaternalNet()]
+    return [sexual, sti.PriorPartners(dur_recall=dur_recall), ss.PrenatalNet()]
 
 
 def make_interventions(poc=None, pn_pars=None, stop=2040,
@@ -143,7 +144,7 @@ def make_sim(seed=1, n_agents=5e3, start=1985, stop=2030,
 
     # FetalHealth tracks adverse birth outcomes; the sti_fetal connector
     # translates NG/CT/TV infections + treatments into FetalHealth API calls.
-    custom = [ss.FetalHealth(), sti_fetal()] if fetal_health else None
+    custom = [ssl.mnch.FetalHealth(), sti_fetal()] if fetal_health else None
 
     # The Zimbabwe demographics CSV encodes age-cohort values in thousands,
     # so override total_pop to the actual 1985 population (~8.7M).

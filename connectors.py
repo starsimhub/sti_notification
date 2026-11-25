@@ -62,19 +62,21 @@ class sti_fetal(ss.Connector):
             tx_residual_timing=sc.objdict(tri1=0.35, tri2=0.55, tri3=0.75),
 
             # Distribution for sampling individual timing shifts (mean/std set dynamically per disease)
-            ptb_shift_dist=ss.lognorm_ex(mean=1.0, std=1.0),
+            ptb_shift_dist=ss.lognormal(mean=1.0, std=1.0),
+
+            # Trimester boundaries, in weeks of gestation (ss.Pregnancy no longer defines trimesters)
+            trimester_weeks=(13, 27),
         )
         self.update_pars(pars, **kwargs)
 
         return
 
-    def init_pre(self, sim):
-        super().init_pre(sim)
-        try:
-            fh = sim.custom['fetal_health']
-            fh.add_conception_callback(self._on_conception)
-        except (KeyError, AttributeError):
-            pass
+    def init_post(self):
+        """ Register on conception after FetalHealth (which sets the baseline in its own callback) """
+        super().init_post()
+        if self._get_fh() is not None:
+            preg = self.sim.get_module(ss.Pregnancy)
+            preg.add_callback(preg.conception, self._on_conception)
         return
 
     def _get_fh(self):
@@ -119,12 +121,10 @@ class sti_fetal(ss.Connector):
         if fh is None or not len(uids):
             return
 
-        # Trimester from gestational age
-        preg = self.sim.people.pregnancy
-        ga_weeks   = preg.gestation[uids]
-        boundaries = preg.pars.trimesters
-        b1 = boundaries[0].weeks
-        b2 = boundaries[1].weeks
+        # Trimester from gestational age: time since conception
+        preg = self.sim.get_module(ss.Pregnancy)
+        ga_weeks = (self.ti - preg.ti_P[uids]) * self.sim.t.dt_year * 52
+        b1, b2 = self.pars.trimester_weeks
         trimester = np.ones(len(uids), dtype=int)
         trimester[ga_weeks >= b1] = 2
         trimester[ga_weeks >= b2] = 3
@@ -157,27 +157,29 @@ class sti_fetal(ss.Connector):
         if fh is None:
             return
 
-        preg = ppl.pregnancy
-        if not preg.pregnant.any():
+        preg = sim.get_module(ss.Pregnancy)
+        if not preg.P.any():
             return
 
-        pregnant_uids = preg.pregnant.uids
+        pregnant_uids = preg.P.uids
 
         for dname in self.disease_names:
             try:
                 disease = sim.diseases[dname]
             except (KeyError, AttributeError):
                 continue
-            newly_infected = disease.ti_infected == ti
+            # Transmission runs after connectors, so this step sees the previous step's infections;
+            # new pregnancies are handled at conception
+            newly_infected = (disease.ti_infected == ti - 1) & (preg.ti_P < ti)
             affected = pregnant_uids[newly_infected[pregnant_uids]]
             if len(affected):
                 self._apply_infection(affected, dname)
 
         return
 
-    def update_results(self):
-        """ Detect treatments and reverse fetal damage. """
-        super().update_results()
+    def record_events(self):
+        """ At the end of the step: detect this step's treatments and reverse fetal damage """
+        super().record_events()
         sim = self.sim
         ti = self.ti
 
@@ -185,11 +187,11 @@ class sti_fetal(ss.Connector):
         if fh is None:
             return
 
-        preg = sim.people.pregnancy
-        if not preg.pregnant.any():
+        preg = sim.get_module(ss.Pregnancy)
+        if not preg.P.any():
             return
 
-        pregnant_uids = preg.pregnant.uids
+        pregnant_uids = preg.P.uids
 
         for tx_name in self.treatment_names:
             try:

@@ -144,7 +144,7 @@ def build_sim(cell, seed, sim_pars):
                    poc=cell['poc'], pn_pars=PN_INTENSITY['baseline'],
                    poc_spec=None if cell['poc'] is None else cell['spec'],
                    care_seek_mult=1.0,
-                   fetal_health=False, verbose=-1)
+                   fetal_health=False, verbose=0)
     set_pars_local(sim, sim_pars)
     extra_intvs = []
     csm = CARE_SEEKING[cell['care']]
@@ -249,7 +249,7 @@ def extract(sim, cell, draw, sub_idx, seed):
 def _annualize(result):
     """Return (years, values) for an annualised sim result, or (None, None)."""
     try:
-        ann = result.annualize()
+        ann = result.resample('year')
         return (np.asarray(ann.timevec.years).astype(int),
                 np.asarray(ann.values, dtype=float))
     except Exception:

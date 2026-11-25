@@ -115,7 +115,7 @@ def set_pars_local(sim, pars: dict):
                 for mod in container:
                     if hasattr(mod, 'name') and mod.name == mod_name:
                         if par_name == 'time_to_undetectable':
-                            mod.pars[par_name] = ss.lognorm_ex(
+                            mod.pars[par_name] = ss.lognormal(
                                 ss.years(float(value)), ss.years(float(value)))
                         elif par_name == 'rel_trans_latent_half_life':
                             mod.pars[par_name] = ss.years(float(value))
@@ -148,7 +148,7 @@ def build_sim(seed: int, sim_pars: dict, *,
               pn_pars=None):
     """Construct and parameterise a single sim. Caller runs it."""
     sim = make_sim(seed=seed, start=start, stop=stop, n_agents=n_agents,
-                   pn_pars=pn_pars, fetal_health=False, verbose=-1)
+                   pn_pars=pn_pars, fetal_health=False, verbose=0)
     set_pars_local(sim, sim_pars)
     return sim
 
@@ -166,7 +166,7 @@ def grab(r, name):
 def annualize_safe(result):
     """Annualise a starsim result; return (None, None) if it fails."""
     try:
-        ann = result.annualize()
+        ann = result.resample('year')
         years = np.asarray(ann.timevec.years).astype(int)
         values = np.asarray(ann.values, dtype=float)
         return years, values

@@ -17,7 +17,7 @@ tx_labels = {'ng_tx':'NG', 'ct_tx':'CT', 'metronidazole':'MTNZ'}
 scenarios = scenlabels.keys()
 
 unneeded_results = [
-    'pregnancy', 'deaths', 'structuredsexual', 'maternalnet', 'new_deaths', 'cum_deaths',
+    'pregnancy', 'deaths', 'structuredsexual', 'prenatalnet', 'new_deaths', 'cum_deaths',
     'fsw_testing', 'other_testing', 'low_cd4_testing', 'art', 'vmmc', 'hivdx'
 ]
 

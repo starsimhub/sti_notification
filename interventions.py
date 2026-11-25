@@ -490,8 +490,8 @@ class CondomCounseling(ss.Intervention):
         )
         return
 
-    def update_results(self):
-        super().update_results()
+    def record_events(self):
+        super().record_events()
         ti = self.ti
         self.results['n_protected'][ti] = int((self.ti_protect_end > ti).sum())
         self.results['new_enrolled'][ti] = int((self.ti_protect_end == ti + self._window_steps).sum())

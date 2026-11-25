@@ -179,7 +179,7 @@ def extract_timeseries(sim):
             if rname not in dres:
                 continue
             try:
-                ann = dres[rname].annualize()
+                ann = dres[rname].resample('year')
                 yrs = np.asarray(ann.timevec.years).astype(int)
                 vals = np.asarray(ann.values, dtype=float)
             except Exception:
