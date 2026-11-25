@@ -15,68 +15,48 @@ Sens/spec inputs come from three places:
   0.40+0.25=0.65), and metro-routing doesn't depend on TV status
   itself, so sens_TV = spec_TV rate = 0.65 (i.e. sens = 0.65,
   spec = 0.35).
-* POC panel (NG / CT / TV): ``interventions.py::POC_SENS = POC_SPEC = 0.95``.
-
-Syphilis follows a different pathway (RPR or dual RDT at ANC + PN, not
-VDS). Headline values:
-
-* SOC (dual RDT): sens ≈ 0.70 (weighted across active-disease stages:
-  0.20 primary + 0.95 secondary/latent). Spec ≈ 0.85 (dual is 0.99
-  specific on naive women but 0.05 on previously-cured; weighted with
-  ~15 % cured share this gives ~0.85).
-* POC (RPR): sens = 0.90, spec = 0.95 (``data/syph_dx.csv``, ``rpr``
-  rows — 0.05 false-positive on both naive and previously-cured women).
+* POC panel (NG / CT / TV): the female values of ``interventions.py::POC_SENS``
+  and ``POC_SPEC`` (base case 95% sensitivity, 98% specificity).
 
 Prevalences among VDS presenters come from ``results/vds_etiology.csv``.
-Syphilis prevalence in ANC-aged women is taken as 10 %, mid-range from
-the calibration baseline nontrep median (~13 % adult female).
 
     conda run -n starsim python plotting/compute_slide4_ppv.py
 """
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 import pandas as pd
 
 REPO = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(REPO))
+from interventions import POC_SENS, POC_SPEC  # noqa: E402
 VDS_CSV = REPO / 'results' / 'vds_etiology.csv'
 OUT = REPO / 'results' / 'slide4_diagnostic_performance.csv'
 
 DISEASES = [('ng', 'Gonorrhoea'),
             ('ct', 'Chlamydia'),
-            ('tv', 'Trichomoniasis'),
-            ('syph', 'Syphilis')]
+            ('tv', 'Trichomoniasis')]
 
 SENS = {
     ('SOC', 'ng'):   0.70,   # tx_mix_cerv: all3 (0.50) + ngct (0.20)
     ('SOC', 'ct'):   0.70,   # NG/CT are co-routed
     ('SOC', 'tv'):   0.65,   # tx_mix: all3 + mtnz in either mix
-    ('SOC', 'syph'): 0.70,   # dual RDT, weighted across active stages
-    ('POC', 'ng'):   0.95,   # POC_SENS
-    ('POC', 'ct'):   0.95,
-    ('POC', 'tv'):   0.95,
-    ('POC', 'syph'): 0.90,   # RPR (syph_dx.csv, rows 44-50)
+    **{('POC', d): POC_SENS[d][0] for d, _ in DISEASES},  # female value
 }
 SPEC = {
     ('SOC', 'ng'):   0.50,   # tx_mix_noncerv: 1 - (all3 0.40 + ngct 0.10)
     ('SOC', 'ct'):   0.50,
     ('SOC', 'tv'):   0.35,   # 1 - 0.65 metro rate
-    ('SOC', 'syph'): 0.85,   # dual RDT weighted (naive 0.99 + cured 0.05)
-    ('POC', 'ng'):   0.95,   # POC_SPEC
-    ('POC', 'ct'):   0.95,
-    ('POC', 'tv'):   0.95,
-    ('POC', 'syph'): 0.95,   # RPR
+    **{('POC', d): POC_SPEC[d][0] for d, _ in DISEASES},  # female value
 }
-# Syph prev in ANC-aged women — different pathway, not in vds_etiology.
-SYPH_PREV_ANC = 0.10
 
 
 def main():
     vd = dict(zip(*[pd.read_csv(VDS_CSV)[c] for c in ('metric', 'value')]))
     prev = {'ng':   vd['marg_ng'],
             'ct':   vd['marg_ct'],
-            'tv':   vd['marg_tv'],
-            'syph': SYPH_PREV_ANC}
+            'tv':   vd['marg_tv']}
 
     rows = []
     for dkey, dname in DISEASES:

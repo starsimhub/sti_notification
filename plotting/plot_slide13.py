@@ -1,9 +1,9 @@
 """Slide 13: 4-panel heatmap — percent reduction in unnecessary treatments vs SOC.
 
-Panels: BP = none / low / moderate / high.
+Panels: condom counselling = none / low / moderate / high.
 Each panel: care-seeking (rows, baseline at bottom) x PN intensity (cols) heatmap.
-Cell metric per (cell, draw): sum of ``new_treated_unnecessary`` across the 4
-curable STIs (NG + CT + TV + syph), window-cumulative 2027-2040 (already
+Cell metric per (cell, draw): sum of ``new_treated_unnecessary`` across the 3
+curable STIs (NG + CT + TV), window-cumulative 2027-2040 (already
 pre-summed in ``scenarios.kavg.csv``). Reduction = 100 * (SOC_median - cell_median) / SOC_median.
 
     conda run -n starsim python plot_slide13.py
@@ -24,7 +24,7 @@ def main():
     )
     draw_heatmap_grid(
         arm_pct,
-        cbar_label='Reduction vs SOC (%)\ncum. unnecessary NG+CT+TV+syph treatments 2027–2040',
+        cbar_label='Reduction vs SOC (%)\ncum. unnecessary NG+CT+TV treatments 2027–2040',
         out_png=REPO / 'figures' / 'fig_slide13.png',
     )
 
