@@ -1,9 +1,12 @@
 """VDS etiology diagnostic (single draw/seed; heavy-ish analyzer, diagnostic use only).
 
-Runs one calibrated draw with the VDSEtiology analyzer and reports, pooled over a
-window: (1) vaginal-discharge prevalence among adult women, (2) the etiology
-marginals (share of VDS women carrying NG/CT/TV/BV; sum >1 under coinfection),
-and (3) the 15 mutually-exclusive infection combinations (sum to 100%).
+Runs one calibrated draw with the VDSEtiology and VDSPresenters analyzers and
+reports, pooled over a window: (1) vaginal-discharge prevalence among adult women,
+(2) the etiology marginals (share carrying NG/CT/TV/BV; sum >1 under coinfection),
+and (3) the 15 mutually-exclusive infection combinations (sum to 100%), for
+women with symptoms (results/vds_etiology.csv) and for women presenting with
+discharge (results/vds_etiology_presenters.csv). "BV" is SimpleBV, every non-STI
+cause of discharge.
 
     conda run -n starsim python diagnostics/vds_etiology.py
 
@@ -31,11 +34,11 @@ os.chdir(REPO)
 
 from _pipeline import row_to_sim_pars, set_pars_local  # noqa
 from model import make_sim                                            # noqa
-from analyzers import VDSEtiology                                     # noqa
+from analyzers import VDSEtiology, VDSPresenters                      # noqa
 
-CALIB = REPO / 'experiments' / '06_2026-06-24_kseed_calibration' / 'outputs'
+CALIB = REPO / 'experiments' / '13_2026-11-25_nonsti_vds' / 'outputs'
 DRAWS = CALIB / 'draws_used.csv'
-FONT = '/Users/robynstuart/gf/syph_dx_zim/assets/LibertinusSans-Regular.otf'
+FONT = str(REPO / 'assets' / 'LibertinusSans-Regular.otf')
 
 MARGINALS = VDSEtiology.MARGINALS
 COMBOS = VDSEtiology.COMBOS
@@ -62,13 +65,13 @@ def main():
     print(f'[vds] draw={draw} seed={seed} n_agents={n_agents} window={lo}-{hi}', flush=True)
 
     sim = make_sim(seed=seed, start=1985, stop=2040, n_agents=n_agents,
-                   poc=None, pn_pars=None, fetal_health=False, verbose=-1)
+                   poc=None, pn_pars=None, fetal_health=False, verbose=0)
     set_pars_local(sim, sp)
-    sim.pars['analyzers'] = list(sim.pars['analyzers']) + [VDSEtiology()]
+    sim.pars['analyzers'] = list(sim.pars['analyzers']) + [VDSEtiology(), VDSPresenters()]
     sim.run()
 
     res = sim.results['vds_etiology']
-    yv = np.array([t.year for t in sim.t.timevec])
+    yv = np.floor(np.array([float(t.years) for t in sim.t.timevec]) + 1e-9).astype(int)
     m = (yv >= lo) & (yv <= hi)
 
     n_women = pooled(res, m, 'n_women')
@@ -95,6 +98,19 @@ def main():
     pd.DataFrame({'metric': ['vds_prev'] + [f'marg_{p}' for p in MARGINALS] + list(COMBOS),
                   'value': [vds_prev] + [marg[p] for p in MARGINALS] + [combo[c] for c in COMBOS]
                   }).to_csv(OUT / 'vds_etiology.csv', index=False)
+
+    # The same for women presenting with discharge
+    pr = sim.results['vds_presenters']
+    n_pres = pooled(pr, m, 'n_pres')
+    pmarg = {p: pooled(pr, m, f'marg_{p}') / n_pres for p in MARGINALS}
+    pcombo = {c: pooled(pr, m, c) / n_pres for c in COMBOS}
+    pnone = pooled(pr, m, 'none') / n_pres
+    print(f'\n=== Women presenting with discharge (n={n_pres:.0f} presentations, unscaled) ===')
+    print('  marginals: ' + ', '.join(f'{p.upper()} {pmarg[p]:.1%}' for p in MARGINALS))
+    print(f'  no NG/CT/TV: {pcombo["bv_only"] + pnone:.1%} (BV alone {pcombo["bv_only"]:.1%}, none {pnone:.1%})')
+    pd.DataFrame({'metric': ['vds_prev'] + [f'marg_{p}' for p in MARGINALS] + list(COMBOS) + ['none'],
+                  'value': [vds_prev] + [pmarg[p] for p in MARGINALS] + [pcombo[c] for c in COMBOS] + [pnone]
+                  }).to_csv(OUT / 'vds_etiology_presenters.csv', index=False)
 
     # figure: marginals + combinations
     sc.fonts(add=FONT); sc.options(font='Libertinus Sans', fontsize=10)

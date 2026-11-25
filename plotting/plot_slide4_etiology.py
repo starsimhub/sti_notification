@@ -17,7 +17,7 @@ from matplotlib.gridspec import GridSpec
 from plot_result1 import upset_panels, VDS_PATHS, COMBOS, FONT
 
 REPO = Path(__file__).resolve().parent.parent
-VDS_CSV = REPO / 'results' / 'vds_etiology.csv'
+VDS_CSV = REPO / 'results' / 'vds_etiology_presenters.csv'  # women presenting with discharge (diagnostics/vds_etiology.py); vds_etiology.csv is every woman with symptoms
 FIGS = REPO / 'figures'
 
 

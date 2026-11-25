@@ -290,6 +290,63 @@ class VDSEtiology(ss.Analyzer):
         return
 
 
+class VDSPresenters(ss.Analyzer):
+    """Etiology of women *presenting* with vaginal discharge (diagnostic use).
+
+    Each step, among women in ``age_range`` who sought care for discharge in the
+    step (the ``seek_care`` events of NG/CT/TV/BV), records the count, per-pathogen
+    carriage (marginals, which sum to >1 under coinfection), and the 15
+    mutually-exclusive combinations plus ``none`` (no NG/CT/TV/BV). This is the
+    population an etiology study at clinics samples, unlike ``VDSEtiology``, which
+    counts every woman with symptoms whether or not she presents. Runs as an
+    analyzer, at the end of the step, so it sees the step's seek_care events and
+    infection status before the next step's treatment.
+    """
+
+    MARGINALS = VDSEtiology.MARGINALS
+    COMBOS = VDSEtiology.COMBOS
+
+    def __init__(self, age_range=(15, 49), name='vds_presenters', *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.name = name
+        self.age_range = age_range
+        return
+
+    def init_results(self):
+        super().init_results()
+        defs = [ss.Result('n_pres', dtype=int, kind='flow', scale=False, label='Women presenting with discharge'),
+                ss.Result('none', dtype=int, kind='flow', scale=False, label='Presenting with none of NG/CT/TV/BV')]
+        defs += [ss.Result(f'marg_{p}', dtype=int, kind='flow', scale=False, label=f'Presenting with {p.upper()}') for p in self.MARGINALS]
+        defs += [ss.Result(c, dtype=int, kind='flow', scale=False, label=c) for c in self.COMBOS]
+        self.define_results(*defs)
+        return
+
+    def step(self):
+        sim = self.sim
+        ti = self.ti
+        ppl = sim.people
+        dis = sim.diseases
+        lo, hi = self.age_range
+        seekers = ss.uids()
+        for p in self.MARGINALS:
+            seekers = seekers | dis[p].seek_care.uids
+        f = seekers[ppl.female[seekers] & (ppl.age[seekers] >= lo) & (ppl.age[seekers] <= hi)]
+        self.results['n_pres'][ti] = len(f)
+        if not len(f):
+            return
+        inf = {p: np.asarray(dis[p].infected[f], bool) for p in self.MARGINALS}
+        for p in self.MARGINALS:
+            self.results[f'marg_{p}'][ti] = int(inf[p].sum())
+        for c in self.COMBOS:
+            parts = c.replace('_only', '').split('_')
+            mask = np.ones(len(f), bool)
+            for p in self.MARGINALS:
+                mask &= inf[p] if p in parts else ~inf[p]
+            self.results[c][ti] = int(mask.sum())
+        self.results['none'][ti] = int((~np.logical_or.reduce([inf[p] for p in self.MARGINALS])).sum())
+        return
+
+
 class PresenterEtiology(ss.Intervention):
     """True infection status among people *presenting* for NG/CT/TV testing.
 
