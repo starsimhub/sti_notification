@@ -1,17 +1,20 @@
 """
-Scenario driver: SOC reference + POC 3-factor full factorial.
+Scenario driver: SOC reference + POC 3-factor factorial + specificity sweep.
 
-Factors (each a 5-rung ladder in scenarios.py), layered on the POC diagnostic
+Factors (each a 4-rung ladder in scenarios.py), layered on the POC diagnostic
 arm and propagated through the calibrated ensemble:
-  - care-seeking      CARE_SEEKING       (care_seek_mult on NG/CT/TV p_symp_care)
-  - partner notif.    PN_INTENSITY       (pn_pars)
-  - bundled prev.     BUNDLED_PREVENTION (CondomCounseling coverage)
+  - care-seeking         CARE_SEEKING        (CareSeekScaler, NG/CT/TV + BV)
+  - partner notification PN_INTENSITY        (PNIntensitySwitch)
+  - condom counselling   CONDOM_COUNSELLING  (CondomCounseling coverage)
+  - POC specificity      SPEC_SWEEP          (subset of cells only)
 
 Cells:
   SOC                          syndromic dx, all levers baseline (the reference)
-  POC_c{C}_p{P}_b{B}           POC dx, 5 x 5 x 5 = 125 cells
-                               (c=baseline,p=baseline,b=none is "POC plain")
-Total 126 distinct cells x N_DRAWS x N_SEEDS sims. One JSON row per
+  POC_c-{C}_p-{P}_b-{B}        POC dx at BASE_SPEC (98%), 4 x 4 x 4 = 64 cells
+                               ("b" = condom counselling; label kept for
+                               compatibility with the plotting scripts)
+  POC_c-{C}_p-{P}_b-{B}_s-{S}  SPEC_SWEEP_CELLS (6) at each non-base spec (3)
+Total 1 + 64 + 18 = 83 cells x N_DRAWS x N_SEEDS sims. One JSON row per
 (cell, draw, seed) -> raw_results/scenarios.jsonl.
 
 Run (repo root, `starsim` conda env, multi-core box):
@@ -20,9 +23,8 @@ Run (repo root, `starsim` conda env, multi-core box):
 Quick smoke test (few cells, small pop, 1 draw):
     conda run -n starsim env SMOKE=1 python run_scenarios.py
 
-Prerequisite: DRAWS must point at the ACTIVE calibration baseline -- NG/CT/TV/
-syph all sustaining AND calibrated with the BV-in-VDS model. Override with the
-DRAWS env var. Endpoints summed over 2027-2040; POC + bundled prevention switch
+Prerequisite: DRAWS must point at the ACTIVE calibration baseline (exp 07,
+syphilis-free). Override with the DRAWS env var. Endpoints summed over 2027-2040; POC + condom counselling switch
 on at intv_year (2027).
 """
 from __future__ import annotations
@@ -49,17 +51,17 @@ for p in (str(REPO), str(SCRIPTS)):
     sys.path.insert(0, p)
 os.chdir(REPO)
 
-from _pipeline import row_to_sim_pars, set_pars_local, SYMP_TEST_CSV  # noqa
+from _pipeline import row_to_sim_pars, set_pars_local                 # noqa
 from model import make_sim                                            # noqa
-from interventions import (ANC_PROBS_REALISTIC, CondomCounseling,     # noqa
-                           CareSeekScaler, PNIntensitySwitch)
-from scenarios import CARE_SEEKING, PN_INTENSITY, BUNDLED_PREVENTION  # noqa
+from interventions import CondomCounseling, CareSeekScaler, PNIntensitySwitch  # noqa
+from scenarios import (CARE_SEEKING, PN_INTENSITY, CONDOM_COUNSELLING,  # noqa
+                       BASE_SPEC, SPEC_SWEEP, SPEC_SWEEP_CELLS)
 
 OUT = REPO / 'results'          # small, committable aggregates (kavg CSV)
 RAW_OUT = REPO / 'raw_results'  # fat VM-only outputs (jsonl, full TS/snap parquets)
 INTV_YEAR = 2027
 END_YEAR = 2040
-N_AGENTS = 10_000
+N_AGENTS = int(os.environ.get('N_AGENTS', 20_000))  # match exp 07 calibration
 
 # Annualised time series we want per (cell, draw, seed).
 # Include enough that re-processing (process_results.py) can pick up new metrics
@@ -78,21 +80,20 @@ TS_RESULTS = {
     'tv':   ['prevalence', 'prevalence_f', 'prevalence_m', 'new_infections',
              'new_diagnoses', 'new_treated', 'new_treated_success',
              'new_treated_unnecessary'],
-    'syph': ['prevalence', 'prevalence_f', 'prevalence_m', 'new_infections',
-             'new_diagnoses', 'new_treated', 'new_treated_success',
-             'new_treated_unnecessary',
-             'sexually_transmissible_prevalence',
-             'sexually_transmissible_prevalence_f',
-             'sexually_transmissible_prevalence_m',
-             'symptomatic_prevalence', 'primary_prevalence',
-             'trep_prevalence_15_64', 'nontrep_prevalence_15_64'],
 }
 
 # Intervention-level TS. Keyed by intervention name lookup on sim.interventions.
 INTV_TS_RESULTS = {
     'pn': ['new_notified', 'new_notified_current', 'new_notified_previous',
            'new_notified_no_sti', 'new_attending', 'new_attended_no_sti',
-           'new_index_total', 'new_index_no_sti'],
+           'new_index_total', 'new_index_no_sti',
+           'new_index_total_f', 'new_index_no_sti_f',
+           'new_index_total_m', 'new_index_no_sti_m'],
+    # True infection status among presenters (sets POC PPV); see
+    # analyzers.PresenterEtiology.
+    'presenter_etiology': [f'{k}_{ch}_{sx}' for ch in ('care', 'pn')
+                           for sx in ('f', 'm')
+                           for k in ('n', 'ng', 'ct', 'tv', 'ngct', 'any')],
 }
 # Age x sex prevalence bases for snapshot years. Auto-discovers
 # {base}_{f|m}_{age1}_{age2} variants from the disease's result keys.
@@ -101,24 +102,29 @@ SNAPSHOT_BASES = {
     'ng':   ['prevalence'],
     'ct':   ['prevalence'],
     'tv':   ['prevalence'],
-    'syph': ['trep_prevalence', 'nontrep_prevalence',
-             'sexually_transmissible_prevalence', 'primary_prevalence'],
 }
 SNAPSHOT_YEARS = (2027, 2030, 2035, 2040)
 
 DRAWS_CSV = Path(os.environ.get(
     'DRAWS',
-    REPO / 'experiments' / '06_2026-06-24_kseed_calibration' / 'outputs' / 'draws_used.csv'))
+    REPO / 'experiments' / '07_2026-11-24_no_syph_calibration' / 'outputs' / 'draws_used.csv'))
 
 
 def build_cells():
-    """SOC reference + POC 5x5x5 factorial (126 distinct cells)."""
-    cells = [dict(label='SOC', poc=None, care='baseline', pn='baseline', bp='none')]
+    """SOC + POC 4x4x4 factorial at BASE_SPEC + specificity sweep (83 cells)."""
+    cells = [dict(label='SOC', poc=None, care='baseline', pn='baseline', bp='none',
+                  spec=None)]
     for c in CARE_SEEKING:
         for p in PN_INTENSITY:
-            for b in BUNDLED_PREVENTION:
+            for b in CONDOM_COUNSELLING:
                 cells.append(dict(label=f'POC_c-{c}_p-{p}_b-{b}',
-                                  poc=True, care=c, pn=p, bp=b))
+                                  poc=True, care=c, pn=p, bp=b, spec=BASE_SPEC))
+    for spec in SPEC_SWEEP:
+        if spec == BASE_SPEC:
+            continue
+        for c, p, b in SPEC_SWEEP_CELLS:
+            cells.append(dict(label=f'POC_c-{c}_p-{p}_b-{b}_s-{spec:g}',
+                              poc=True, care=c, pn=p, bp=b, spec=spec))
     return cells
 
 
@@ -129,17 +135,16 @@ def build_sim(cell, seed, sim_pars):
     # any scenario lever (CS, PN intensity, BP) baked into construction
     # rewrites history back to 1985 and pre-2027 trajectories diverge
     # across cells.
-    #   - care_seek_mult held at 1.0; CareSeekScaler bumps NG/CT/TV
-    #     p_symp_care + syph testing rel_test at intv_year
+    #   - care_seek_mult held at 1.0; CareSeekScaler bumps NG/CT/TV/BV
+    #     p_symp_care at intv_year
     #   - PN built at baseline rates (matches calibration); PNIntensitySwitch
     #     swaps to the cell's intensity at intv_year
     #   - CondomCounseling already uses start=INTV_YEAR internally
     sim = make_sim(seed=seed, start=1985, stop=END_YEAR, n_agents=N_AGENTS,
                    poc=cell['poc'], pn_pars=PN_INTENSITY['baseline'],
+                   poc_spec=None if cell['poc'] is None else cell['spec'],
                    care_seek_mult=1.0,
-                   fetal_health=False, verbose=-1,
-                   syph_symp_test_prob=pd.read_csv(SYMP_TEST_CSV),
-                   syph_anc_probs=ANC_PROBS_REALISTIC)
+                   fetal_health=False, verbose=-1)
     set_pars_local(sim, sim_pars)
     extra_intvs = []
     csm = CARE_SEEKING[cell['care']]
@@ -152,7 +157,7 @@ def build_sim(cell, seed, sim_pars):
             attendance_rates=pn_int['attendance_rates'],
             start=INTV_YEAR))
     if cell['bp'] != 'none':
-        bp = BUNDLED_PREVENTION[cell['bp']]
+        bp = CONDOM_COUNSELLING[cell['bp']]
         extra_intvs.append(CondomCounseling(coverage=bp['coverage'], eff=bp['eff'],
                                             dur=ss.months(bp['dur_months']),
                                             start=INTV_YEAR))
@@ -170,9 +175,9 @@ def _wsum(res, yv):
 def extract(sim, cell, draw, sub_idx, seed):
     yv = np.array([t.year for t in sim.t.timevec])
     row = dict(cell=cell['label'], care=cell['care'], pn=cell['pn'], bp=cell['bp'],
-               poc=bool(cell['poc']), draw=int(draw), sub_idx=int(sub_idx),
-               seed=int(seed), status='ok')
-    for d in ('hiv', 'ng', 'ct', 'tv', 'syph'):
+               poc=bool(cell['poc']), spec=cell['spec'], draw=int(draw),
+               sub_idx=int(sub_idx), seed=int(seed), status='ok')
+    for d in ('hiv', 'ng', 'ct', 'tv'):
         dr = sim.results.get(d)
         if dr is None:
             continue
@@ -200,14 +205,6 @@ def extract(sim, cell, draw, sub_idx, seed):
         if succ is not None and inf is not None and inf > 0:
             row[f'{d}_prop_treated'] = float(succ) / float(inf)
 
-    # Syph-specific: sexually-transmissible prevalence (primary + secondary +
-    # early latent), the WHO "early infectious syphilis" slice.
-    sr = sim.results.get('syph')
-    if sr is not None:
-        if 'sexually_transmissible_prevalence' in sr:
-            row['syph_sti_prev_end'] = float(
-                sr['sexually_transmissible_prevalence'].values[-1])
-
     # PN: total + channel split + false-alarm precision endpoints + sex split.
     pn = sim.interventions.get('pn')
     if pn is not None:
@@ -226,11 +223,22 @@ def extract(sim, cell, draw, sub_idx, seed):
             if k in pn.results:
                 row[f'pn_{k}'] = _wsum(pn.results[k], yv)
 
+    # Presenter etiology: true infection status among people tested.
+    pe = sim.interventions.get('presenter_etiology')
+    if pe is not None:
+        for k in pe.results.keys():
+            if k in ('timevec',):
+                continue
+            try:
+                row[f'pres_{k}'] = _wsum(pe.results[k], yv)
+            except Exception:
+                pass
+
     # Care-timing analyzer: # of new infections cured within window of
-    # acquisition. Per-disease for NG/CT/TV/syph at the default (3, 6) months.
+    # acquisition. Per-disease for NG/CT/TV at the default (3, 6) months.
     care = sim.analyzers.get('care_timing') if hasattr(sim.analyzers, 'get') else None
     if care is not None:
-        for d in ('ng', 'ct', 'tv', 'syph'):
+        for d in ('ng', 'ct', 'tv'):
             for w in getattr(care, 'windows_months', (3, 6)):
                 key = f'{d}_inf_treated_within_{w}mo'
                 if key in care.results:
@@ -252,7 +260,7 @@ def extract_timeseries(sim, cell, draw, sub_idx, seed):
     """Annualised TS rows for disease-level + intervention-level metrics."""
     rows = []
     base = dict(cell=cell['label'], care=cell['care'], pn=cell['pn'],
-                bp=cell['bp'], poc=bool(cell['poc']),
+                bp=cell['bp'], poc=bool(cell['poc']), spec=cell['spec'],
                 draw=int(draw), sub_idx=int(sub_idx), seed=int(seed))
     # Disease-level TS.
     for disease_name, result_names in TS_RESULTS.items():
@@ -291,7 +299,7 @@ def extract_snapshots(sim, cell, draw, sub_idx, seed):
     """Age x sex prevalence at SNAPSHOT_YEARS for each SNAPSHOT_BASES entry."""
     rows = []
     base = dict(cell=cell['label'], care=cell['care'], pn=cell['pn'],
-                bp=cell['bp'], poc=bool(cell['poc']),
+                bp=cell['bp'], poc=bool(cell['poc']), spec=cell['spec'],
                 draw=int(draw), sub_idx=int(sub_idx), seed=int(seed))
     for disease_name, bases in SNAPSHOT_BASES.items():
         dres = sim.results.get(disease_name)
@@ -364,9 +372,9 @@ def main():
         N_AGENTS = int(os.environ.get('N_AGENTS', 10_000))
         keep = {'SOC',
                 'POC_c-baseline_p-baseline_b-none',
-                'POC_c-high_p-baseline_b-none',
-                'POC_c-baseline_p-high_b-none',
-                'POC_c-baseline_p-baseline_b-high'}
+                'POC_c-high_p-high_b-high',
+                'POC_c-baseline_p-baseline_b-none_s-0.95',
+                'POC_c-high_p-high_b-high_s-0.995'}
         cells = [c for c in cells if c['label'] in keep]
         draws = draws.head(5)
         n_seeds = 5
@@ -425,7 +433,7 @@ def main():
     raw = pd.read_json(outfile, lines=True)
     raw_ok = raw[raw['status'] == 'ok']
     if len(raw_ok):
-        meta_cols = ['cell', 'care', 'pn', 'bp', 'poc', 'draw']
+        meta_cols = ['cell', 'care', 'pn', 'bp', 'poc', 'spec', 'draw']
         scalar_cols = [c for c in raw_ok.columns
                        if c not in meta_cols + ['seed', 'sub_idx', 'status']]
         scalars_avg = raw_ok.groupby(meta_cols, dropna=False)[scalar_cols].mean().reset_index()
@@ -436,17 +444,17 @@ def main():
 
     if all_ts:
         ts_df = pd.DataFrame(all_ts)
-        ts_avg = (ts_df.groupby(['cell', 'care', 'pn', 'bp', 'poc', 'draw',
-                                  'disease', 'result_name', 'year'])
+        ts_avg = (ts_df.groupby(['cell', 'care', 'pn', 'bp', 'poc', 'spec', 'draw',
+                                  'disease', 'result_name', 'year'], dropna=False)
                        ['value'].mean().reset_index())
         ts_avg.to_parquet(ts_parquet, index=False)
         print(f'  K-avg ts -> {ts_parquet.name}: {len(ts_avg)} rows '
               f'(from {len(ts_df)} per-sim rows)')
     if all_snap:
         snap_df = pd.DataFrame(all_snap)
-        snap_avg = (snap_df.groupby(['cell', 'care', 'pn', 'bp', 'poc', 'draw',
+        snap_avg = (snap_df.groupby(['cell', 'care', 'pn', 'bp', 'poc', 'spec', 'draw',
                                       'disease', 'result_name', 'sex',
-                                      'age_bin', 'year'])
+                                      'age_bin', 'year'], dropna=False)
                           ['value'].mean().reset_index())
         snap_avg.to_parquet(snap_parquet, index=False)
         print(f'  K-avg snap -> {snap_parquet.name}: {len(snap_avg)} rows '

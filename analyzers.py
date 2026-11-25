@@ -288,3 +288,83 @@ class VDSEtiology(ss.Analyzer):
         for c, mask in combo.items():
             self.results[c][ti] = len((vds & mask).uids)
         return
+
+
+class PresenterEtiology(ss.Intervention):
+    """True infection status among people *presenting* for NG/CT/TV testing.
+
+    The positive predictive value of the POC panel, and therefore the share
+    of index cases whose treatment (and partner notification) is a false
+    positive, depends on prevalence among the people who are tested, not on
+    population prevalence. This recorder measures that denominator.
+
+    Implemented as an Intervention (not an Analyzer) so that it can run at
+    the *start* of the intervention list, before detection and treatment
+    modules clear infections. Two presenter channels are recorded:
+
+      * ``care``: symptomatic care-seekers this step (any of NG/CT/TV/BV
+        symptomatic with ``ti_seeks_care == ti``), i.e. the VDS/UDS stream.
+      * ``pn``: partners who attended via PN on the previous step
+        (``pn.ti_notified == ti - 1``). They are routed to testing inside
+        PN's step and treated on the following step, so at this point they
+        have not yet been treated.
+
+    Results (unscaled counts, by sex f/m and channel care/pn):
+    ``n_{ch}_{sex}`` presenters; ``{p}_{ch}_{sex}`` presenters infected with
+    p in {ng, ct, tv}; ``ngct_{ch}_{sex}`` infected with NG or CT;
+    ``any_{ch}_{sex}`` infected with any of NG/CT/TV.
+    """
+
+    PATHOGENS = ('ng', 'ct', 'tv')
+    CHANNELS = ('care', 'pn')
+    SEXES = ('f', 'm')
+
+    def __init__(self, name='presenter_etiology', pn_name='pn', *args, **kwargs):
+        super().__init__(name=name, *args, **kwargs)
+        self.pn_name = pn_name
+        return
+
+    def init_results(self):
+        super().init_results()
+        defs = []
+        for ch in self.CHANNELS:
+            for sx in self.SEXES:
+                for k in ('n',) + self.PATHOGENS + ('ngct', 'any'):
+                    defs.append(ss.Result(f'{k}_{ch}_{sx}', dtype=int, scale=False,
+                                          auto_plot=False))
+        self.define_results(*defs)
+        return
+
+    def _record(self, mask, ch):
+        sim = self.sim
+        ti = self.ti
+        dis = sim.diseases
+        female = sim.people.female
+        inf = {p: dis[p].infected for p in self.PATHOGENS}
+        for sx, sexmask in (('f', female), ('m', ~female)):
+            m = mask & sexmask
+            self.results[f'n_{ch}_{sx}'][ti] = len(m.uids)
+            for p in self.PATHOGENS:
+                self.results[f'{p}_{ch}_{sx}'][ti] = len((m & inf[p]).uids)
+            self.results[f'ngct_{ch}_{sx}'][ti] = len((m & (inf['ng'] | inf['ct'])).uids)
+            self.results[f'any_{ch}_{sx}'][ti] = len(
+                (m & (inf['ng'] | inf['ct'] | inf['tv'])).uids)
+        return
+
+    def step(self):
+        sim = self.sim
+        ti = self.ti
+        dis = sim.diseases
+        care = None
+        for p in ('ng', 'ct', 'tv', 'bv'):
+            d = dis.get(p)
+            if d is None:
+                continue
+            m = d.symptomatic & (d.ti_seeks_care == ti)
+            care = m if care is None else (care | m)
+        if care is not None:
+            self._record(care, 'care')
+        pn = sim.interventions.get(self.pn_name)
+        if pn is not None and ti > 0:
+            self._record(pn.ti_notified == (ti - 1), 'pn')
+        return

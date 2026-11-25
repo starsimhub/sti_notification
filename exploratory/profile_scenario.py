@@ -26,10 +26,10 @@ sys.path.insert(0, str(HERE / 'calibration' / 'artifacts' / 'scripts'))
 sys.path.insert(0, str(HERE))
 os.chdir(HERE)
 
-from _pipeline import row_to_sim_pars, set_pars_local, SYMP_TEST_CSV  # noqa
+from _pipeline import row_to_sim_pars, set_pars_local  # noqa
 from model import make_sim  # noqa
 from interventions import (CondomCounseling, CareSeekScaler,         # noqa
-                           PNIntensitySwitch, ANC_PROBS_REALISTIC)
+                           PNIntensitySwitch)
 from scenarios import CARE_SEEKING, PN_INTENSITY, BUNDLED_PREVENTION  # noqa
 import starsim as ss  # noqa
 
@@ -56,9 +56,7 @@ cfg = SCENARIO[CELL]
 def build():
     sim = make_sim(seed=263000, start=1985, stop=2040, n_agents=N_AGENTS,
                    poc=cfg['poc'], pn_pars=PN_INTENSITY['baseline'],
-                   care_seek_mult=1.0, fetal_health=False, verbose=-1,
-                   syph_symp_test_prob=pd.read_csv(SYMP_TEST_CSV),
-                   syph_anc_probs=ANC_PROBS_REALISTIC)
+                   care_seek_mult=1.0, fetal_health=False, verbose=-1)
     set_pars_local(sim, sim_pars)
     extras = []
     csm = CARE_SEEKING[cfg['care']]

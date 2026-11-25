@@ -29,7 +29,6 @@ import starsim as ss  # noqa: E402
 
 from model import make_sim                              # noqa: E402
 from priors import calib_pars                           # noqa: E402
-from interventions import ANC_PROBS_REALISTIC           # noqa: E402
 
 SYMP_TEST_CSV = DATA_DIR / 'symp_test_prob_concentrated.csv'
 
@@ -145,16 +144,9 @@ def build_sim(seed: int, sim_pars: dict, *,
               n_agents: int = 10_000,
               pn_pars=None):
     """Construct and parameterise a single sim. Caller runs it."""
-    symp_test = pd.read_csv(SYMP_TEST_CSV)
     sim = make_sim(seed=seed, start=start, stop=stop, n_agents=n_agents,
-                   pn_pars=pn_pars, fetal_health=False, verbose=-1,
-                   syph_symp_test_prob=symp_test,
-                   syph_anc_probs=ANC_PROBS_REALISTIC)
+                   pn_pars=pn_pars, fetal_health=False, verbose=-1)
     set_pars_local(sim, sim_pars)
-    for mod in sim.pars['diseases']:
-        if getattr(mod, 'name', None) == 'syph':
-            mod.store_sw = True
-            break
     return sim
 
 
@@ -189,7 +181,10 @@ def stage_shares_from_matrix(matrix):
 
 
 def extract_calibration_summary(sim, draw_idx: int, seed: int) -> dict:
-    """Compute per-sim summary stats + pass flags. This is the
+    """LEGACY (syphilis-era, exps 01-06): requires a syph module.
+    Exp 07 onward uses its own syphilis-free extractor.
+
+    Compute per-sim summary stats + pass flags. This is the
     object Phase 1 / Phase 2 write to JSONL for ensemble selection."""
     r = sim.results['syph']
     yrs, prev_f       = grab(r, 'prevalence_f')

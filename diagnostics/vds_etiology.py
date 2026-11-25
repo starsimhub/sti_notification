@@ -29,9 +29,8 @@ for p in (str(REPO), str(SCRIPTS)):
     sys.path.insert(0, p)
 os.chdir(REPO)
 
-from _pipeline import row_to_sim_pars, set_pars_local, SYMP_TEST_CSV  # noqa
+from _pipeline import row_to_sim_pars, set_pars_local  # noqa
 from model import make_sim                                            # noqa
-from interventions import ANC_PROBS_REALISTIC                         # noqa
 from analyzers import VDSEtiology                                     # noqa
 
 CALIB = REPO / 'experiments' / '06_2026-06-24_kseed_calibration' / 'outputs'
@@ -63,9 +62,7 @@ def main():
     print(f'[vds] draw={draw} seed={seed} n_agents={n_agents} window={lo}-{hi}', flush=True)
 
     sim = make_sim(seed=seed, start=1985, stop=2040, n_agents=n_agents,
-                   poc=None, pn_pars=None, fetal_health=False, verbose=-1,
-                   syph_symp_test_prob=pd.read_csv(SYMP_TEST_CSV),
-                   syph_anc_probs=ANC_PROBS_REALISTIC)
+                   poc=None, pn_pars=None, fetal_health=False, verbose=-1)
     set_pars_local(sim, sp)
     sim.pars['analyzers'] = list(sim.pars['analyzers']) + [VDSEtiology()]
     sim.run()

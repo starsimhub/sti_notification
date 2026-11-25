@@ -4,9 +4,8 @@ Connectors between STI diseases and the FetalHealth module.
 Adapted from the anc_sti_screening repo. The sti_fetal connector holds all
 disease-specific parameters (delivery timing shifts, growth penalties,
 treatment reversibility) and translates STI events into calls to FetalHealth's
-generic API. Compared to the ANC version, this adds syphilis as a covered
-disease — syphilis has the largest fetal-health effect of the seven STIs in
-this model.
+generic API. Compared to the ANC version, syphilis was removed from the model
+in Nov 2026, so only NG/CT/TV are covered.
 
 Performance note: this runs once per timestep and only operates on women
 who were newly infected or treated that step, so cost scales with incident
@@ -24,7 +23,7 @@ class sti_fetal(ss.Connector):
 
     Args:
         diseases (list):             disease names to monitor
-            (default: ng, ct, tv, syph)
+            (default: ng, ct, tv)
         treatments (list):           treatment intervention names
         treatment_disease_map (dict): maps treatment name -> disease name
         ptb_shift_mean (dict):       mean weeks delivery brought forward, per disease
@@ -38,26 +37,24 @@ class sti_fetal(ss.Connector):
                  pars=None, **kwargs):
         super().__init__()
         self.name = 'sti_fetal'
-        self.disease_names = diseases or ['ng', 'ct', 'tv', 'syph']
-        self.treatment_names = treatments or ['ng_tx', 'ct_tx', 'metronidazole', 'syph_tx']
+        self.disease_names = diseases or ['ng', 'ct', 'tv']
+        self.treatment_names = treatments or ['ng_tx', 'ct_tx', 'metronidazole']
         if treatment_disease_map is None:
             treatment_disease_map = {
                 'ng_tx':         'ng',
                 'ct_tx':         'ct',
                 'metronidazole': 'tv',
-                'syph_tx':       'syph',
             }
         self.treatment_disease_map = treatment_disease_map
 
         self.define_pars(
             # Delivery timing shift per infection (mean weeks brought forward)
-            # Syphilis carries the largest effect in untreated pregnancies; NG/CT/TV
-            # are smaller modifiers (Gomez 2013, Newman 2013, Korenromp 2019).
-            ptb_shift_mean=sc.objdict(ng=2.0, ct=1.5, tv=1.0, syph=4.0),
+            # (Gomez 2013, Newman 2013, Korenromp 2019).
+            ptb_shift_mean=sc.objdict(ng=2.0, ct=1.5, tv=1.0),
             ptb_shift_std=1.0,
 
             # Growth restriction per infection (fractional weight reduction)
-            growth_penalty=sc.objdict(ng=0.08, ct=0.03, tv=0.03, syph=0.12),
+            growth_penalty=sc.objdict(ng=0.08, ct=0.03, tv=0.03),
 
             # Treatment reversibility -- fraction of damage PERSISTING after treatment, by trimester
             # T1: most reversible (early treatment), T3: least reversible (damage locked in)

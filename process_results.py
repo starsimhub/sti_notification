@@ -26,7 +26,7 @@ OUT = REPO / 'results'
 # already extract it.
 DEFAULT_RESULT_NAMES = ('prevalence', 'new_infections',
                         'prevalence_f', 'prevalence_m')
-DEFAULT_DISEASES = ('ng', 'ct', 'tv', 'syph', 'hiv')
+DEFAULT_DISEASES = ('ng', 'ct', 'tv', 'hiv')   # syphilis removed (exp 07)
 DEFAULT_YEARS = (1990, 2040)
 DEFAULT_QUANTILES = (0.25, 0.75)   # None → median only
 
@@ -37,7 +37,7 @@ SNAP_YEAR = 2027
 
 def _aggregate(df, group_cols, quantiles):
     """Groupby group_cols, compute median (+ p_lo/p_hi if quantiles given)."""
-    g = df.groupby(list(group_cols))['value']
+    g = df.groupby(list(group_cols), dropna=False)['value']  # SOC has spec=NaN
     out = pd.DataFrame({'median': g.median()})
     if quantiles is not None:
         lo, hi = quantiles
@@ -73,6 +73,8 @@ def process_results(
         f'years={years}. Raw result_names (sample): {sorted(ts.result_name.unique())[:10]}'
     )
     group_cols = ('cell', 'care', 'pn', 'bp', 'poc', 'disease', 'result_name', 'year')
+    if 'spec' in ts.columns:
+        group_cols = group_cols[:5] + ('spec',) + group_cols[5:]
     ts_agg = _aggregate(ts, group_cols, quantiles)
     ts_dst = OUT / 'scenarios_timeseries.parquet'
     ts_agg.to_parquet(ts_dst, index=False, compression='zstd')

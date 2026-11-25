@@ -12,16 +12,13 @@ import pandas as pd
 REPO = Path(__file__).resolve().parent.parent
 sys.path[:0] = [str(REPO), str(REPO / 'calibration/artifacts/scripts')]
 os.chdir(REPO)
-from _pipeline import row_to_sim_pars, set_pars_local, SYMP_TEST_CSV
+from _pipeline import row_to_sim_pars, set_pars_local
 from model import make_sim
-from interventions import ANC_PROBS_REALISTIC
 
 draws = pd.read_csv('experiments/01_2026-06-15_calibration_rc1.5.7/outputs/draws_used.csv')
 sp = row_to_sim_pars(draws[draws.draw_idx == 773].iloc[0].to_dict())
 sim = make_sim(seed=0, start=1985, stop=2020, n_agents=10_000, poc=None,
-               pn_pars=None, fetal_health=False, verbose=0,
-               syph_symp_test_prob=pd.read_csv(SYMP_TEST_CSV),
-               syph_anc_probs=ANC_PROBS_REALISTIC)
+               pn_pars=None, fetal_health=False, verbose=0)
 set_pars_local(sim, sp)
 sim.run()
 
