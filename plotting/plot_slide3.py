@@ -3,14 +3,14 @@
 Problem-statement figure (SOC only, no POC comparison here -- that comes at
 Slide 5). Three regions:
 
-  Top strip (4 mini-panels): % of SOC women treated for {NG, CT, TV, syph}
+  Top strip (3 mini-panels): % of SOC women treated for {NG, CT, TV}
       who don't have that pathogen. Sourced from scenarios.kavg.csv.
 
   Bottom-left (main panel): the "upset-riff" -- for every woman fronting up
       for VDS, how many drugs did she receive (0/1/2/3) and how many
       infections did she actually have. Stacked bar chart. Sourced from
       soc_overtreatment.csv (SocOvertreatmentTracer output). Drugs counted:
-      ng_tx, ct_tx, metronidazole. STIs counted: NG/CT/TV/syph (BV excluded).
+      ng_tx, ct_tx, metronidazole. STIs counted: NG/CT/TV (non-STI discharge excluded).
 
   Bottom-right: unwarranted male-partner PN volume under SOC (small stacked
       bar, warranted vs unwarranted). Sourced from specificity.csv.
@@ -41,8 +41,7 @@ STI_C = {0: '#e5b8b3', 1: '#a8a29e', 2: '#2c3e50'}  # 0 STIs = pale terracotta
                                                      # 1 STI = mid gray
                                                      # 2+ STIs = dark navy
 
-DISEASES = [('ng', 'Gonorrhoea'), ('ct', 'Chlamydia'),
-            ('tv', 'Trichomoniasis'), ('syph', 'Syphilis')]
+DISEASES = [('ng', 'Gonorrhoea'), ('ct', 'Chlamydia'), ('tv', 'Trichomoniasis')]
 SCALE = 8.7e6 / 1e4  # total_pop / n_agents -> people
 YEARS = 2040 - 2027
 
@@ -156,10 +155,9 @@ def main():
                      left=0.06, right=0.985, top=0.88, bottom=0.14,
                      hspace=0.5, wspace=0.55)
 
-    # Top strip: 4 per-disease over% panels (columns 1-4 of the 6-wide grid;
-    # leaves columns 0 and 5 empty so the top row doesn't span the full width)
+    # Top strip: one per-disease over% panel per pair of columns of the 6-wide grid
     for i, (d, name) in enumerate(DISEASES):
-        ax = fig.add_subplot(outer[0, i + 1])
+        ax = fig.add_subplot(outer[0, 2*i:2*i + 2])
         per_disease_over_panel(ax, k, d)
         ax.set_title(name, fontsize=10.5, pad=3)
         if i == 0:
@@ -179,7 +177,7 @@ def main():
     # fig.text(0.5, 0.03,
     #          'Top: median across draws from scenarios.kavg.csv (SOC cell), 2027–40, female indices. '
     #          'Bottom: SocOvertreatmentTracer (5 seeds, draw 263), 2027–40, VDS-presenting women; drugs '
-    #          '= ng_tx / ct_tx / metronidazole; STIs = NG / CT / TV / syph (BV excluded).',
+    #          '= ng_tx / ct_tx / metronidazole; STIs = NG / CT / TV (non-STI discharge excluded).',
     #          ha='center', fontsize=8, color='#666666')
 
     FIGS.mkdir(exist_ok=True)

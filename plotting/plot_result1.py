@@ -34,7 +34,7 @@ YEARS = 2040 - 2027
 SCALE = 8.7e6 / 1e4
 
 VDS_PATHS = ['ng', 'ct', 'tv', 'bv']
-VDS_NAMES = {'ng': 'NG', 'ct': 'CT', 'tv': 'TV', 'bv': 'BV'}
+VDS_NAMES = {'ng': 'NG', 'ct': 'CT', 'tv': 'TV', 'bv': 'Non-STI'}  # SimpleBV: BV, candidiasis, idiopathic discharge
 COMBOS = ['ng_only', 'ct_only', 'tv_only', 'bv_only', 'ng_ct', 'ng_tv', 'ng_bv',
           'ct_tv', 'ct_bv', 'tv_bv', 'ng_ct_tv', 'ng_ct_bv', 'ng_tv_bv',
           'ct_tv_bv', 'ng_ct_tv_bv']
@@ -109,7 +109,7 @@ def upset_panels(ax_bar, ax_mat, ax_set, marg, combo, vds_prev, fs=10):
         if v >= 2:
             ax_bar.text(xi, v + max(vals) * 0.05, f'{v:.0f}',
                         ha='center', fontsize=fs - 3, color=DARK)
-    ax_bar.set_ylabel('% of VDS women', fontsize=fs - 1)
+    ax_bar.set_ylabel('% of women presenting with VDS', fontsize=fs - 1)
     ax_bar.set_ylim(0, max(vals) * 1.18)
     ax_bar.spines[['top', 'right']].set_visible(False)
     ax_bar.tick_params(labelbottom=False, labelsize=fs - 2)
@@ -191,7 +191,7 @@ def main():
     ax_mat = fig.add_subplot(right_gs[1, 1], sharex=ax_bar)
     ax_set = fig.add_subplot(right_gs[1, 0], sharey=ax_mat)
     upset_panels(ax_bar, ax_mat, ax_set, marg, combo, vds_prev)
-    ax_bar.set_title('VDS etiology (2030–40)', fontsize=10.5, pad=3)
+    ax_bar.set_title('Etiology of VDS presentations (SOC, 2027–40)', fontsize=10.5, pad=3)
 
     # fig.text(0.5, 0.02,
     #          f'Left: kavg 5 draws (exp 06), baseline PN, bars = median, whiskers = 25–75 IQR. '

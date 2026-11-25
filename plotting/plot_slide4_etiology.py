@@ -43,7 +43,7 @@ def main():
     ax_set = fig.add_subplot(gs[1, 0], sharey=ax_mat)
 
     upset_panels(ax_bar, ax_mat, ax_set, marg, combo, vds_prev, fs=11)
-    ax_bar.set_title('VDS etiology (2030–40)', fontsize=12, pad=6)
+    ax_bar.set_title('Etiology of VDS presentations (SOC, 2027–40)', fontsize=12, pad=6)
 
     FIGS.mkdir(exist_ok=True)
     p = FIGS / 'fig_slide4_etiology.png'

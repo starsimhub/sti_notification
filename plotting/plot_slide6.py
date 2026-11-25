@@ -31,8 +31,7 @@ TS = REPO / 'results' / 'scenarios_timeseries.parquet'
 FIGS = REPO / 'figures'
 FONT = str(REPO / 'assets' / 'LibertinusSans-Regular.otf')
 
-DISEASES = [('ng', 'Gonorrhoea'), ('ct', 'Chlamydia'),
-            ('tv', 'Trichomoniasis'), ('syph', 'Syphilis')]
+DISEASES = [('ng', 'Gonorrhoea'), ('ct', 'Chlamydia'), ('tv', 'Trichomoniasis')]
 YEARS = 2040 - 2027
 INTV = 2027
 
@@ -142,7 +141,7 @@ def build_ts_grid_figure(k, ts, arms, arm_c, out_name='fig.png'):
     fig_bottom = 0.10 if inline_legend else 0.18
 
     fig = pl.figure(figsize=(12.15, 5.08))
-    outer = GridSpec(2, 4, figure=fig, left=0.065, right=0.985,
+    outer = GridSpec(2, len(DISEASES), figure=fig, left=0.065, right=0.985,
                      top=0.92, bottom=fig_bottom, hspace=0.42, wspace=0.32)
 
     ax_ts_ng_prev = None
