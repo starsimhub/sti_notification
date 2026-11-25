@@ -47,7 +47,7 @@ class NGConfusion(ss.Analyzer):
 
     def step(self):
         sim = self.sim
-        if sim.now < 2027 or sim.now > 2040:
+        if sim.now.years < 2027 or sim.now.years > 2040:
             return
         d = sim.diseases
         female = sim.people.female

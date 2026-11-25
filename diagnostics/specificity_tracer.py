@@ -4,7 +4,7 @@ The kavg PN/treatment 'over' metrics are per-disease and TV-blind, which
 inflates the over-share (a CT+ woman false-positive for NG is counted 'over for
 NG'; a TV+ index is counted 'no STI' because the metric omits TV). This measures
 person-level specificity instead: a treated/notifying person is 'over' only if
-they have NO STI at all -- not infected with NG, CT, TV, or syph (BV excluded).
+they have NO STI at all -- not infected with NG, CT or TV (BV excluded).
 
 Female-index -> male-partner direction. SOC vs POC-plain, draw 263 x 5 seeds,
 2027-40. Writes results/specificity.csv (per arm/seed counts).
@@ -29,17 +29,17 @@ from _pipeline import row_to_sim_pars, set_pars_local  # noqa
 from model import make_sim                             # noqa
 from scenarios import PN_INTENSITY                     # noqa
 
-DRAWS = REPO / 'experiments' / '06_2026-06-24_kseed_calibration' / 'outputs' / 'draws_used.csv'
+DRAWS = REPO / 'experiments' / '12_2026-11-25_mix_and_match' / 'outputs' / 'draws_used.csv'
 N_SEEDS = 5
 ARMS = {'SOC': dict(poc=None), 'POC': dict(poc=True)}
 # tx -> disease state key for the "had a real STI" test (TV via metronidazole;
 # BV deliberately omitted -- BV is not an STI).
-TX_DISEASE = [('ng_tx', 'ng'), ('ct_tx', 'ct'), ('metronidazole', 'tv'), ('syph_tx', 'syph')]
+TX_DISEASE = [('ng_tx', 'ng'), ('ct_tx', 'ct'), ('metronidazole', 'tv')]
 
 
 class SpecAttribution(ss.Analyzer):
     """Per-step person-level: of those treated, who had no STI (any of
-    ng/ct/tv/syph)? Split by sex. Also tracks PN attendees treated."""
+    ng/ct/tv)? Split by sex. Also tracks PN attendees treated."""
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.c = {k: 0 for k in
@@ -48,7 +48,7 @@ class SpecAttribution(ss.Analyzer):
 
     def step(self):
         sim = self.sim
-        if sim.now < 2027 or sim.now > 2040:
+        if sim.now.years < 2027 or sim.now.years > 2040:
             return
         ti = self.ti
         treated = ss.uids(); had_sti = ss.uids()
@@ -77,8 +77,8 @@ class SpecAttribution(ss.Analyzer):
 class SocOvertreatmentTracer(ss.Analyzer):
     """SOC-only: per VDS-presenting woman, count (n_drugs, n_actual_STIs).
 
-    Drugs counted: ng_tx, ct_tx, metronidazole (the syndromic_vds routing set;
-    syph_tx doesn't fire from VDS in practice). Actual STIs: NG/CT/TV/syph
+    Drugs counted: ng_tx, ct_tx, metronidazole (the syndromic_vds routing set).
+    Actual STIs: NG/CT/TV
     (BV excluded -- BV is not an STI, and a BV-only VDS woman getting
     metronidazole shows here as n_drugs=1, n_stis=0).
 
@@ -87,7 +87,7 @@ class SocOvertreatmentTracer(ss.Analyzer):
     """
     _DRUGS = ('ng_tx', 'ct_tx', 'metronidazole')
     _DISEASE_TX = (('ng', 'ng_tx'), ('ct', 'ct_tx'),
-                   ('tv', 'metronidazole'), ('syph', 'syph_tx'))
+                   ('tv', 'metronidazole'))
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -96,7 +96,7 @@ class SocOvertreatmentTracer(ss.Analyzer):
 
     def step(self):
         sim = self.sim
-        if sim.now < 2027 or sim.now > 2040:
+        if sim.now.years < 2027 or sim.now.years > 2040:
             return
         vds = sim.interventions.get('syndromic_vds')
         if vds is None or not hasattr(vds, 'ti_tested'):
@@ -158,7 +158,7 @@ def run_one(task):
     arm, seed, sp = task['arm'], task['seed'], task['sim_pars']
     sim = make_sim(seed=seed, start=1985, stop=2040, n_agents=10_000,
                    poc=ARMS[arm]['poc'], pn_pars=PN_INTENSITY['baseline'],
-                   care_seek_mult=1.0, fetal_health=False, verbose=-1)
+                   care_seek_mult=1.0, fetal_health=False, verbose=0)
     set_pars_local(sim, sp)
     analyzers = [SpecAttribution(name='spec'),
                  SocOvertreatmentTracer(name='soc_ot')]

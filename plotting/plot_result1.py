@@ -2,8 +2,8 @@
 
 Layout: 9.7 x 5 inches, 2 columns.
   Left  — 6 mini-panels (2 cols x 3 rows)
-    rows 0-1: treatment precision for NG / CT / TV / Syph (poc_alone style)
-    row  2:   female VDS treatment (pn_specificity style); female GUD treatment
+    2 x 2: treatment precision for NG / CT / TV (poc_alone style), and
+           female VDS treatment (pn_specificity style)
   Right — VDS etiology upset plot (explains residual overtreatment)
 
   conda run -n starsim python plot_result1.py
