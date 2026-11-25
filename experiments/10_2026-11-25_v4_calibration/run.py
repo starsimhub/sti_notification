@@ -16,6 +16,9 @@ mortality deduplication and migration. This experiment moves to the Starsim 4 pr
   Dziva Chikwari 2025, Lancet Glob Health, table 3). The model's age groups are 15-20 and 20-25, weighted 2/7 and 5/7
   to approximate 18-24. Bands are the binomial 95% CI widened by a design effect of 2.
 * NG incidence (IHME projections) is accepted within ACCEPT_TOL_NG_INC band-widths: approximately right, defensible.
+* VDS presenters: the share of women presenting with vaginal discharge who have no NG/CT/TV, 2014-16 (Zimbabwe STI
+  Etiology Study, Chirenje 2018: about 115/200 without NG/CT/TV, excluding M. genitalium). SimpleBV stands for every
+  non-STI cause of discharge. Read from the PresenterEtiology recorder.
 * Priors: exp 07's, plus hiv.rel_death (scales HIV mortality on and off ART; exists from stisim 1.5.11 / v4).
 
 Acceptance: every disease sustains in >= MIN_SEEDS_SUSTAINED of K seeds; every prevalence target and both HIV death
@@ -109,19 +112,21 @@ TARGETS = {
     'ng_prev_f_18_24_stich': (_binom_band(57, 1686),                     ('ng', YOUNG, STICH_WIN, 'weighted')),
     'ct_prev_f_18_24_stich': (_binom_band(281, 1746),                    ('ct', YOUNG, STICH_WIN, 'weighted')),
     'tv_prev_f_18_24_stich': (_binom_band(166, 1746),                    ('tv', YOUNG, STICH_WIN, 'weighted')),
+    'nonsti_share_vds_f':    (_binom_band(115, 200, deff=1.0),           ('presenters', 'nonsti', (2014, 2016), 'presenter_share')),
     'ng_new_inf_per_yr':     ((200_000, 450_000),                        ('ng', 'new_infections', WIN, 'annual_sum')),
     'ct_new_inf_per_yr':     ((200_000, 450_000),                        ('ct', 'new_infections', WIN, 'annual_sum')),
     'tv_new_inf_per_yr':     ((700_000, 1_600_000),                      ('tv', 'new_infections', WIN, 'annual_sum')),
 }
 WEIGHTS = {'ng_prev': 2.0, 'tv_prev': 2.0,
-           'ng_prev_f_18_24_stich': 2.0, 'ct_prev_f_18_24_stich': 2.0, 'tv_prev_f_18_24_stich': 2.0,
+           'ng_prev_f_18_24_stich': 2.0, 'ct_prev_f_18_24_stich': 2.0, 'tv_prev_f_18_24_stich': 2.0, 'nonsti_share_vds_f': 2.0,
            'hiv_inf_2000s': 0.5, 'hiv_inf_2010s': 0.5,
            'ng_new_inf_per_yr': 0.5, 'ct_new_inf_per_yr': 0.5, 'tv_new_inf_per_yr': 0.5}
 PREV_TARGETS = [k for k in TARGETS if 'prev' in k]
-ACCEPT = {**{t: ACCEPT_TOL for t in PREV_TARGETS + ['hiv_deaths_2000s', 'hiv_deaths_2010s']},
+ACCEPT = {**{t: ACCEPT_TOL for t in PREV_TARGETS + ['hiv_deaths_2000s', 'hiv_deaths_2010s', 'nonsti_share_vds_f']},
           'ng_new_inf_per_yr': ACCEPT_TOL_NG_INC}
 
-VALIDATION_DATA = dict(promise_any_sti_pregnant=0.27, promise_symp_share_pregnant=0.10, stich_any_sti_f_18_24=425/1697)
+VALIDATION_DATA = dict(promise_any_sti_pregnant=0.27, promise_symp_share_pregnant=0.10, stich_any_sti_f_18_24=425/1697,
+                       ngct_share_vds_f=0.33)  # Chirenje 2018: NG 24%, CT 14%, with some overlap
 
 TS_RESULT_NAMES = ['prevalence', 'prevalence_f', 'prevalence_m', 'prevalence_15_49', 'prevalence_f_25_30',
                    'prevalence_f_15_20', 'prevalence_f_20_25', 'new_infections', 'new_deaths']
@@ -158,7 +163,25 @@ def _years(res):
     return np.floor(np.array([float(t.years) for t in res.timevec]) + 1e-9).astype(int)
 
 
+def _presenter_share(sim, key, win):
+    """ Among female VDS presenters (PresenterEtiology, care channel) over the window: the share with no NG/CT/TV, or with NG or CT """
+    pe = sim.interventions.get('presenter_etiology')
+    if pe is None:
+        return float('nan')
+    res = pe.results
+    yrs = _years(res.n_care_f)
+    m = (yrs >= win[0]) & (yrs <= win[1])
+    n = np.asarray(res.n_care_f.values)[m].sum()
+    if not n:
+        return float('nan')
+    if key == 'nonsti':
+        return float(1 - np.asarray(res.any_care_f.values)[m].sum() / n)
+    return float(np.asarray(res.ngct_care_f.values)[m].sum() / n)
+
+
 def _stat(sim, disease, key, win, how):
+    if how == 'presenter_share':
+        return _presenter_share(sim, key, win)
     dres = sim.results.get(disease)
     if dres is None:
         return float('nan')
@@ -189,6 +212,7 @@ def extract(sim, draw_idx, seed):
     row['promise_any_sti_pregnant'] = c['preg_inf'] / c['preg'] if c['preg'] else float('nan')
     row['promise_symp_share_pregnant'] = c['preg_symp'] / c['preg_inf'] if c['preg_inf'] else float('nan')
     row['stich_any_sti_f_18_24'] = c['young_inf'] / c['young'] if c['young'] else float('nan')
+    row['ngct_share_vds_f'] = _presenter_share(sim, 'ngct', (2014, 2016))
     lo = STOP - 5
     for d in DISEASES:
         pf = _stat(sim, d, 'prevalence_f', (lo, STOP), 'mean')

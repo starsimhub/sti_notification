@@ -55,7 +55,10 @@ def make_discharging_stis(care_seek_mult=1.0):
                        p_symp_care=scaled(P_SYMP_CARE['ct']))
     tv = sti.Trichomoniasis(eff_condom=0.8, beta_m2f=0.14, p_symp=sti.by_sex(0.6, 0.5),
                             p_symp_care=scaled(P_SYMP_CARE['tv']))
-    bv = sti.SimpleBV(p_symp_care=P_SYMP_CARE['bv'][0])
+    # SimpleBV stands for every non-STI cause of vaginal discharge (BV, candida, idiopathic). These episodes recur:
+    # all clear (p_clear=1, rather than half persisting for 100 years), so women present once per episode. This puts the
+    # share of female VDS presenters with no NG/CT/TV near the Zimbabwe STI Etiology Study's ~57% (Chirenje 2018).
+    bv = sti.SimpleBV(p_symp_care=P_SYMP_CARE['bv'][0], p_clear=1.0)
     return ng, ct, tv, bv
 
 

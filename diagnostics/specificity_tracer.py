@@ -29,7 +29,7 @@ from _pipeline import row_to_sim_pars, set_pars_local  # noqa
 from model import make_sim                             # noqa
 from scenarios import PN_INTENSITY                     # noqa
 
-DRAWS = REPO / 'experiments' / '12_2026-11-25_mix_and_match' / 'outputs' / 'draws_used.csv'
+DRAWS = REPO / 'experiments' / '13_2026-11-25_nonsti_vds' / 'outputs' / 'draws_used.csv'
 N_SEEDS = 5
 ARMS = {'SOC': dict(poc=None), 'POC': dict(poc=True)}
 # tx -> disease state key for the "had a real STI" test (TV via metronidazole;

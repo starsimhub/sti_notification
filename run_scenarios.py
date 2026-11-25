@@ -61,7 +61,7 @@ OUT = REPO / 'results'          # small, committable aggregates (kavg CSV)
 RAW_OUT = REPO / 'raw_results'  # fat VM-only outputs (jsonl, full TS/snap parquets)
 INTV_YEAR = 2027
 END_YEAR = 2040
-N_AGENTS = int(os.environ.get('N_AGENTS', 10_000))  # match the exp 12 calibration
+N_AGENTS = int(os.environ.get('N_AGENTS', 10_000))  # match the exp 13 calibration
 
 # Annualised time series we want per (cell, draw, seed).
 # Include enough that re-processing (process_results.py) can pick up new metrics
@@ -107,7 +107,7 @@ SNAPSHOT_YEARS = (2027, 2030, 2035, 2040)
 
 DRAWS_CSV = Path(os.environ.get(
     'DRAWS',
-    REPO / 'experiments' / '12_2026-11-25_mix_and_match' / 'outputs' / 'draws_used.csv'))
+    REPO / 'experiments' / '13_2026-11-25_nonsti_vds' / 'outputs' / 'draws_used.csv'))
 
 
 def build_cells():
