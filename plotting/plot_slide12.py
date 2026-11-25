@@ -1,10 +1,14 @@
 """Slide 12: 4-panel heatmap — percent reduction in cumulative STI infections vs SOC.
 
-Panels: BP = none / low / moderate / high.
+Panels: condom counselling = none / low / moderate / high.
 Each panel: care-seeking (rows, baseline at bottom) x PN intensity (cols) heatmap.
 Cells: (SOC_median - cell_median) / SOC_median * 100, where each cell's total
-is the sum of window-cumulative new_infections across 4 curable STIs
-(NG + CT + TV + syph) and the median is across draws.
+is the sum of window-cumulative new_infections across the 3 curable STIs
+(NG + CT + TV) and the median is across draws. POC cells are those at the base
+specificity (the specificity sweep repeats some care/PN/condom combinations).
+A fifth panel shows each lever's Shapley share of the infections averted beyond
+POC alone, when all three are at the same level (results/shapley.csv, from
+analysis/fp_harms.py), if that file exists.
 
 Also exports ``draw_heatmap_grid`` — the shared 4-panel drawing helper — for
 use by slides 13 (overtreatment) and 14 (unnecessary F->M PN), which read the
@@ -25,7 +29,9 @@ REPO = Path(__file__).resolve().parents[1]
 KAVG = REPO / 'results' / 'scenarios.kavg.csv'
 FONT = str(REPO / 'assets' / 'LibertinusSans-Regular.otf')
 
-DISEASES = ('ng', 'ct', 'tv', 'syph')
+DISEASES = ('ng', 'ct', 'tv')
+BASE_SPEC = 0.98
+SHAPLEY = REPO / 'results' / 'shapley.csv'
 CARE_LEVELS = ('baseline', 'low', 'moderate', 'high')
 PN_LEVELS = ('baseline', 'low', 'moderate', 'high')
 BP_PANELS = ('none', 'low', 'moderate', 'high')
@@ -38,7 +44,7 @@ def cell_median_pct_reduction(kavg, per_draw_metric):
 
     Returns a DataFrame with columns [care, pn, bp, pct_reduction].
     """
-    df = kavg.copy()
+    df = kavg[(kavg.cell == 'SOC') | np.isclose(kavg.spec.astype(float), BASE_SPEC)].copy()
     df['metric'] = per_draw_metric(df)
     cell_med = df.groupby(['cell', 'care', 'pn', 'bp'], dropna=False)['metric'].median()
     soc_med = float(cell_med.loc['SOC'].iloc[0])
@@ -48,7 +54,29 @@ def cell_median_pct_reduction(kavg, per_draw_metric):
     return poc[['care', 'pn', 'bp', 'pct_reduction']]
 
 
-def draw_heatmap_grid(arm_pct, cbar_label, out_png, censor_negative=False):
+def draw_shapley(ax, shapley):
+    """ Each lever's median share of the infections averted beyond POC alone, with all three at one level """
+    levels = [l for l in CARE_LEVELS[1:] if l in set(shapley.level)]
+    parts = [('phi_care', 'Care-seeking', '#2a6fdb'), ('phi_pn', 'Partner notification', '#e3893b'), ('phi_bp', 'Condom counselling', '#3aa278')]
+    left = np.zeros(len(levels))
+    for col, label, color in parts:
+        share = np.array([np.nanmedian(shapley.loc[shapley.level == l, col] / shapley.loc[shapley.level == l, 'total']) for l in levels])
+        ax.barh(range(len(levels)), 100*share, left=100*left, color=color, label=label, height=0.6, edgecolor='white', linewidth=1)
+        for i, (x0, w) in enumerate(zip(left, share)):
+            if w > 0.08:
+                ax.text(100*(x0 + w/2), i, f'{100*w:.0f}%', ha='center', va='center', fontsize=8, color='white')
+        left = left + share
+    ax.set_yticks(range(len(levels)))
+    ax.set_yticklabels([f'all {l}' for l in levels])
+    ax.set_xlim(0, 100)
+    ax.set_xlabel('Share of infections averted\nbeyond POC alone (%)')
+    ax.set_title('Shapley shares', fontsize=11)
+    ax.legend(fontsize=7, frameon=False, loc='upper center', bbox_to_anchor=(0.5, -0.25), ncol=1)
+    ax.spines[['top', 'right']].set_visible(False)
+    return
+
+
+def draw_heatmap_grid(arm_pct, cbar_label, out_png, censor_negative=False, with_shapley=False):
     """4-panel heatmap: care x PN (rows x cols), one panel per BP level.
 
     arm_pct: DataFrame with columns [care, pn, bp, pct_reduction], one row per
@@ -63,8 +91,13 @@ def draw_heatmap_grid(arm_pct, cbar_label, out_png, censor_negative=False):
     sc.fonts(add=FONT)
     sc.options(font='Libertinus Sans', fontsize=11)
 
-    fig, axes = pl.subplots(1, 4, figsize=(12, 5),
-                            gridspec_kw=dict(wspace=0.15))
+    shapley = pd.read_csv(SHAPLEY) if (with_shapley and SHAPLEY.exists()) else None
+    n = 5 if shapley is not None else 4
+    fig, axes = pl.subplots(1, n, figsize=(12 + 3*(n - 4), 5),
+                            gridspec_kw=dict(wspace=0.15, width_ratios=[1]*4 + [1.1]*(n - 4)))
+    if shapley is not None:
+        draw_shapley(axes[4], shapley)
+        axes = axes[:4]
 
     vmin = float(arm_pct['pct_reduction'].min())
     vmax = float(arm_pct['pct_reduction'].max())
@@ -102,7 +135,7 @@ def draw_heatmap_grid(arm_pct, cbar_label, out_png, censor_negative=False):
         else:
             ax.set_yticklabels([])
         ax.set_xlabel('Partner notification')
-        ax.set_title(f'Bundled prevention: {bp}', fontsize=11)
+        ax.set_title(f'Condom counselling: {bp}', fontsize=11)
         # Cell text: pick colour from the underlying rgba's luminance so it
         # stays readable across the full colormap (viridis is dark at low
         # values, bright yellow at high). Censored (grey) cells get "No change".
@@ -140,8 +173,9 @@ def main():
     )
     draw_heatmap_grid(
         arm_pct,
-        cbar_label='Reduction vs SOC (%)\ncum. NG+CT+TV+syph infections 2027–2040',
+        cbar_label='Reduction vs SOC (%)\ncum. NG+CT+TV infections 2027–2040',
         out_png=REPO / 'figures' / 'fig_slide12.png',
+        with_shapley=True,
     )
 
 

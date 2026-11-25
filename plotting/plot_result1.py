@@ -29,8 +29,7 @@ DARK, UDOT = '#2c3e50', '#d7dbe0'
 
 ARMS = {'SOC': 'SOC', 'POC': 'POC_c-baseline_p-baseline_b-none'}
 ARM_C = {'SOC': '#555555', 'POC': '#e6772d'}
-DISEASES = [('ng', 'Gonorrhoea'), ('ct', 'Chlamydia'),
-            ('tv', 'Trichomoniasis'), ('syph', 'Syphilis')]
+DISEASES = [('ng', 'Gonorrhoea'), ('ct', 'Chlamydia'), ('tv', 'Trichomoniasis')]
 YEARS = 2040 - 2027
 SCALE = 8.7e6 / 1e4
 
@@ -156,13 +155,13 @@ def main():
     fig = pl.figure(figsize=(9.7, 5))
     outer = GridSpec(1, 2, figure=fig, width_ratios=[5.4, 4.3],
                      left=0.05, right=0.995, top=0.91, bottom=0.10, wspace=0.18)
-    left_gs  = GridSpecFromSubplotSpec(3, 2, subplot_spec=outer[0],
-                                       hspace=0.60, wspace=0.42)
+    left_gs  = GridSpecFromSubplotSpec(2, 2, subplot_spec=outer[0],
+                                       hspace=0.55, wspace=0.42)
     right_gs = GridSpecFromSubplotSpec(2, 2, subplot_spec=outer[1],
                                        width_ratios=[0.85, 5], height_ratios=[2.6, 1.5],
                                        hspace=0.08, wspace=0.18)
 
-    # ---- Left: rows 0-1, treatment precision (4 disease panels) -------------
+    # ---- Left: treatment precision (3 disease panels) ------------------------
     for idx, (d_key, d_name) in enumerate(DISEASES):
         r, c = divmod(idx, 2)
         ax = fig.add_subplot(left_gs[r, c])
@@ -170,33 +169,15 @@ def main():
         ax.set_title(d_name, fontsize=10.5, pad=3)
         if c == 0:
             ax.set_ylabel('tx / yr (M)', fontsize=9, labelpad=2)
-        if r == 0:
-            ax.set_ylim(top=2)
-        if r == 1:
-            ax.set_ylim(top=1)
 
-    # ---- Left: row 2, female VDS treatment -----------------------------------
-    ax_vds = fig.add_subplot(left_gs[2, 0])
+    # ---- Left: the fourth panel, female VDS treatment ------------------------
+    ax_vds = fig.add_subplot(left_gs[1, 1])
     arms = ['SOC', 'POC']
     f_tot = {a: s[s.arm == a].f_tx.to_numpy(float) * SCALE / 1e6 / YEARS for a in arms}
     f_ov  = {a: s[s.arm == a].f_tx_over.to_numpy(float) * SCALE / 1e6 / YEARS for a in arms}
     specificity_panel(ax_vds, f_tot, f_ov)
     ax_vds.set_title('Female VDS treatment', fontsize=10.5, pad=3)
     ax_vds.set_ylabel('events / yr (M)', fontsize=9, labelpad=2)
-
-    # ---- Left: row 2, female GUD treatment -----------------------------------
-    ax_gud = fig.add_subplot(left_gs[2, 1])
-    POC_CELL = ARMS['POC']
-    g_tot = {
-        'SOC': k[k.cell == 'SOC'][   'syph_new_treated_f'].to_numpy(float) / 1e6 / YEARS,
-        'POC': k[k.cell == POC_CELL]['syph_new_treated_f'].to_numpy(float) / 1e6 / YEARS,
-    }
-    g_ov = {
-        'SOC': k[k.cell == 'SOC'][   'syph_new_treated_unnecessary_f'].to_numpy(float) / 1e6 / YEARS,
-        'POC': k[k.cell == POC_CELL]['syph_new_treated_unnecessary_f'].to_numpy(float) / 1e6 / YEARS,
-    }
-    specificity_panel(ax_gud, g_tot, g_ov)
-    ax_gud.set_title('Female GUD treatment', fontsize=10.5, pad=3)
 
     # ---- Legend --------------------------------------------------------------
     h = [mpatches.Patch(facecolor='#888', edgecolor='none'),
@@ -214,7 +195,7 @@ def main():
 
     # fig.text(0.5, 0.02,
     #          f'Left: kavg 5 draws (exp 06), baseline PN, bars = median, whiskers = 25–75 IQR. '
-    #          f'VDS/GUD person-level: over = treated with no NG/CT/TV/syph. '
+    #          f'VDS person-level: over = treated with no NG/CT/TV. '
     #          f'Right: draw 68, VDS prev {vds_prev:.0%}.',
     #          ha='center', fontsize=8, color='#666666')
 

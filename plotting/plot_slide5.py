@@ -7,9 +7,8 @@ right panel is the female-index -> male-partner notifications cascade,
 computed from the person-level specificity.csv tracer output.
 
 Layout (10.4 x 5.4):
-  Left  — 6 mini-panels (2 cols x 3 rows), reused from plot_result1:
-    rows 0-1: NG, CT, TV, Syph treatment precision (SOC vs POC)
-    row  2:   Female VDS treatment, Female GUD treatment
+  Left  — 4 mini-panels (2 cols x 2 rows), reused from plot_result1:
+    NG, CT, TV treatment precision (SOC vs POC), and female VDS treatment
   Right — Female-index -> male-partner notifications, warranted vs over,
           SOC vs POC. Same person-level "over" definition as R1.
 
@@ -83,8 +82,8 @@ def main():
     outer = GridSpec(1, 2, figure=fig, width_ratios=[6.2, 2.6],
                      left=0.055, right=0.985, top=0.94, bottom=0.08,
                      wspace=0.22)
-    left_gs = GridSpecFromSubplotSpec(3, 2, subplot_spec=outer[0],
-                                      hspace=0.65, wspace=0.42)
+    left_gs = GridSpecFromSubplotSpec(2, 2, subplot_spec=outer[0],
+                                      hspace=0.55, wspace=0.42)
 
     # ---- Left: rows 0-1, treatment precision by disease ----
     for idx, (d_key, d_name) in enumerate(DISEASES):
@@ -94,32 +93,15 @@ def main():
         ax.set_title(d_name, fontsize=10.5, pad=3)
         if c == 0:
             ax.set_ylabel('tx / yr (M)', fontsize=9, labelpad=2)
-        if r == 0:
-            ax.set_ylim(top=2)
-        if r == 1:
-            ax.set_ylim(top=1)
 
-    # ---- Left: row 2, female VDS + GUD treatment events ----
-    ax_vds = fig.add_subplot(left_gs[2, 0])
+    # ---- Left: the fourth panel, female VDS treatment events ----
+    ax_vds = fig.add_subplot(left_gs[1, 1])
     arms = ['SOC', 'POC']
     f_tot = {a: s[s.arm == a].f_tx.to_numpy(float) * SCALE / 1e6 / YEARS for a in arms}
     f_ov = {a: s[s.arm == a].f_tx_over.to_numpy(float) * SCALE / 1e6 / YEARS for a in arms}
     specificity_panel(ax_vds, f_tot, f_ov)
     ax_vds.set_title('Female VDS treatment', fontsize=10.5, pad=3)
     ax_vds.set_ylabel('events / yr (M)', fontsize=9, labelpad=2)
-
-    ax_gud = fig.add_subplot(left_gs[2, 1])
-    poc_cell = ARMS['POC']
-    g_tot = {
-        'SOC': k[k.cell == 'SOC']['syph_new_treated_f'].to_numpy(float) / 1e6 / YEARS,
-        'POC': k[k.cell == poc_cell]['syph_new_treated_f'].to_numpy(float) / 1e6 / YEARS,
-    }
-    g_ov = {
-        'SOC': k[k.cell == 'SOC']['syph_new_treated_unnecessary_f'].to_numpy(float) / 1e6 / YEARS,
-        'POC': k[k.cell == poc_cell]['syph_new_treated_unnecessary_f'].to_numpy(float) / 1e6 / YEARS,
-    }
-    specificity_panel(ax_gud, g_tot, g_ov)
-    ax_gud.set_title('Female GUD treatment', fontsize=10.5, pad=3)
 
     # ---- Right: female index -> male-partner PN cascade ----
     ax_pn = fig.add_subplot(outer[1])
