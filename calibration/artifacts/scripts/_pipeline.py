@@ -119,6 +119,9 @@ def set_pars_local(sim, pars: dict):
                                 ss.years(float(value)), ss.years(float(value)))
                         elif par_name == 'rel_trans_latent_half_life':
                             mod.pars[par_name] = ss.years(float(value))
+                        elif par_name == 'dur_asymp2clear':  # mean in months, both sexes; keep per-sex SD
+                            mod.pars[par_name] = [[ss.months(float(value)), sd]
+                                                  for _, sd in mod.pars[par_name]]
                         elif par_name == 'p_symp_primary_f':
                             mod.pars['p_symp_primary'][0] = float(value)
                         elif par_name == 'p_symp_primary_m':

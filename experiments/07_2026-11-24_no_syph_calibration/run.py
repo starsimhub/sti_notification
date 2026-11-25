@@ -24,9 +24,9 @@ Design changes vs exp 06
   sustains in >= MIN_SEEDS_SUSTAINED of K seeds AND every prevalence target
   lies within ACCEPT_TOL band-widths of its band. Acceptable draws are then
   ranked by weighted GoF and the top N_KEEP retained.
-* Population: N_AGENTS default 20k (exp 06: 10k). At ~1.5% NG prevalence a
-  10k-agent sim carries only a few dozen NG infections, so stochastic
-  fade-out is likely a large part of the exp 06 between-seed bimodality.
+* Population: N_AGENTS default 10k (as exp 06), for compute. At ~1.5% NG
+  prevalence a 10k-agent sim carries few NG infections, so stochastic
+  fade-out is a risk; MIN_SEEDS_SUSTAINED screens out draws prone to it.
 
 Validation (not fitted; see validate.py once written / README):
   STICH 2020-21, ages 16-24: CT 14.7%, NG 2.8% (both sexes);
@@ -66,12 +66,18 @@ REPO_ROOT = HERE.parent.parent
 sys.path.insert(0, str(REPO_ROOT / 'calibration' / 'artifacts' / 'scripts'))
 sys.path.insert(0, str(REPO_ROOT))
 
-# --- Priors: drop syphilis + HIV-syph coupling; keep exp 06 NG beta floor ---
+# --- Priors: drop syphilis + HIV-syph coupling; open NG untreated duration ---
+# The coverage check (../07_2026-11-24_coverage_check/SUMMARY.md) found NG
+# prevalence and incidence never jointly in band at default durations, and NG's
+# in-band betas at the old 0.10 floor. Duration and beta trade off, so the floor
+# is lowered with the duration prior. dur_asymp2clear is the mean in months
+# (both sexes; defaults F 8, M 6).
 from priors import calib_pars  # noqa: E402
 for k in [k for k in list(calib_pars.keys())
           if k.startswith('syph') or k.startswith('hiv_syph')]:
     del calib_pars[k]
-calib_pars['ng.beta_m2f'] = ('NG β (M→F)', 0.10, 0.60, True)
+calib_pars['ng.beta_m2f'] = ('NG β (M→F)', 0.05, 0.60, True)
+calib_pars['ng.dur_asymp2clear'] = ('NG untreated asymp duration (months)', 3, 18, True)
 
 from _pipeline import generate_prior_draws, row_to_sim_pars, build_sim  # noqa: E402
 os.chdir(REPO_ROOT)
@@ -84,7 +90,7 @@ LHS_SEED = 47
 LHS_TOTAL = 500
 N_DRAWS = int(os.environ.get('N_DRAWS', 20))
 N_WORKERS = int(os.environ.get('N_WORKERS', 60))
-N_AGENTS = int(os.environ.get('N_AGENTS', 20_000))
+N_AGENTS = int(os.environ.get('N_AGENTS', 10_000))
 STOP = int(os.environ.get('STOP', 2030))
 N_KEEP = int(os.environ.get('N_KEEP', 30))
 MIN_SEEDS_SUSTAINED = int(os.environ.get('MIN_SEEDS_SUSTAINED', max(1, K_SEEDS - 1)))
