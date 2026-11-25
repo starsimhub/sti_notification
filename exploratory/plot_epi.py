@@ -1,11 +1,11 @@
-"""Baseline epidemiology overview (SOC), 2x5, 9.7w x 5h.
+"""Baseline epidemiology overview (SOC), 2x4, 9.7w x 5h.
 
 Sourced entirely from the factorial pilot parquets (SOC cell, 3 draws, 1 seed):
   results/scenarios_timeseries.parquet   prevalence by sex, all years
   results/scenarios_snapshots.parquet    prevalence by age x sex (2027+ only)
 
 Top row:    prevalence time series by sex (model median + range, + data) for
-            NG, CT, TV, syphilis, HIV.
+            NG, CT, TV, HIV.
 Bottom row: prevalence by age and sex (model bars at the earliest snapshot, 2027,
             + data points). HIV is layered across ZIMPHIA years (2016 + 2020);
             the others have a single data reference.
@@ -26,15 +26,13 @@ TS = REPO / 'results' / 'scenarios_timeseries.parquet'
 SNAP = REPO / 'results' / 'scenarios_snapshots.parquet'
 FONT = str(REPO / 'assets' / 'LibertinusSans-Regular.otf')
 
-DISEASES = ['ng', 'ct', 'tv', 'syph', 'hiv']
-DNAME = {'ng': 'Gonorrhoea', 'ct': 'Chlamydia', 'tv': 'Trichomoniasis',
-         'syph': 'Syphilis', 'hiv': 'HIV'}
+DISEASES = ['ng', 'ct', 'tv', 'hiv']
+DNAME = {'ng': 'Gonorrhoea', 'ct': 'Chlamydia', 'tv': 'Trichomoniasis', 'hiv': 'HIV'}
 AGES = ['15_20', '20_25', '25_30', '30_35', '35_50', '50_65']
 AGE_LBL = ['15', '20', '25', '30', '35', '50']
 SNAP_YEAR = 2027
-# bottom-row prevalence base per disease (syph: treponemal, to match ZIMPHIA trep)
-AGE_BASE = {'ng': 'prevalence', 'ct': 'prevalence', 'tv': 'prevalence',
-            'hiv': 'prevalence', 'syph': 'trep_prevalence'}
+# bottom-row prevalence base per disease
+AGE_BASE = {'ng': 'prevalence', 'ct': 'prevalence', 'tv': 'prevalence', 'hiv': 'prevalence'}
 
 F_COLOR, M_COLOR = '#d46e9c', '#4a90d9'
 F_LIGHT, M_LIGHT = '#f0a3c4', '#a3c4e8'
@@ -47,9 +45,6 @@ ZIMPHIA_HIV = {
     2020: {'15_20': (0.038, 0.021), '20_25': (0.064, 0.028), '25_30': (0.106, 0.040),
            '30_35': (0.184, 0.093), '35_50': (0.295, 0.208), '50_65': (0.250, 0.251)},
 }
-# ZIMPHIA treponemal (ever-exposed) syphilis by age/sex — matches model trep_prevalence
-ZIMPHIA_SYPH_TREP = {'15_20': (0.008, 0.003), '20_25': (0.021, 0.010), '25_30': (0.024, 0.013),
-                     '30_35': (0.021, 0.018), '35_50': (0.034, 0.036), '50_65': (0.086, 0.077)}
 
 
 def set_font(size=9):
@@ -67,11 +62,6 @@ def ts_data(d):
     elif d == 'ct':
         s = pd.read_csv(REPO / 'data' / 'zimbabwe_sti_data.csv')
         out.append((s.time.values, s['ct_prevalence_f_25_30'].values * 100, F_COLOR, 'data (F 25-30)'))
-    elif d == 'syph':
-        s = pd.read_csv(REPO / 'data' / 'zimbabwe_syph_data.csv')
-        for col, c in [('syph.prevalence_f', F_COLOR), ('syph.prevalence_m', M_COLOR)]:
-            ss = s[['time', col]].dropna()
-            out.append((ss.time.values, ss[col].values * 100, c, None))
     elif d == 'hiv':
         s = pd.read_csv(REPO / 'data' / 'zimbabwe_hiv_calib.csv')
         out.append((s.time.values, s.hiv_prevalence.values * 100, DATA_C, 'data'))
@@ -84,7 +74,7 @@ def main():
     ts = pd.read_parquet(TS).query("cell == 'SOC'").sort_values('year')
     sn = pd.read_parquet(SNAP).query("cell == 'SOC' and year == @SNAP_YEAR")
 
-    fig, axes = pl.subplots(2, 5, figsize=(12.15, 5))
+    fig, axes = pl.subplots(2, len(DISEASES), figsize=(9.7, 5))
 
     # --- top row: prevalence TS by sex (median + ribbon) + data ---
     for ax, d in zip(axes[0], DISEASES):
@@ -136,11 +126,6 @@ def main():
                                edgecolor='white', linewidth=0.3,
                                label=f'ZIMPHIA {yr}' if sex == 'f' else None)
             ax.legend(fontsize=6, frameon=False, loc='upper left')
-        elif d == 'syph':
-            for sex, off, c in [('f', -w / 2, F_COLOR), ('m', w / 2, M_COLOR)]:
-                yv = [ZIMPHIA_SYPH_TREP[ab][0 if sex == 'f' else 1] * 100 for ab in AGES]
-                ax.scatter(x + off, yv, s=12, color=c, marker='D', zorder=5,
-                           edgecolor='white', linewidth=0.3)
         ax.set_xticks(x); ax.set_xticklabels(AGE_LBL, fontsize=6.5)
         ax.set_xlabel('age', fontsize=7.5); ax.set_ylim(bottom=0)
         ax.tick_params(axis='y', labelsize=7)
@@ -151,7 +136,7 @@ def main():
     # fig.text(0.5, 0.015,
     #          f'SOC (syndromic) model, {ndraws} calibration draws: line/bar = median, band/whisker = range. '
     #          'Diamonds = data (programme surveillance, ZIMPHIA). HIV age panel overlays ZIMPHIA 2016 + 2020; '
-    #          'syphilis age is treponemal. Model age panels at 2027.',
+    #          'Model age panels at 2027.',
     #          ha='center', fontsize=6.8, color='#666666')
     fig.subplots_adjust(left=0.06, right=0.995, top=0.93, bottom=0.13, wspace=0.32, hspace=0.42)
     p = FIGS / 'supplementary' / 'fig_epi_overview.png'
