@@ -12,7 +12,7 @@ Robyn M. Stuart, Lori M. Newman, Michael Marks, Griffins Manguro, Chido Dziva Ch
 > - The model is now STIsim on Starsim 4. Non-STI causes of discharge (BV, candidiasis, idiopathic) are modelled together, and recur.
 > - The calibration adds HIV mortality, young women's prevalence from STICH and the etiology of VDS presentations (Chirenje 2018) as targets.
 >
-> **[XX]** marks scenario results that await the factorial run (`results/scenarios_run_v4b.log`). Calibration numbers are from `experiments/13_2026-11-25_nonsti_vds/SUMMARY.md`. Check the journal's current word, reference and Summary limits before formatting.
+> Numbers are from `results/headlines.md` (factorial of 25 Nov 2026, `results/scenarios_run_v4c.log`) and `experiments/13_2026-11-25_nonsti_vds/SUMMARY.md`. Check the journal's current word, reference and Summary limits before formatting.
 
 ---
 
@@ -22,7 +22,7 @@ Robyn M. Stuart, Lori M. Newman, Michael Marks, Griffins Manguro, Chido Dziva Ch
 
 **Methods** We used STIsim, an agent-based model of co-transmitting HIV, NG, CT, TV and non-STI causes of vaginal discharge. We calibrated it to Zimbabwe, including the etiology of VDS among women presenting at clinics. We compared syndromic standard of care (SOC) with a POC NG/CT/TV panel (95% sensitivity; 98% specificity, varied from 95% to 99.5%), alone and layered with a 4 × 4 × 4 factorial of care-seeking, PN intensity and condom counselling anchored to Zimbabwean and regional data. We projected 2027–2040 outcomes across 30 calibrated parameter sets.
 
-**Findings** Replacing SOC with POC testing cut the false-positive share of female index cases from [XX]% to [XX]%. It also averted [XX]% (IQR [XX]–[XX]) of NG, CT and TV infections. Adding high-intensity care-seeking, PN and condom counselling averted [XX]% ([XX]–[XX]). But as these interventions lowered NG/CT prevalence among women presenting with discharge from [XX]% to [XX]%, the false-positive share climbed back to [XX]% at 98% specificity. That is [XX] unnecessary partner notifications per year. Holding the false-positive share at the POC-alone level required a specificity of at least [XX]%.
+**Findings** Replacing SOC with POC testing cut the false-positive share of female index cases from 61% (IQR 59–64) to 8% (7–9), and reduced unnecessary NG/CT treatment by 97%. It averted 7·5% (6·8–8·1) of NG, CT and TV infections. Adding high-intensity care-seeking, PN and condom counselling averted 33% (32–35). But as these interventions lowered NG/CT prevalence among women presenting with discharge from 31% to 20%, the false-positive share climbed back to 12% (11–14) at 98% specificity, and to 25% (23–29) at 95%. With more partners notified per index case, false-positive notifications rose six-fold, from about 6800 to 43 000 per year, nearly half the number under SOC. Holding the false-positive share at the POC-alone level required a specificity of about 98·8%.
 
 **Interpretation** The false-positive burden of partner notification is not a fixed property of a test: it rises as STI programmes succeed. Specifications for POC STI tests used to trigger PN should be set against the lower prevalence that programmes aim to reach. PN pathways should be designed so that a false-positive notification does as little harm as possible.
 
@@ -164,39 +164,53 @@ The 30 retained parameter sets reproduced the HIV, NG, CT and TV targets (Append
 ## POC testing alone
 
 Relative to SOC, POC alone (98% specificity):
-- averted [XX]% ([XX]–[XX]) of NG/CT/TV infections over 2027–2040;
-- reduced unnecessary NG/CT treatment by [XX]%;
-- cut the false-positive share of female index cases from [XX]% under SOC to [XX]% (Figure 3).
+- averted 7·5% (IQR 6·8–8·1) of NG/CT/TV infections over 2027–2040;
+- reduced unnecessary NG/CT treatment by 97% (97–97);
+- cut the false-positive share of female index cases from 61% (59–64) under SOC to 8·1% (7·3–9·0), and of male index cases from 19% (17–22) to 1·1% (0·9–1·3) (Figure 3);
+- cut false-positive notifications from about 91 500 to 6800 per year.
 
 ## The false-positive share climbs back up as the programme succeeds
 
-Across all scenarios, the false-positive share of female index cases tracked NG/CT prevalence among women presenting with discharge, closely following the analytic relationship 1 − PPV (Figure 5A). As combined interventions lowered presenter prevalence from [XX]% to [XX]%, the false-positive share rose from [XX]% (POC alone) to [XX]% (all high). That is [XX]% of the way back to the SOC level of [XX]% (Figure 5B).
+Across all scenarios, the false-positive share of female index cases tracked NG/CT prevalence among women presenting with discharge, closely following the analytic relationship 1 − PPV (Figure 5A). As combined interventions lowered presenter prevalence from 31% (POC alone) to 24% (all moderate) and 20% (all high), the false-positive share rose:
+- at 98% specificity, from 8·1% to 10·2% (9·3–11·7) and 12·3% (11·1–14·2);
+- at 95% specificity, from 17% to 21% and 25%.
 
-Care-seeking and condom counselling drove most of the rise. Both lower NG/CT prevalence among presenters, and care-seeking also brings more women with non-STI discharge to testing. PN had a smaller effect on the share but the largest effect on the absolute number of false-positive notifications, because it scales all notifications.
+These shares stay well below the SOC level of 61% (Figure 5B). The number of false-positive notifications rose further: from about 6800 per year with POC alone to 24 000 (all moderate) and 43 000 (all high), nearly half the 91 500 under SOC.
+
+Care-seeking drove most of the rise in the share. On its own at high intensity it lowered presenter prevalence to 25% and raised the share to 10·6%, because it brings more women with non-STI discharge to testing. PN and condom counselling alone barely changed the share (8·6% and 8·7%). PN had the largest effect on the number of false-positive notifications, because it scales all notifications: on its own at high intensity it raised them five-fold, to about 33 000 per year.
 
 ## Infections averted by combining POC with demand-side interventions
 
-Infections averted increased with each intervention (Figure 4). The high-intensity combination averted [XX]% ([XX]–[XX]). Shapley decomposition attributed [XX]% to care-seeking, [XX]% to PN and [XX]% to condom counselling. Results were similar at moderate intensity (Appendix).
+Infections averted increased with each intervention (Figure 4). The all-moderate combination averted 23% (21–24) and the all-high combination 33% (32–35). Of the infections averted beyond POC alone at high intensity, Shapley decomposition attributed 14% (13–15) to care-seeking, 58% (56–59) to PN and 28% (27–30) to condom counselling. At moderate intensity the shares were 13%, 53% and 35%.
 
 ## Specificity needed
 
-At 95% specificity the false-positive share of female index cases in the all-high scenario was [XX]%; at 99.5% it was [XX]% (Table 2). Holding it at the POC-alone level at 98% required a specificity of at least [XX]%.
+At 95% specificity the false-positive share of female index cases in the all-high scenario was 25% (23–29); at 99·5% it was 4·2% (3·8–4·9) (Table 2). Holding it at the POC-alone level at 98% (8·1%) required a specificity of about 98·8% (interpolated across the sweep).
 
-**Table 2.** Specificity sweep. Median (IQR).
+**Table 2.** Specificity sweep. Median (IQR) across 30 parameter sets; notifications and presenter prevalence are medians.
 
-| Scenario | Specificity | Infections averted (%) | False-positive share, female index cases | False-positive notifications per year | Presenter NG/CT prevalence |
+| Scenario | Specificity | Infections averted (%) | False-positive share, female index cases (%) | False-positive notifications per year | Presenter NG/CT prevalence (%) |
 |---|---|---|---|---|---|
-| POC alone | 95% / 98% / 99% / 99.5% | [XX] | [XX] | [XX] | [XX] |
-| All moderate | … | | | | |
-| All high | … | | | | |
+| POC alone | 95% | 7·5 (6·8–8·1) | 17·1 (15·7–19·4) | 15 700 | 31·4 |
+| | 98% | 7·5 (6·8–8·1) | 8·1 (7·3–9·0) | 6800 | 31·4 |
+| | 99% | 7·5 (6·8–8·1) | 4·5 (4·1–5·1) | 3700 | 31·4 |
+| | 99·5% | 7·5 (6·8–8·1) | 2·5 (2·4–2·9) | 2100 | 31·4 |
+| All moderate | 95% | 22·8 (21·6–24·2) | 21·3 (19·4–24·2) | 55 700 | 24·2 |
+| | 98% | 22·7 (21·4–24·1) | 10·2 (9·3–11·7) | 24 300 | 24·3 |
+| | 99% | 22·6 (21·4–23·9) | 5·8 (5·3–6·8) | 13 800 | 24·3 |
+| | 99·5% | 22·5 (21·3–23·9) | 3·4 (3·1–4·0) | 8400 | 24·3 |
+| All high | 95% | 33·6 (32·3–34·8) | 25·1 (22·7–28·7) | 100 000 | 19·6 |
+| | 98% | 33·3 (32·1–34·5) | 12·3 (11·1–14·2) | 43 200 | 19·7 |
+| | 99% | 33·3 (32·0–34·4) | 7·0 (6·3–8·2) | 24 600 | 19·7 |
+| | 99·5% | 33·2 (32·0–34·4) | 4·2 (3·8–4·9) | 15 000 | 19·8 |
 
 ## Harm–benefit trade-off
 
-Across the factorial, unnecessary notifications per infection averted ranged from [XX] to [XX] (Figure 6). The ratio was lowest for [XX] and highest for [XX].
+Across the factorial at 98% specificity, false-positive notifications per infection averted ranged from 0·011 to 0·041 (Figure 6). The ratio was lowest for POC with condom counselling alone, and highest for POC with high-intensity care-seeking and PN but no counselling.
 
 # Discussion
 
-Replacing syndromic management with POC NG/CT/TV testing sharply reduces the share of partner notifications triggered by a false-positive diagnosis. But that gain is not permanent. As care-seeking, PN and condom counselling reduce NG and CT, the women presenting with discharge are increasingly those with BV, candidiasis or no identified pathogen. So the positive predictive value of even a highly specific test falls. At 98% specificity the false-positive share of female index cases climbed back from [XX]% with POC alone to [XX]% at high intensity. Meanwhile the combined interventions averted [XX]% of curable STI infections over 2027–2040.
+Replacing syndromic management with POC NG/CT/TV testing sharply reduces the share of partner notifications triggered by a false-positive diagnosis. But that gain is not permanent. As care-seeking, PN and condom counselling reduce NG and CT, the women presenting with discharge are increasingly those with BV, candidiasis or no identified pathogen. So the positive predictive value of even a highly specific test falls. At 98% specificity the false-positive share of female index cases climbed back from 8% with POC alone to 12% at high intensity, and from 17% to 25% at 95% specificity. Because the same interventions notify more partners per index case, the number of false-positive notifications rose six-fold. Meanwhile the combined interventions averted a third of curable STI infections over 2027–2040.
 
 This is a direct consequence of the etiology of VDS. Under half of the women presenting with discharge in Zimbabwe have an STI (Chirenje 2018), and our calibrated model reproduces this. Non-STI discharge is unaffected by STI control, so its share of presentations can only grow as STIs decline. If most VDS has no STI, much of the PN triggered from the VDS pathway will follow presentations where the test result carries the most risk of being wrong (M. Marks).
 
