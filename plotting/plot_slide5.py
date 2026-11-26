@@ -93,6 +93,7 @@ def main():
         ax.set_title(d_name, fontsize=10.5, pad=3)
         if c == 0:
             ax.set_ylabel('tx / yr (M)', fontsize=9, labelpad=2)
+        ax.set_ylim(top=ax.get_ylim()[1] * 1.35)  # Headroom for the '% over' labels above the bars
 
     # ---- Left: the fourth panel, female VDS treatment events ----
     ax_vds = fig.add_subplot(left_gs[1, 1])

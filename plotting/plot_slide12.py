@@ -68,11 +68,13 @@ def draw_shapley(ax, shapley):
         left = left + share
     ax.set_yticks(range(len(levels)))
     ax.set_yticklabels([f'all {l}' for l in levels])
+    ax.yaxis.tick_right()  # Clear of the heatmap to the left
+    ax.spines[['left']].set_visible(False)
     ax.set_xlim(0, 100)
     ax.set_xlabel('Share of infections averted\nbeyond POC alone (%)')
     ax.set_title('Shapley shares', fontsize=11)
     ax.legend(fontsize=7, frameon=False, loc='upper center', bbox_to_anchor=(0.5, -0.25), ncol=1)
-    ax.spines[['top', 'right']].set_visible(False)
+    ax.spines[['top']].set_visible(False)
     return
 
 
@@ -156,8 +158,11 @@ def draw_heatmap_grid(arm_pct, cbar_label, out_png, censor_negative=False, with_
                         fontsize=9, color=textc)
     axes[0].set_ylabel('Care-seeking')
 
-    cbar = fig.colorbar(im, ax=axes, orientation='vertical', shrink=0.85,
-                        pad=0.02, fraction=0.03)
+    if shapley is not None:  # Below the heatmaps, clear of the Shapley panel
+        cbar = fig.colorbar(im, ax=axes, orientation='horizontal', shrink=0.6, pad=0.18, fraction=0.05)
+    else:
+        cbar = fig.colorbar(im, ax=axes, orientation='vertical', shrink=0.85,
+                            pad=0.02, fraction=0.03)
     cbar.set_label(cbar_label, fontsize=9)
 
     out_png.parent.mkdir(exist_ok=True)

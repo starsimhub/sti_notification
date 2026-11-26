@@ -57,6 +57,7 @@ SENS = 0.95
 
 def load():
     d = pd.read_csv(RES / 'scenarios.kavg.csv')
+    d['spec'] = d.spec.round(4)  # Stored values carry float noise (e.g. 0.9500000000000001), which == comparisons miss
     d['new_inf'] = d[[f'{x}_new_inf' for x in DIS]].sum(axis=1)
     d['unnec_tx'] = d[[f'{x}_new_treated_unnecessary' for x in DIS]].sum(axis=1)
     d['fp_share_f'] = d.pn_new_index_no_sti_f / d.pn_new_index_total_f
